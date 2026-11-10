@@ -19,10 +19,10 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative aspect-[4/3] overflow-hidden rounded-lg border border-line bg-white shadow-lg transition-transform hover:scale-[1.01] sm:aspect-[16/11]"
+          className="relative aspect-[4/3] overflow-hidden rounded-lg border border-line bg-white   transition-transform hover:scale-[1.01] sm:aspect-[16/11]"
         >
           <Image quality={90} src={s.image} alt={s.title} fill sizes="(min-width:1024px) 600px, 100vw" className={s.contain ? "object-contain p-6" : "object-cover"} />
-          <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-navy-950/85 px-3 py-1 text-xs font-bold text-white shadow-md backdrop-blur">
+          <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-navy-950/85 px-3 py-1 text-xs font-bold text-white   backdrop-blur">
             <MapPin className="h-3.5 w-3.5 text-brand-400" />
             {s.title}
           </span>

@@ -41,7 +41,7 @@ function CostChart({ list }: { list: PricingPlan[] }) {
           <p className="text-xs text-body">Device price (one-time) + monthly charge × {months}. Cheapest first.</p>
         </div>
         <div className="flex rounded-lg border border-line-strong bg-surface p-0.5 text-xs font-semibold" role="group" aria-label="Period">
-          {PERIODS.map((m) => <button key={m} onClick={() => setMonths(m)} aria-pressed={months === m} className={cn("rounded-md px-3 py-1.5", months === m ? "bg-brand-600 text-white" : "text-body")}>{m} mo</button>)}
+          {PERIODS.map((m) => <button key={m} onClick={() => setMonths(m)} aria-pressed={months === m} className={cn("rounded-lg px-3 py-1.5", months === m ? "bg-brand-600 text-white" : "text-body")}>{m} mo</button>)}
         </div>
       </div>
       <ul className="space-y-2.5">
@@ -49,14 +49,14 @@ function CostChart({ list }: { list: PricingPlan[] }) {
           <li key={p.id} onMouseEnter={() => setHover(p.id)} onMouseLeave={() => setHover(null)} className={cn("rounded-lg p-2 transition-colors", hover === p.id && "bg-softer")}>
             <div className="mb-1.5 flex items-center gap-3">
               <span className="relative h-8 w-11 shrink-0 overflow-hidden rounded bg-white">{p.image && <Image src={p.image} alt="" fill sizes="44px" className="object-contain" />}</span>
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{p.name}{i === 0 && <span className="ml-2 rounded-full bg-green-500/15 px-2 py-0.5 text-[11px] font-semibold text-green-600">Lowest</span>}</span>
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{p.name}{i === 0 && <span className="ml-2 rounded-full bg-green-500/15 px-2 py-0.5 text-[11px] md:text-xs font-semibold text-green-600">Lowest</span>}</span>
               <span className="text-sm font-bold tabular-nums text-ink">{formatBDT(total)}</span>
             </div>
             <div className="flex h-3 overflow-hidden rounded-full bg-softer" aria-hidden>
               <motion.span key={`d-${months}`} initial={{ width: 0 }} animate={{ width: `${(p.devicePrice / max) * 100}%` }} transition={{ duration: 0.5, delay: i * 0.04 }} className="h-full bg-navy-700" />
               <motion.span key={`s-${months}`} initial={{ width: 0 }} animate={{ width: `${(service / max) * 100}%` }} transition={{ duration: 0.5, delay: i * 0.04 }} className="h-full bg-brand-600" />
             </div>
-            <p className="mt-1 text-[11px] text-body">Device {formatBDT(p.devicePrice)} + service {formatBDT(service)}</p>
+            <p className="mt-1 text-[11px] md:text-xs text-body">Device {formatBDT(p.devicePrice)} + service {formatBDT(service)}</p>
           </li>
         ))}
       </ul>
@@ -103,7 +103,7 @@ export default function PricingExplorer() {
             </label>
             <div className="flex rounded-lg border border-line-strong bg-surface p-0.5" role="group" aria-label="View">
               {([["cards", LayoutGrid, "Cards"], ["cost", BarChart3, "Cost"]] as const).map(([id, Icon, label]) => (
-                <button key={id} onClick={() => setView(id)} aria-pressed={view === id} className={cn("flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold", view === id ? "bg-brand-600 text-white" : "text-body")}><Icon className="h-4 w-4" />{label}</button>
+                <button key={id} onClick={() => setView(id)} aria-pressed={view === id} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", view === id ? "bg-brand-600 text-white" : "text-body")}><Icon className="h-4 w-4" />{label}</button>
               ))}
             </div>
             </div>

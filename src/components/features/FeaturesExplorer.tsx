@@ -17,10 +17,10 @@ import { cn, formatBDT } from "@/utils/format";
 import type { FeatureCategory } from "@/types";
 
 function Availability({ id }: { id: string }) {
-  if (!isPackageFeature(id)) return <span className="rounded-full bg-softer px-2 py-0.5 text-[11px] font-semibold text-body">Platform feature</span>;
+  if (!isPackageFeature(id)) return <span className="rounded-full bg-softer px-2 py-0.5 text-[10px] md:text-xs font-semibold text-body">Platform feature</span>;
   const n = packagesFor(id).length;
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", n === plans.length ? "bg-green-500/15 text-green-600" : "bg-amber-500/15 text-amber-600")}>
+    <span className={cn("rounded-full px-2 py-0.5 text-[10px] md:text-xs font-semibold", n === plans.length ? "bg-green-500/15 text-green-600" : "bg-amber-500/15 text-amber-600")}>
       {n === plans.length ? `All ${n} packages` : `${n} of ${plans.length} packages`}
     </span>
   );
@@ -57,60 +57,116 @@ export default function FeaturesExplorer() {
   };
 
   return (
-    <Container className="py-12 sm:py-14" id="all-features">
-      {/* sticky filter bar */}
-      <div className="glass z-30 mb-8 space-y-3 rounded-lg border border-white/60 p-3 dark:border-white/10 md:sticky md:top-14 lg:top-[4.25rem]">
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="relative min-w-0 flex-1 basis-56">
-            <span className="sr-only">Search features</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input ref={searchRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search features…  (press / )" className="w-full rounded-lg border border-line-strong bg-surface py-2 pl-9 pr-8 text-sm text-ink placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-            {q && <button onClick={() => setQ("")} aria-label="Clear search" className="absolute right-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-slate-400 hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
-          </label>
-          <p className="text-xs text-body" aria-live="polite">{list.length} of {features.length} features · tap <Star className="inline h-3 w-3 -translate-y-px" /> to shortlist</p>
+    <Container className="py-8 sm:py-12" id="all-features">
+      {/* Search & Category Filter Controls */}
+      <div className="mb-10 space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              ref={searchRef}
+              type="text"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search 40+ features... (press '/' to focus)"
+              className="w-full rounded-2xl border border-line bg-surface py-2.5 pl-10 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+            />
+            {q && (
+              <button
+                type="button"
+                onClick={() => setQ("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="text-xs text-body">
+            Showing <strong className="text-ink">{list.length}</strong> of {features.length} features
+          </div>
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none]" role="tablist" aria-label="Feature categories">
-          {(["All", ...featureCategories] as const).map((c) => {
-            const count = c === "All" ? features.length : features.filter((f) => f.category === c).length;
-            const on = cat === c;
+
+        {/* Category Pills */}
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Feature categories">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={cat === "All"}
+            onClick={() => setCat("All")}
+            className={cn(
+              "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
+              cat === "All"
+                ? "bg-brand-600 text-white shadow-sm"
+                : "border border-line bg-surface text-body hover:border-brand-400"
+            )}
+          >
+            All Features ({features.length})
+          </button>
+          {featureCategories.map((c) => {
+            const count = features.filter((f) => f.category === c).length;
+            const isSelected = cat === c;
             return (
-              <button key={c} role="tab" aria-selected={on} onClick={() => setCat(c)} className={cn("flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors", on ? "border-brand-600 bg-brand-600 text-white" : "border-line-strong bg-surface text-body-strong hover:border-brand-400")}>
-                {c}<span className={cn("rounded-full px-1.5 text-[11px] font-semibold", on ? "bg-white/25" : "bg-softer text-body")}>{count}</span>
+              <button
+                key={c}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setCat(c)}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
+                  isSelected
+                    ? "bg-brand-600 text-white shadow-sm"
+                    : "border border-line bg-surface text-body hover:border-brand-400"
+                )}
+              >
+                {c} ({count})
               </button>
             );
           })}
         </div>
       </div>
 
-      {list.length === 0 && (
-        <div className="grid place-items-center rounded-lg border border-dashed border-line-strong py-16 text-center">
-          <SearchX className="h-9 w-9 text-slate-400" /><p className="mt-3 text-base font-bold text-ink">No features match “{q}”</p>
-          <p className="text-xs text-body">Try “engine”, “fuel”, “speed” or “BRTA”.</p>
-          <Button size="sm" className="mt-4" onClick={() => { setQ(""); setCat("All"); }}>Reset filters</Button>
+      {list.length === 0 ? (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-line-strong py-16 text-center">
+          <SearchX className="h-10 w-10 text-slate-400" />
+          <p className="mt-3 text-base font-bold text-ink">No features match &quot;{q}&quot;</p>
+          <p className="text-xs text-slate-500">Try searching for keywords like &quot;engine lock&quot;, &quot;fuel&quot;, &quot;playback&quot;, or &quot;speed&quot;.</p>
+          <button
+            className="mt-4 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"
+            onClick={() => {
+              setQ("");
+              setCat("All");
+            }}
+          >
+            Clear Filters
+          </button>
         </div>
-      )}
+      ) : null}
 
       {groups.map((g) => (
-        <section key={g} className="mb-12" aria-labelledby={`cat-${g}`}>
+        <section key={g} className="mb-9" aria-labelledby={`cat-${g}`}>
           <div className="mb-4 flex items-center justify-between border-b border-line pb-2.5">
-            <h2 id={`cat-${g}`} className="flex items-center gap-2 text-lg font-bold text-ink"><span className="h-2 w-2 rounded-full bg-brand-600" />{g}</h2>
+            <h2 id={`cat-${g}`} className="flex items-center gap-2 text-base font-bold text-ink"><span className="h-5 w-1 rounded-full bg-gradient-to-b from-brand-400 to-brand-700" />{g}</h2>
             <span className="text-xs text-body">{list.filter((f) => f.category === g).length} features</span>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {list.filter((f) => f.category === g).map((f, i) => {
               const on = picked.includes(f.id);
               return (
                 <motion.article key={f.id} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.3, delay: (i % 6) * 0.04 }}
-                  className={cn("group glass flex flex-col rounded-lg border p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-white/60 hover:border-brand-400 dark:border-white/10")}>
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-navy-900 text-white transition-colors group-hover:bg-brand-600"><DynIcon name={f.icon} className="h-5 w-5" /></span>
-                    <div className="min-w-0 flex-1"><h3 className="text-[15px] font-bold leading-snug text-ink">{f.title}</h3><div className="mt-1"><Availability id={f.id} /></div></div>
-                    <button onClick={() => toggle(f.id)} aria-pressed={on} aria-label={on ? `Remove ${f.title} from shortlist` : `Add ${f.title} to shortlist`} className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-colors", on ? "border-brand-500 bg-brand-600 text-white" : "border-line-strong text-slate-400 hover:text-brand-text")}>
-                      <Star className={cn("h-4 w-4", on && "fill-current")} />
+                  className={cn("group glass relative flex flex-col overflow-hidden rounded-lg border p-3.5 transition-all duration-300 hover:-translate-y-1   sm:p-4", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-white/60 hover:border-brand-400 dark:border-white/10")}>
+                  <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-brand-500/15 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="relative flex items-start gap-2.5">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-navy-700 to-navy-950 text-white   ring-1 ring-white/10 transition-all duration-300 group-hover:from-brand-500 group-hover:to-brand-700 group-hover:scale-105"><DynIcon name={f.icon} className="h-4 w-4" /></span>
+                    <div className="min-w-0 flex-1"><h3 className="text-[13px] md:text-base font-bold leading-snug text-ink">{f.title}</h3><div className="mt-1"><Availability id={f.id} /></div></div>
+                    <button onClick={() => toggle(f.id)} aria-pressed={on} aria-label={on ? `Remove ${f.title} from shortlist` : `Add ${f.title} to shortlist`} className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full border transition-all active:scale-90", on ? "border-brand-500 bg-brand-600 text-white" : "border-line-strong text-slate-400 hover:text-brand-text")}>
+                      <Star className={cn("h-3.5 w-3.5", on && "fill-current")} />
                     </button>
                   </div>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-body">{f.description}</p>
-                  <button onClick={() => dispatch(openFeatureModal(f.id))} className="mt-3 inline-flex items-center gap-1.5 self-start text-sm font-semibold text-brand-text hover:underline">Details & packages <ArrowRight className="h-3.5 w-3.5" /></button>
+                  <p className="relative mt-2.5 flex-1 text-sm leading-relaxed text-body">{f.description}</p>
+                  <button onClick={() => dispatch(openFeatureModal(f.id))} className="relative mt-3 inline-flex items-center gap-1 self-start rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-text transition-colors hover:bg-brand-100">Details & packages <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" /></button>
                 </motion.article>
               );
             })}

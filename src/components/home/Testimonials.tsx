@@ -26,7 +26,7 @@ export default function Testimonials() {
         >
           {testimonials.map((t) => (
             <SwiperSlide key={t.id} className="!h-auto">
-              <figure className="flex h-full flex-col justify-between rounded-lg border border-line bg-soft/40 p-6 sm:p-7 shadow-sm transition-all hover:border-brand-300 hover:shadow-xl">
+              <figure className="flex h-full flex-col justify-between rounded-lg border border-line bg-soft/40 p-6 sm:p-7   transition-all hover:border-brand-300  ">
                 <div>
                   {/* Top Bar: Metric Badge & Star Rating */}
                   <div className="flex items-center justify-between gap-2">
@@ -58,7 +58,7 @@ export default function Testimonials() {
                       </span>
                     </div>
                     <p className="text-slate-500 truncate">{t.role} · {t.company}</p>
-                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
+                    <p className="mt-0.5 flex items-center gap-1 text-[11px] md:text-xs text-slate-400">
                       <MapPin className="h-3 w-3 text-brand-500" /> {t.location}
                     </p>
                   </div>

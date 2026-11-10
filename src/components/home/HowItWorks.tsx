@@ -19,7 +19,7 @@ export default function HowItWorks() {
             <li key={s.t} className="relative rounded-lg glass border border-white/60 dark:border-white/10 p-5">
               <span className="absolute right-4 top-3 text-3xl font-black text-slate-100">{i + 1}</span>
               <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-50 text-brand-text"><s.icon className="h-5 w-5" /></span>
-              <h3 className="mt-4 text-[14px] font-bold text-ink">{s.t}</h3>
+              <h3 className="mt-4 text-[14px] md:text-base font-bold text-ink">{s.t}</h3>
               <p className="mt-1 text-sm text-body">{s.d}</p>
             </li>
           ))}

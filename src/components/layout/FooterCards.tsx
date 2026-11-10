@@ -26,7 +26,7 @@ export function CallbackCard() {
     reset();
   };
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur">
+    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
       <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-600/20 text-brand-400"><PhoneCall className="h-5 w-5" /></span>
         <div><h3 className="text-base font-semibold text-white">Request a call back</h3><p className="text-xs text-slate-400">Leave your number and our team will call you. Or call {SITE.phone} any time — helpline is 24×7.</p></div>
@@ -43,7 +43,7 @@ export function CallbackCard() {
           <button type="submit" disabled={isSubmitting} className="gloss-btn h-[2.6rem] rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Sending…" : "Call me"}</button>
         </form>
       )}
-      <p className="mt-3 text-[11px] text-slate-500">Demo form — nothing is sent to a server.</p>
+      <p className="mt-3 text-[11px] md:text-xs text-slate-500">Demo form — nothing is sent to a server.</p>
     </div>
   );
 }
@@ -57,18 +57,18 @@ export function AppCard() {
     return () => { alive = false; };
   }, []);
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur">
+    <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
       <Image src="/img/app/icon.png" alt="Safety GPS Tracker app icon" width={48} height={52} className="h-14 w-auto shrink-0 drop-shadow-lg" />
       <div className="min-w-0 flex-1">
         <h3 className="flex items-center gap-1.5 text-base font-semibold text-white"><Smartphone className="h-4 w-4 text-brand-400" />Track on the go</h3>
         <p className="mt-0.5 text-xs text-slate-400">Android and iOS tracking apps are included with every package.</p>
-        <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get the Android app on Google Play" className="mt-3 inline-block transition-transform hover:-translate-y-0.5"><Image src="/img/app/play-badge.png" alt="Get it on Google Play" width={130} height={40} className="h-9 w-auto rounded-md" /></a>
+        <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get the Android app on Google Play" className="mt-3 inline-block transition-transform hover:-translate-y-0.5"><Image src="/img/app/play-badge.png" alt="Get it on Google Play" width={130} height={40} className="h-9 w-auto rounded-lg" /></a>
       </div>
       <div className="hidden shrink-0 text-center sm:block">
         <div className="grid h-[104px] w-[104px] place-items-center overflow-hidden rounded-lg bg-white p-1" role="img" aria-label="QR code for the Android app on Google Play">
           {qr ? <span className="block h-24 w-24 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} /> : <span className="h-24 w-24 animate-pulse rounded bg-slate-200" />}
         </div>
-        <p className="mt-1.5 text-[10px] text-slate-500">Scan for Android</p>
+        <p className="mt-1.5 text-[10px] md:text-xs text-slate-500">Scan for Android</p>
       </div>
     </div>
   );

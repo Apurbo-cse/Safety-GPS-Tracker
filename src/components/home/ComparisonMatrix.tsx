@@ -92,7 +92,7 @@ export default function ComparisonMatrix() {
 
         <div className="mx-auto mt-12 max-w-5xl">
           <Reveal>
-            <div className="overflow-x-auto rounded-lg glass border border-white/60 dark:border-white/10 shadow-xl">
+            <div className="overflow-x-auto rounded-lg glass border border-white/60 dark:border-white/10  ">
               <table className="w-full min-w-[700px] border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-line bg-softer/60 text-xs font-bold uppercase tracking-wider text-slate-500">

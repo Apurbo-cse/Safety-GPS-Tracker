@@ -21,7 +21,7 @@ export default function CartDrawer() {
   return (
     <div className={`fixed inset-0 z-[80] ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
       <div className={`absolute inset-0 bg-navy-950/50 transition-opacity ${open ? "opacity-100" : "opacity-0"}`} onClick={close} />
-      <aside className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-2xl transition-transform ${open ? "translate-x-0" : "translate-x-full"}`} role="dialog" aria-label="Cart">
+      <aside className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface   transition-transform ${open ? "translate-x-0" : "translate-x-full"}`} role="dialog" aria-label="Cart">
         <div className="flex items-center justify-between border-b border-line-soft px-5 py-4">
           <h2 className="flex items-center gap-2 text-base font-bold text-ink"><ShoppingCart className="h-5 w-5" />Your order</h2>
           <button onClick={close} aria-label="Close cart" className="grid h-9 w-9 place-items-center rounded-lg hover:bg-softer"><X className="h-5 w-5" /></button>

@@ -113,21 +113,21 @@ function LiveTab() {
           <MapBase>
             {VEHICLES.map((x) => <g key={x.id} onClick={() => setSel(x.id)} className="cursor-pointer"><Marker x={x.x} y={x.y} color={STATUS[x.status].hex} selected={x.id === sel} pulse={x.status === "running"} /></g>)}
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
         </div>
         <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
           <p className="text-sm font-bold text-white">{v.name}</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400"><MapPin className="h-3 w-3" />{v.place}</p>
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><Gauge className="h-3 w-3" />Speed</p><p className="mt-0.5 text-base font-bold tabular-nums text-white">{Math.max(speed, 0)}<span className="text-xs font-medium text-slate-400"> km/h</span></p></div>
-            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><KeyRound className="h-3 w-3" />Ignition</p><p className={cn("mt-0.5 text-base font-bold", v.status === "running" || v.status === "idle" ? "text-green-400" : "text-slate-300")}>{v.status === "running" || v.status === "idle" ? "ON" : "OFF"}</p></div>
+            <div className="rounded-lg bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><Gauge className="h-3 w-3" />Speed</p><p className="mt-0.5 text-base font-bold tabular-nums text-white">{Math.max(speed, 0)}<span className="text-xs font-medium text-slate-400"> km/h</span></p></div>
+            <div className="rounded-lg bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><KeyRound className="h-3 w-3" />Ignition</p><p className={cn("mt-0.5 text-base font-bold", v.status === "running" || v.status === "idle" ? "text-green-400" : "text-slate-300")}>{v.status === "running" || v.status === "idle" ? "ON" : "OFF"}</p></div>
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-300"><User className="h-3 w-3 text-slate-400" />{v.driver}</p>
           <button onClick={toggleLock} disabled={v.status === "offline"}
             className={cn("mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40", isLocked ? "bg-green-600 text-white hover:bg-green-500" : "gloss-btn text-white")}>
             {isLocked ? <><LockOpen className="h-4 w-4" />Unlock engine</> : <><Lock className="h-4 w-4" />Lock engine</>}
           </button>
-          {v.status === "offline" && <p className="mt-2 text-[11px] text-slate-500">Device offline — commands unavailable.</p>}
+          {v.status === "offline" && <p className="mt-2 text-[11px] md:text-xs text-slate-500">Device offline — commands unavailable.</p>}
         </div>
       </div>
     </div>
@@ -175,14 +175,14 @@ function PlaybackTab() {
             <Marker x={40} y={320} color="#22c55e" /><Marker x={570} y={60} color="#ef4444" />
             <g transform={`translate(${pt.x} ${pt.y})`}><circle r="14" fill="#f05a22" fillOpacity=".25" /><circle r="8" fill="#f05a22" stroke="#fff" strokeWidth="2.5" /></g>
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
         </div>
         <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3">
           <button onClick={() => { if (progress >= 1) seek(0); setPlaying((p) => !p); }} aria-label={playing ? "Pause" : "Play"} className="gloss-btn grid h-10 w-10 shrink-0 place-items-center rounded-full text-white">
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
           <input type="range" min={0} max={1000} value={Math.round(progress * 1000)} onChange={(e) => { setPlaying(false); seek(Number(e.target.value) / 1000); }} aria-label="Trip position" className="h-1.5 flex-1 cursor-pointer accent-brand-600" />
-          <div className="flex shrink-0 rounded-md border border-white/10 p-0.5 text-xs font-semibold">
+          <div className="flex shrink-0 rounded-lg border border-white/10 p-0.5 text-xs font-semibold">
             {[1, 2, 4].map((r) => <button key={r} onClick={() => setRate(r)} aria-pressed={rate === r} className={cn("rounded px-2 py-1", rate === r ? "bg-white/15 text-white" : "text-slate-400")}>{r}×</button>)}
           </div>
         </div>
@@ -239,7 +239,7 @@ function FenceTab() {
           <Marker x={CX} y={CY} color="#38bdf8" />
           <Marker x={pos.x} y={pos.y} color={outside ? "#ef4444" : "#22c55e"} pulse />
         </MapBase>
-        <span className={cn("absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur", outside ? "bg-red-600/80 text-white" : "bg-green-600/80 text-white")}>
+        <span className={cn("absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] md:text-xs font-semibold backdrop-blur", outside ? "bg-red-600/80 text-white" : "bg-green-600/80 text-white")}>
           {outside ? "Outside zone" : <><Check className="h-3 w-3" />Inside zone</>}
         </span>
       </div>
@@ -303,7 +303,7 @@ function ReportsTab() {
       <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
         <div className="mb-3 flex items-center justify-between">
           <div><p className="text-xs text-slate-400">{hover !== null ? `Day ${hover + 1}` : "Daily average"}</p><p className="text-2xl font-bold tabular-nums text-white">{shown} <span className="text-sm font-medium text-slate-400">km</span></p></div>
-          <div className="flex rounded-md border border-white/10 p-0.5 text-xs font-semibold">
+          <div className="flex rounded-lg border border-white/10 p-0.5 text-xs font-semibold">
             {([7, 30] as const).map((r) => <button key={r} onClick={() => { setRange(r); setHover(null); }} aria-pressed={range === r} className={cn("rounded px-2.5 py-1", range === r ? "bg-white/15 text-white" : "text-slate-400")}>{r} days</button>)}
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function SoftwarePreview() {
       <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl" aria-hidden />
       <Container className="relative">
         <SectionHeading light eyebrow="Tracking software preview" title="Try the fleet console" description="An interactive demo with simulated data — lock an engine, replay a trip, drag a geo-fence, clear alerts." />
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-white/10 bg-[#0f1217] shadow-[0_30px_70px_-30px_rgb(0_0_0/0.8),inset_0_1px_0_rgb(255_255_255/0.08)]">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-white/10 bg-[#0f1217]  ">
           <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.03] px-4 py-2.5">
             <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" /><span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
             <span className="ml-2 truncate text-xs text-slate-400">Fleet console · demo</span>

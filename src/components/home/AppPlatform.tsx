@@ -34,7 +34,7 @@ export default function AppPlatform() {
             ))}
           </ul>
 
-          <div className="mt-8 rounded-2xl border border-line bg-soft/50 p-4 max-w-lg">
+          <div className="mt-8 rounded-lg border border-line bg-soft/50 p-4 max-w-lg">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-brand-500" />
               Install Native Mobile Telematics App

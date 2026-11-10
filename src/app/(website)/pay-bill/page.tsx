@@ -10,7 +10,7 @@ export default function PayBillPage() {
   return (
     <>
       <PageHero art="van" eyebrow="Pay bill" title="Pay your monthly bill" description="Enter your invoice details, preview the invoice and confirm. This page is a demonstration interface." />
-      <Container className="max-w-2xl py-12"><div className="rounded-lg glass border border-white/60 dark:border-white/10 p-5 shadow-sm sm:p-7"><PayBillForm /></div>
+      <Container className="max-w-2xl py-12"><div className="rounded-lg glass border border-white/60 dark:border-white/10 p-5   sm:p-7"><PayBillForm /></div>
         <figure className="mt-6 rounded-lg border border-line bg-white p-4"><Image src="/img/payments.png" alt="Supported payment methods on the company website" width={1400} height={226} className="h-auto w-full" /><figcaption className="mt-2 text-center text-xs text-slate-500">Payment methods shown on the company website. This page is a demo and does not process payments.</figcaption></figure></Container>
     </>
   );

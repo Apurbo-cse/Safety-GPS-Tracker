@@ -115,7 +115,7 @@ export default function HardwareEcosystem() {
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-all",
                     isActive
-                      ? "border-brand-600 bg-brand-500/10 text-brand-text shadow-md ring-2 ring-brand-500/30"
+                      ? "border-brand-600 bg-brand-500/10 text-brand-text   ring-2 ring-brand-500/30"
                       : "border-line bg-soft/50 text-slate-600 dark:text-slate-300 hover:border-brand-400 hover:bg-surface"
                   )}
                 >
@@ -136,7 +136,7 @@ export default function HardwareEcosystem() {
           {/* Selected Sensor Deep-Dive Card */}
           <div className="mt-8">
             <Reveal key={selected.id}>
-              <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/50 via-surface to-surface p-6 shadow-xl lg:grid-cols-12 sm:p-8">
+              <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/50 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
                 <div className="space-y-4 lg:col-span-7">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-text">

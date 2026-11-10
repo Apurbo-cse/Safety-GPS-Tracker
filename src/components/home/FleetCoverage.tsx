@@ -125,7 +125,7 @@ export default function FleetCoverage() {
               className={cn(
                 "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-xs sm:text-sm font-bold transition-all border shrink-0",
                 activeId === c.id
-                  ? "border-brand-600 bg-brand-600 text-white shadow-lg shadow-brand-600/25"
+                  ? "border-brand-600 bg-brand-600 text-white    "
                   : "border-line bg-soft/50 text-body hover:border-brand-400 hover:text-ink hover:bg-surface"
               )}
             >
@@ -138,7 +138,7 @@ export default function FleetCoverage() {
         {/* Selected Category Details Card */}
         <div className="mt-6">
           <Reveal key={active.id}>
-            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/40 via-surface to-surface p-6 shadow-xl lg:grid-cols-12 sm:p-8">
+            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/40 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
               {/* Left Column: Description & Feature Grid */}
               <div className="space-y-6 lg:col-span-7">
                 <div>
@@ -183,7 +183,7 @@ export default function FleetCoverage() {
                   <div className="mt-6 rounded-lg border border-brand-500/20 bg-brand-500/5 p-4 text-xs">
                     <p className="font-bold text-ink">Pricing Recommendation:</p>
                     <p className="mt-0.5 text-brand-text font-semibold">{active.pricingHint}</p>
-                    <p className="mt-1 text-[11px] text-slate-500">Includes Free Installation + 1 Year Device Replacement Warranty.</p>
+                    <p className="mt-1 text-[11px] md:text-xs text-slate-500">Includes Free Installation + 1 Year Device Replacement Warranty.</p>
                   </div>
                 </div>
 

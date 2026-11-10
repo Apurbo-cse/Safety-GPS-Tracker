@@ -19,7 +19,7 @@ const MAX = 4;
 const GROUPS = groupFeatures(comparisonFeatures);
 const firstYear = (p: PricingPlan) => p.devicePrice + p.monthlyCharge * 12;
 
-const Best = () => <span className="ml-1.5 rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-green-600">Lowest</span>;
+const Best = () => <span className="ml-1.5 rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] md:text-xs font-semibold text-green-600">Lowest</span>;
 const Mark = ({ on }: { on: boolean }) => on ? <Check className="mx-auto h-4 w-4 text-green-600" aria-label="Included" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="Not listed" />;
 
 export default function PackageComparison() {
@@ -99,9 +99,9 @@ export default function PackageComparison() {
                     <th key={p.id} onMouseEnter={() => setHoverCol(p.id)} className={cn("sticky top-0 z-20 border-b border-line px-3 py-3 text-center align-top transition-colors", hoverCol === p.id ? "bg-brand-50" : "bg-soft")}>
                       <div className="relative">
                         {cols.length > 2 && <button onClick={() => toggle(p.id)} aria-label={`Remove ${p.name}`} className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-softer hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
-                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
+                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
                         <span className="mt-1.5 block text-sm font-bold leading-tight text-ink">{p.name}</span>
-                        {p.siteTitle && <span className="block text-[11px] font-normal text-body">{p.siteTitle}</span>}
+                        {p.siteTitle && <span className="block text-[11px] md:text-xs font-normal text-body">{p.siteTitle}</span>}
                         <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
                       </div>
                     </th>
@@ -139,7 +139,7 @@ export default function PackageComparison() {
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
             {[[aId, setAId, "Package A"], [bId, setBId, "Package B"]].map(([val, set, label], i) => (
               <label key={String(label)} className={cn("block", i === 1 && "col-start-3 row-start-1")}>
-                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-body">{String(label)}</span>
+                <span className="mb-1 block text-[11px] md:text-xs font-semibold uppercase tracking-wide text-body">{String(label)}</span>
                 <select value={val as string} onChange={(e) => (set as (v: string) => void)(e.target.value)} className="w-full rounded-lg border border-line-strong bg-surface px-2.5 py-2.5 text-sm font-medium text-ink">
                   {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
@@ -153,7 +153,7 @@ export default function PackageComparison() {
               const other = p.id === a.id ? b : a;
               return (
                 <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-lg border border-white/60 p-3 dark:border-white/10">
-                  <span className="relative block h-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
+                  <span className="relative block h-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
                   <p className="mt-2 text-sm font-bold leading-tight text-ink">{p.name}</p>
                   <dl className="mt-2 space-y-1 text-xs">
                     <div className="flex justify-between gap-1"><dt className="text-body">Device</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(p.devicePrice)}{p.devicePrice < other.devicePrice && <Best />}</dd></div>

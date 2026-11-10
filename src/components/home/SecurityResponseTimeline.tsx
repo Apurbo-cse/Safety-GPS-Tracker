@@ -61,12 +61,12 @@ export default function SecurityResponseTimeline() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {TIMELINE_STEPS.map((s, idx) => (
               <Reveal key={s.step} delay={idx * 0.1}>
-                <div className="relative flex h-full flex-col justify-between rounded-lg border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-brand-500/50 hover:bg-white/[0.06] hover:shadow-2xl">
+                <div className="relative flex h-full flex-col justify-between rounded-lg border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-brand-500/50 hover:bg-white/[0.06]  ">
                   {/* Top Header */}
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-bold text-slate-400">STAGE {s.step}</span>
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-[11px] font-bold text-brand-300">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-[11px] md:text-xs font-bold text-brand-300">
                         {s.time}
                       </span>
                     </div>
@@ -76,11 +76,11 @@ export default function SecurityResponseTimeline() {
                     </div>
 
                     <h3 className="mt-4 text-base font-bold text-white">{s.title}</h3>
-                    <span className="mt-1 inline-block text-[11px] font-bold text-brand-400">{s.badge}</span>
+                    <span className="mt-1 inline-block text-[11px] md:text-xs font-bold text-brand-400">{s.badge}</span>
                     <p className="mt-2 text-xs leading-relaxed text-slate-300">{s.description}</p>
                   </div>
 
-                  <div className="mt-6 border-t border-white/10 pt-3 text-[11px] font-mono text-slate-400">
+                  <div className="mt-6 border-t border-white/10 pt-3 text-[11px] md:text-xs font-mono text-slate-400">
                     Response SLA: <b className="text-white">Active (24/7)</b>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export default function SecurityResponseTimeline() {
           <Reveal delay={0.4}>
             <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-lg border border-white/15 bg-gradient-to-r from-brand-600/20 via-brand-500/10 to-transparent p-6 backdrop-blur sm:flex-row">
               <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-brand-600 text-white shadow-lg">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-brand-600 text-white  ">
                   <PhoneCall className="h-6 w-6" />
                 </div>
                 <div>
@@ -105,7 +105,7 @@ export default function SecurityResponseTimeline() {
 
               <a
                 href="tel:01713546487"
-                className="whitespace-nowrap rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md hover:bg-brand-50 hover:text-brand-700 transition-colors"
+                className="whitespace-nowrap rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-slate-950   hover:bg-brand-50 hover:text-brand-700 transition-colors"
               >
                 Call Emergency Desk
               </a>

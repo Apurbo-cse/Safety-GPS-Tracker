@@ -52,7 +52,7 @@ export default function RoiCalculator() {
 
         <div className="mx-auto mt-10 max-w-5xl">
           <Reveal>
-            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/60 to-surface p-6 shadow-xl lg:grid-cols-12 sm:p-8">
+            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/60 to-surface p-6   lg:grid-cols-12 sm:p-8">
               {/* Left Column: Sliders & Controls */}
               <div className="space-y-6 lg:col-span-7">
                 <div>
@@ -102,7 +102,7 @@ export default function RoiCalculator() {
                     onChange={(e) => setVehicleCount(Number(e.target.value))}
                     className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
                   />
-                  <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+                  <div className="mt-1 flex justify-between text-[11px] md:text-xs text-slate-400">
                     <span>1 vehicle</span>
                     <span>50 vehicles</span>
                     <span>100+ vehicles</span>
@@ -129,7 +129,7 @@ export default function RoiCalculator() {
                     onChange={(e) => setFuelCostPerVehicle(Number(e.target.value))}
                     className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
                   />
-                  <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+                  <div className="mt-1 flex justify-between text-[11px] md:text-xs text-slate-400">
                     <span>{formatBDT(5000)}</span>
                     <span>{formatBDT(60000)}</span>
                     <span>{formatBDT(120000)}</span>
@@ -154,7 +154,7 @@ export default function RoiCalculator() {
               </div>
 
               {/* Right Column: Dynamic Savings Summary Card */}
-              <div className="flex flex-col justify-between rounded-lg border border-brand-500/20 bg-gradient-to-b from-navy-950 to-navy-900 p-6 text-white shadow-2xl lg:col-span-5">
+              <div className="flex flex-col justify-between rounded-lg border border-brand-500/20 bg-gradient-to-b from-navy-950 to-navy-900 p-6 text-white   lg:col-span-5">
                 <div>
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/20 px-3 py-1 text-xs font-bold text-brand-300 ring-1 ring-brand-500/40">
                     <Sparkles className="h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ export default function RoiCalculator() {
                     </div>
                   </div>
 
-                  <p className="mt-4 text-[11px] text-slate-400 leading-relaxed">
+                  <p className="mt-4 text-[11px] md:text-xs text-slate-400 leading-relaxed">
                     Based on verified telematics data from 45,000+ commercial vehicles in Dhaka, Chittagong, and Sylhet. Payback period is under 30 days.
                   </p>
                 </div>
@@ -195,7 +195,7 @@ export default function RoiCalculator() {
                   <LinkButton href="/contact" size="lg" className="w-full text-center justify-center font-bold">
                     Claim Fleet Discount & Free Demo
                   </LinkButton>
-                  <p className="text-center text-[10px] text-slate-400">
+                  <p className="text-center text-[10px] md:text-xs text-slate-400">
                     Includes Free Onsite Technician Installation in 64 Districts
                   </p>
                 </div>

@@ -54,7 +54,7 @@ export default function VehicleScene({
           />
         </div>
       </div>
-      <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+      <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-white backdrop-blur">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" />
           <span className="relative h-2 w-2 rounded-full bg-green-400" />

@@ -70,16 +70,16 @@
 
 @theme {
   /* Type scale — compact so text sits comfortably on every device */
-  --text-xs: 0.6875rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.875rem;
-  --text-lg: 0.96rem;
-  --text-xl: 1.06rem;
-  --text-2xl: 1.2rem;
-  --text-3xl: clamp(1.4rem, 1.2rem + 0.7vw, 1.65rem);
-  --text-4xl: clamp(1.55rem, 1.25rem + 1.1vw, 1.95rem);
-  --text-5xl: clamp(1.75rem, 1.3rem + 1.7vw, 2.55rem);
-  --text-6xl: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+  --text-xs: 0.625rem;
+  --text-sm: 0.71875rem;
+  --text-base: 0.78125rem;
+  --text-lg: 0.875rem;
+  --text-xl: 0.96rem;
+  --text-2xl: 1.06rem;
+  --text-3xl: clamp(1.2rem, 1.05rem + 0.5vw, 1.4rem);
+  --text-4xl: clamp(1.32rem, 1.1rem + 0.8vw, 1.65rem);
+  --text-5xl: clamp(1.5rem, 1.15rem + 1.3vw, 2.1rem);
+  --text-6xl: clamp(1.7rem, 1.25rem + 1.8vw, 2.5rem);
 
   /* Always-dark surfaces (hero, footer, sidebar) */
   --color-navy-950: #101216;
@@ -102,7 +102,7 @@ html {
 }
 
 body {
-  font-size: 0.875rem;
+  font-size: 0.78125rem;
   background:
     radial-gradient(900px 480px at 88% -6%, rgb(240 90 34 / 0.10), transparent 60%),
     radial-gradient(760px 420px at -6% 18%, rgb(120 140 190 / 0.10), transparent 60%),
@@ -234,6 +234,38 @@ button { -webkit-user-select: none; user-select: none; }
 @media (max-width: 767px) {
   input, select, textarea { font-size: 16px; } /* stop iOS zoom on focus */
 }
+/* Phones: one step smaller, like a native app */
+@media (max-width: 639px) {
+  :root {
+    --text-xs: 0.5625rem;
+    --text-sm: 0.65625rem;
+    --text-base: 0.71875rem;
+    --text-lg: 0.8125rem;
+    --text-xl: 0.875rem;
+    --text-2xl: 0.96rem;
+    --text-3xl: 1.1rem;
+    --text-4xl: 1.2rem;
+    --text-5xl: 1.35rem;
+    --text-6xl: 1.5rem;
+  }
+  body { font-size: 0.71875rem; }
+}
+/* Tablet / desktop: larger again */
+@media (min-width: 768px) {
+  :root {
+    --text-xs: 0.78125rem;
+    --text-sm: 0.90625rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.45rem;
+    --text-3xl: clamp(1.65rem, 1.4rem + 0.7vw, 1.9rem);
+    --text-4xl: clamp(1.85rem, 1.5rem + 1.1vw, 2.3rem);
+    --text-5xl: clamp(2.1rem, 1.6rem + 1.6vw, 2.9rem);
+    --text-6xl: clamp(2.3rem, 1.7rem + 2.2vw, 3.4rem);
+  }
+  body { font-size: 1rem; }
+}
 @media (max-width: 1023px) {
   html { scroll-padding-top: 4rem; }
   body { overscroll-behavior-y: contain; }
@@ -254,18 +286,18 @@ button { -webkit-user-select: none; user-select: none; }
 :root {
   --glass-bg: rgb(255 255 255 / 0.66);
   --glass-border: rgb(255 255 255 / 0.9);
-  --glass-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 0 0 1px rgb(20 24 34 / 0.05), 0 10px 30px -12px rgb(20 24 34 / 0.18);
+  --glass-shadow: none;
 }
 .dark {
   --glass-bg: rgb(255 255 255 / 0.05);
   --glass-border: rgb(255 255 255 / 0.1);
-  --glass-shadow: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 0 0 1px rgb(255 255 255 / 0.06), 0 12px 32px -14px rgb(0 0 0 / 0.7);
+  --glass-shadow: none;
 }
 .glass {
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
-  box-shadow: var(--glass-shadow);
+  
 }
 .dark body { background:
     radial-gradient(900px 480px at 88% -6%, rgb(240 90 34 / 0.16), transparent 60%),
@@ -276,7 +308,6 @@ button { -webkit-user-select: none; user-select: none; }
 .gloss-btn {
   position: relative; overflow: hidden; isolation: isolate;
   background-image: linear-gradient(180deg, #ff7d49 0%, #f05a22 52%, #d84813 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(0 0 0 / 0.14), 0 8px 18px -8px rgb(240 90 34 / 0.6);
 }
 .gloss-btn::after {
   content: ""; position: absolute; inset: 0 0 52% 0; z-index: -1; border-radius: inherit; pointer-events: none;

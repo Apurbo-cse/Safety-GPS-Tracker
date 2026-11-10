@@ -66,7 +66,7 @@ export default function PricingPreview() {
               return (
                 <button key={p.id} role="radio" aria-checked={on} onClick={(e) => { setPlanId(p.id); e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
                   className={cn("glass flex w-56 shrink-0 items-center gap-3 rounded-lg border p-2.5 text-left transition-all lg:w-auto", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-white/60 hover:border-brand-400 dark:border-white/10")}>
-                  <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="64px" className="object-contain" />}</span>
+                  <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="64px" className="object-contain" />}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink">{p.name}</span>
                     <span className="block text-xs text-body">{formatBDT(p.devicePrice)} · {formatBDT(p.monthlyCharge)}/mo</span>
@@ -107,7 +107,7 @@ export default function PricingPreview() {
               <div className="mt-3 flex items-center gap-3">
                 <span className="text-sm font-medium text-body-strong">Service period</span>
                 <div className="ml-auto flex rounded-lg border border-line-strong bg-surface p-0.5 text-xs font-semibold" role="group" aria-label="Service period">
-                  {PERIODS.map((m) => <button key={m} onClick={() => setMonths(m)} aria-pressed={months === m} className={cn("rounded-md px-3 py-1.5", months === m ? "bg-brand-600 text-white" : "text-body")}>{m} mo</button>)}
+                  {PERIODS.map((m) => <button key={m} onClick={() => setMonths(m)} aria-pressed={months === m} className={cn("rounded-lg px-3 py-1.5", months === m ? "bg-brand-600 text-white" : "text-body")}>{m} mo</button>)}
                 </div>
               </div>
 
@@ -127,7 +127,7 @@ export default function PricingPreview() {
                 <Button onClick={buy}><ShoppingCart className="h-4 w-4" />Buy Now</Button>
                 <Button variant="outline" onClick={() => dispatch(openDemoModal(`Sales enquiry: ${qty} × ${plan.name}`))}>Contact Sales</Button>
               </div>
-              <p className="mt-3 text-[11px] leading-relaxed text-slate-500">Estimate = device price + monthly charge × months, using the published prices. No discounts are applied; sales confirms the final quote.</p>
+              <p className="mt-3 text-[11px] md:text-xs leading-relaxed text-slate-500">Estimate = device price + monthly charge × months, using the published prices. No discounts are applied; sales confirms the final quote.</p>
             </div>
           </div>
         </div>

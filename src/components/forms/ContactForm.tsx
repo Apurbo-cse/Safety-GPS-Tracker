@@ -41,7 +41,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 rounded-lg glass border border-white/60 dark:border-white/10 p-5 shadow-sm sm:p-7">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 rounded-lg glass border border-white/60 dark:border-white/10 p-5   sm:p-7">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Full name" error={errors.name?.message}><input className={inputCls} autoComplete="name" aria-invalid={!!errors.name} {...register("name")} /></Field>
         <Field label="Email" error={errors.email?.message}><input type="email" className={inputCls} autoComplete="email" aria-invalid={!!errors.email} {...register("email")} /></Field>
