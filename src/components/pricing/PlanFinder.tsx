@@ -84,7 +84,7 @@ export default function PlanFinder() {
     <section id="finder" className="scroll-mt-32 py-14">
       <Container>
         <SectionHeading eyebrow="Find my plan" title="Not sure which package?" description="Answer three quick questions and we'll point you to the best-fitting published package." />
-        <div className="glass mx-auto max-w-3xl rounded-lg border border-white/60 p-5 dark:border-white/10 sm:p-7">
+        <div className="glass mx-auto max-w-3xl rounded-lg border border-line p-5 sm:p-7">
           {!done && (
             <div className="mb-5 flex items-center gap-3">
               {step > 0 && <button onClick={() => setStep((s) => s - 1)} aria-label="Back" className="grid h-8 w-8 place-items-center rounded-full border border-line-strong text-body hover:text-ink"><ArrowLeft className="h-4 w-4" /></button>}

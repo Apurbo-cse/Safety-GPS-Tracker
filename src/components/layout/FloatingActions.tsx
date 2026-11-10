@@ -19,7 +19,7 @@ export default function FloatingActions() {
           <motion.button
             key="top" initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6, y: 10 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top"
-            className="grid h-11 w-11 place-items-center rounded-full glass border border-white/60 dark:border-white/10 text-ink   hover:border-brand-400 hover:text-brand-text">
+            className="grid h-11 w-11 place-items-center rounded-full glass border border-line text-ink   hover:border-brand-400 hover:text-brand-text">
             <ArrowUp className="h-5 w-5" />
           </motion.button>
         )}

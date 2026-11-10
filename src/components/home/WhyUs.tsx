@@ -21,7 +21,7 @@ export default function WhyUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.35, delay: idx * 0.05 }}
-              className="group flex flex-col justify-between rounded-lg glass border border-white/60 dark:border-white/10 p-5   transition-all hover:-translate-y-1 hover:border-brand-400  "
+              className="group flex flex-col justify-between rounded-lg glass border border-line p-5   transition-all hover:-translate-y-1 hover:border-brand-400  "
             >
               <div>
                 <span className="grid h-12 w-12 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">

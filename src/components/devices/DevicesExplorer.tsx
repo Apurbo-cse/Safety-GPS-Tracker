@@ -1,17 +1,16 @@
 "use client";
 import { useMemo, useState } from "react";
 import {
-  CheckCircle2,
+  ChevronDown,
   Cpu,
+  RotateCcw,
   Search,
   SearchX,
-  ShieldCheck,
-  Zap,
+  SlidersHorizontal,
 } from "lucide-react";
 import Container from "@/components/common/Container";
 import DeviceCard from "./DeviceCard";
 import { deviceCategories, devices } from "@/data/devices";
-import { cn } from "@/utils/format";
 
 const CAPABILITIES = [
   "All",
@@ -49,118 +48,124 @@ export default function DevicesExplorer() {
     });
   }, [cat, capability, q]);
 
+  const hasActiveFilters = cat !== "All" || capability !== "All" || q.trim() !== "";
+
+  const handleReset = () => {
+    setCat("All");
+    setCapability("All");
+    setQ("");
+  };
+
   return (
     <Container className="py-12 sm:py-16">
-      {/* Top Reassurance Trust Strip */}
-      <div className="mb-10 rounded-lg border border-line bg-gradient-to-r from-soft/60 via-surface to-soft/60 p-6  ">
-        <div className="flex flex-wrap items-center justify-between gap-6 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-500/10 text-brand-600">
-              <ShieldCheck className="h-5 w-5" />
+      {/* Select Option & Search Controls */}
+      <div className="mb-8 rounded-lg border border-line bg-surface p-4  sm:p-5">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-center">
+          {/* Category Select Option */}
+          <div className="relative sm:col-span-1 lg:col-span-4">
+            <label htmlFor="device-category-select" className="sr-only">
+              Select category
+            </label>
+            <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+              <SlidersHorizontal className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-extrabold text-ink text-sm">BTRC Approved Telematics Hardware</p>
-              <p className="text-slate-500">
-                100% genuine Concox, Teltonika & SinoTrack GPS hardware with 1-Year Instant Replacement Warranty.
-              </p>
-            </div>
+            <select
+              id="device-category-select"
+              value={cat}
+              onChange={(e) => setCat(e.target.value as (typeof deviceCategories)[number])}
+              className="w-full appearance-none rounded-xl border border-line-strong bg-soft/50 py-2.5 pl-10 pr-9 text-xs font-semibold text-ink transition-colors hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 sm:text-sm"
+            >
+              {deviceCategories.map((c) => {
+                const count =
+                  c === "All"
+                    ? devices.length
+                    : devices.filter((d) => d.category === c).length;
+                return (
+                  <option key={c} value={c} className="bg-surface text-ink">
+                    {c === "All" ? `All Categories (${count})` : `${c} (${count})`}
+                  </option>
+                );
+              })}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 font-mono text-[11px] md:text-xs text-slate-500">
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-              <CheckCircle2 className="h-4 w-4" /> 64 Districts Free Doorstep Installation
-            </span>
-            <span>·</span>
-            <span className="flex items-center gap-1.5 text-brand-text font-bold">
-              <Zap className="h-4 w-4" /> 10-Second GNSS Telemetry
-            </span>
+          {/* Capability Select Option */}
+          <div className="relative sm:col-span-1 lg:col-span-4">
+            <label htmlFor="device-capability-select" className="sr-only">
+              Select capability
+            </label>
+            <select
+              id="device-capability-select"
+              value={capability}
+              onChange={(e) => setCapability(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-line-strong bg-soft/50 py-2.5 pl-4 pr-9 text-xs font-semibold text-ink transition-colors hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 sm:text-sm"
+            >
+              {CAPABILITIES.map((cap) => (
+                <option key={cap} value={cap} className="bg-surface text-ink">
+                  {cap === "All" ? "All Hardware Capabilities" : `Capability: ${cap}`}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
+
+          {/* Search Input */}
+          <div className="relative sm:col-span-2 lg:col-span-4">
+            <label htmlFor="device-search-input" className="sr-only">
+              Search tracking hardware
+            </label>
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              id="device-search-input"
+              type="text"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search devices, sensors, OBD..."
+              className="w-full rounded-xl border border-line-strong bg-soft/50 py-2.5 pl-10 pr-4 text-xs font-medium text-ink placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 sm:text-sm"
+            />
           </div>
         </div>
-      </div>
 
-      {/* Search & Category Filter Controls */}
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Device categories">
-          {deviceCategories.map((c) => {
-            const count = c === "All" ? devices.length : devices.filter((d) => d.category === c).length;
-            const isSelected = cat === c;
-            return (
-              <button
-                key={c}
-                role="tab"
-                aria-selected={isSelected}
-                onClick={() => setCat(c)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs sm:text-sm font-bold transition-all  ",
-                  isSelected
-                    ? "border-brand-600 bg-brand-600 text-white   scale-[1.02]"
-                    : "border-line bg-surface text-body hover:border-brand-400 hover:text-ink hover:bg-softer"
-                )}
-              >
-                <span>{c}</span>
-                <span
-                  className={cn(
-                    "rounded-full px-1.5 py-0.2 text-[10px] md:text-xs font-bold font-mono",
-                    isSelected ? "bg-white/20 text-white" : "bg-soft text-slate-400"
-                  )}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+        {/* Filter Summary & Reset Action */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line/60 pt-3 text-xs text-body">
+          <div>
+            Showing <strong className="text-ink">{list.length}</strong> of{" "}
+            {devices.length} hardware models
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="inline-flex items-center gap-1.5 font-bold text-brand-text transition-colors hover:text-brand-700 hover:underline"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Reset filters</span>
+            </button>
+          )}
         </div>
-
-        <label className="relative block w-full lg:w-80">
-          <span className="sr-only">Search tracking hardware</span>
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search devices, sensors, OBD..."
-            className="w-full rounded-lg border border-line-strong bg-surface py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20  "
-          />
-        </label>
-      </div>
-
-      {/* Hardware Capability Fast Filter Pills */}
-      <div className="mb-8 flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-bold text-slate-500 uppercase tracking-wider mr-1 text-[11px] md:text-xs">Filter by capability:</span>
-        {CAPABILITIES.map((cap) => (
-          <button
-            key={cap}
-            onClick={() => setCapability(cap)}
-            className={cn(
-              "rounded-lg px-3 py-1 font-semibold transition-all border",
-              capability === cap
-                ? "border-brand-600 bg-brand-500/10 text-brand-text font-bold"
-                : "border-line bg-surface text-slate-500 hover:border-brand-300 hover:text-ink"
-            )}
-          >
-            {cap}
-          </button>
-        ))}
       </div>
 
       {/* Device List or Empty State */}
       {list.length === 0 ? (
         <div className="grid place-items-center rounded-lg border border-dashed border-line-strong py-16 text-center">
           <SearchX className="h-10 w-10 text-slate-400" />
-          <p className="mt-3 text-base font-bold text-ink">No devices match your search or filter</p>
-          <p className="text-xs text-slate-500">Try searching for keywords like &quot;voice&quot;, &quot;video&quot;, &quot;obd&quot;, or &quot;relay&quot;.</p>
+          <p className="mt-3 text-base font-bold text-ink">
+            No devices match your search or filter
+          </p>
+          <p className="text-xs text-slate-500">
+            Try choosing &quot;All Categories&quot; or searching for keywords like &quot;voice&quot;, &quot;video&quot;, &quot;obd&quot;, or &quot;relay&quot;.
+          </p>
           <button
-            className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-xs font-bold text-white   hover:bg-brand-700"
-            onClick={() => {
-              setQ("");
-              setCat("All");
-              setCapability("All");
-            }}
+            className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"
+            onClick={handleReset}
           >
             Clear Filters
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {list.map((d) => (
             <DeviceCard key={d.id} device={d} />
           ))}
@@ -168,7 +173,7 @@ export default function DevicesExplorer() {
       )}
 
       {/* Bottom Guarantee Note */}
-      <div className="mt-12 rounded-lg border border-line bg-soft/40 p-5 text-xs text-body leading-relaxed flex items-start gap-3">
+      <div className="mt-12 flex items-start gap-3 rounded-lg border border-line bg-soft/40 p-5 text-xs leading-relaxed text-body">
         <Cpu className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" />
         <p>
           All GPS trackers come with internal backup batteries, multi-carrier 4G IoT SIM cards, and a certified solid-state engine immobilizer relay kit. Free doorstep technician installation and covert wiring available across all 64 districts in Bangladesh.

@@ -65,7 +65,7 @@ export default function PricingPreview() {
               const on = p.id === planId;
               return (
                 <button key={p.id} role="radio" aria-checked={on} onClick={(e) => { setPlanId(p.id); e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-                  className={cn("glass flex w-56 shrink-0 items-center gap-3 rounded-lg border p-2.5 text-left transition-all lg:w-auto", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-white/60 hover:border-brand-400 dark:border-white/10")}>
+                  className={cn("glass flex w-56 shrink-0 items-center gap-3 rounded-lg border p-2.5 text-left transition-all lg:w-auto", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-line hover:border-brand-400")}>
                   <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="64px" className="object-contain" />}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink">{p.name}</span>
@@ -78,7 +78,7 @@ export default function PricingPreview() {
           </div>
 
           {/* estimate */}
-          <div className="glass grid gap-6 rounded-lg border border-white/60 p-5 dark:border-white/10 md:grid-cols-2 md:p-6">
+          <div className="glass grid gap-6 rounded-lg border border-line p-5 md:grid-cols-2 md:p-6">
             <div>
               <div className="relative h-44 overflow-hidden rounded-lg border border-line bg-white sm:h-52">
                 {plan.image && <Image quality={90} src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="(min-width:768px) 340px, 100vw" className="object-contain p-2" />}

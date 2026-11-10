@@ -24,8 +24,8 @@ export default function AboutPage() {
           <p className="mt-4 rounded-lg bg-softer p-3 text-sm text-body-strong"><strong>Office:</strong> {SITE.address}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-5"><span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><Target className="h-5 w-5" /></span><h3 className="mt-3 font-bold text-ink">Mission</h3><p className="mt-1 text-sm text-body">Give every vehicle owner accurate, timely location and security information through simple tracking software.</p></div>
-          <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-5"><span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><Eye className="h-5 w-5" /></span><h3 className="mt-3 font-bold text-ink">Vision</h3><p className="mt-1 text-sm text-body">Be a dependable tracking partner for personal vehicles and business fleets across Bangladesh.</p></div>
+          <div className="rounded-lg glass border border-line p-5"><span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><Target className="h-5 w-5" /></span><h3 className="mt-3 font-bold text-ink">Mission</h3><p className="mt-1 text-sm text-body">Give every vehicle owner accurate, timely location and security information through simple tracking software.</p></div>
+          <div className="rounded-lg glass border border-line p-5"><span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><Eye className="h-5 w-5" /></span><h3 className="mt-3 font-bold text-ink">Vision</h3><p className="mt-1 text-sm text-body">Be a dependable tracking partner for personal vehicles and business fleets across Bangladesh.</p></div>
         </div>
       </Container>
       <section className="bg-surface py-14">
@@ -41,11 +41,11 @@ export default function AboutPage() {
         </Container>
       </section>
       <Container className="grid gap-6 py-14 md:grid-cols-2">
-        <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-6">
+        <div className="rounded-lg glass border border-line p-6">
           <h2 className="flex items-center gap-2 text-lg font-bold text-ink"><Cpu className="h-5 w-5 text-brand-text" />Device partners</h2>
           <div className="mt-4"><PartnerLogos items={DEVICE_PARTNER_LOGOS} /></div>
         </div>
-        <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-6">
+        <div className="rounded-lg glass border border-line p-6">
           <h2 className="flex items-center gap-2 text-lg font-bold text-ink"><Radio className="h-5 w-5 text-brand-text" />Telecom partners</h2>
           <div className="mt-4"><PartnerLogos items={TELECOM_PARTNER_LOGOS} /></div>
         </div>
@@ -54,7 +54,7 @@ export default function AboutPage() {
         <Container>
           <SectionHeading eyebrow="Why choose us" title="What you get with Safety GPS Tracker" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{whyUs.map((w) => (
-            <div key={w.title} className="flex gap-4 rounded-lg glass border border-white/60 dark:border-white/10 p-5"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-text"><w.icon className="h-5 w-5" /></span><div><h3 className="text-[14px] md:text-base font-bold text-ink">{w.title}</h3><p className="mt-1 text-sm text-body">{w.text}</p></div></div>
+            <div key={w.title} className="flex gap-4 rounded-lg glass border border-line p-5"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-text"><w.icon className="h-5 w-5" /></span><div><h3 className="text-[14px] md:text-base font-bold text-ink">{w.title}</h3><p className="mt-1 text-sm text-body">{w.text}</p></div></div>
           ))}</div>
         </Container>
       </section>

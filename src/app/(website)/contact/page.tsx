@@ -24,13 +24,13 @@ export default function ContactPage() {
           <ul className="space-y-3">
             {rows.map((r) => (
               <li key={r.label}>
-                <a href={r.href} className="flex items-center gap-4 rounded-lg glass border border-white/60 dark:border-white/10 p-4 transition-colors hover:border-brand-300">
+                <a href={r.href} className="flex items-center gap-4 rounded-lg glass border border-line p-4 transition-colors hover:border-brand-300">
                   <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-50 text-brand-text"><r.icon className="h-5 w-5" /></span>
                   <span><span className="block text-xs text-slate-500">{r.label}</span><span className="text-sm font-bold text-ink">{r.value}</span></span>
                 </a>
               </li>
             ))}
-            <li className="flex items-start gap-4 rounded-lg glass border border-white/60 dark:border-white/10 p-4">
+            <li className="flex items-start gap-4 rounded-lg glass border border-line p-4">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-text"><MapPin className="h-5 w-5" /></span>
               <span><span className="block text-xs text-slate-500">Office</span><span className="text-sm font-bold text-ink">{SITE.address}</span></span>
             </li>

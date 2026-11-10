@@ -82,7 +82,7 @@ export default function CommandPalette() {
       {open && (
         <motion.div className="fixed inset-0 z-[100] flex items-start justify-center bg-navy-950/60 px-4 pt-[12vh] backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
           <motion.div role="dialog" aria-modal="true" aria-label="Search and commands" onClick={(e) => e.stopPropagation()} onKeyDown={onKey}
-            className="w-full max-w-xl overflow-hidden rounded-lg glass border border-white/60 dark:border-white/10  "
+            className="w-full max-w-xl overflow-hidden rounded-lg glass border border-line  "
             initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.98 }} transition={{ duration: 0.18 }}>
             <div className="flex items-center gap-3 border-b border-line px-4">
               <Search className="h-5 w-5 text-slate-400" />

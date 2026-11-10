@@ -27,7 +27,7 @@ export default function Stats() {
   return (
     <section className="py-10">
       <Container>
-        <dl className="glass grid grid-cols-2 divide-line rounded-lg border border-white/60 py-2 text-center dark:border-white/10 lg:grid-cols-4 lg:divide-x">
+        <dl className="glass grid grid-cols-2 divide-line rounded-lg border border-line py-2 text-center lg:grid-cols-4 lg:divide-x">
           {stats.map((s) => (
             <div key={s.l} className="px-4 py-5">
               <dd className="text-2xl font-bold text-ink tabular-nums sm:text-3xl">{s.v}</dd>

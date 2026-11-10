@@ -24,7 +24,7 @@ export default function PricingSubNav() {
   const go = (id: string) => (e: React.MouseEvent) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
 
   return (
-    <nav aria-label="Pricing sections" className="glass sticky top-14 z-30 border-y border-white/60 dark:border-white/10 lg:top-16">
+    <nav aria-label="Pricing sections" className="glass sticky top-14 z-30 border-y border-line lg:top-16">
       <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] sm:px-6 lg:px-8">
         {ITEMS.map(([id, label]) => (
           <a key={id} href={`#${id}`} onClick={go(id)} aria-current={active === id ? "true" : undefined}

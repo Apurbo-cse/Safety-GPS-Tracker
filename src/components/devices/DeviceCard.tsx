@@ -14,7 +14,7 @@ export default function DeviceCard({ device }: { device: Device }) {
   return (
     <motion.article
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="flex flex-col overflow-hidden rounded-lg glass border border-white/60 dark:border-white/10   transition-all hover:border-brand-400  "
+      className="flex flex-col overflow-hidden rounded-lg glass border border-line   transition-all hover:border-brand-400  "
     >
       {device.image ? (
         <div className="relative h-48 bg-white border-b border-line-soft">

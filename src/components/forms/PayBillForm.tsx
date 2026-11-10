@@ -49,7 +49,7 @@ export default function PayBillForm() {
       <div className="space-y-4 text-center">
         <CheckCircle2 className="mx-auto h-14 w-14 text-green-600" />
         <h2 className="text-xl font-bold text-ink">Payment confirmation (demo)</h2>
-        <dl className="mx-auto max-w-sm divide-y divide-line-soft rounded-lg glass border border-white/60 dark:border-white/10 text-left text-sm">
+        <dl className="mx-auto max-w-sm divide-y divide-line-soft rounded-lg glass border border-line text-left text-sm">
           {[["Reference", ref], ["Invoice", data.invoice], ["Method", data.method], ["Amount", formatBDT(data.amount)]].map(([k, v]) => (
             <div key={k} className="flex justify-between px-4 py-2.5"><dt className="text-slate-500">{k}</dt><dd className="font-semibold text-ink">{v}</dd></div>
           ))}
@@ -64,7 +64,7 @@ export default function PayBillForm() {
     return (
       <div className="space-y-4">
         {banner}
-        <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-5">
+        <div className="rounded-lg glass border border-line p-5">
           <div className="flex items-start justify-between">
             <div><p className="text-xs uppercase tracking-wide text-slate-500">Invoice preview</p><p className="text-lg font-bold text-ink">{data.invoice}</p></div>
             <p className="text-sm font-semibold text-brand-text">Safety GPS Tracker</p>

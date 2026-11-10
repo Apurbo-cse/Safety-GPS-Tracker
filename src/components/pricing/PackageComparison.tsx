@@ -152,7 +152,7 @@ export default function PackageComparison() {
             {[a, b].map((p) => {
               const other = p.id === a.id ? b : a;
               return (
-                <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-lg border border-white/60 p-3 dark:border-white/10">
+                <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-lg border border-line p-3">
                   <span className="relative block h-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
                   <p className="mt-2 text-sm font-bold leading-tight text-ink">{p.name}</p>
                   <dl className="mt-2 space-y-1 text-xs">

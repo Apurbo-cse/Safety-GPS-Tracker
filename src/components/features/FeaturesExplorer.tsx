@@ -69,7 +69,7 @@ export default function FeaturesExplorer() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search 40+ features... (press '/' to focus)"
-              className="w-full rounded-2xl border border-line bg-surface py-2.5 pl-10 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-line bg-surface py-2.5 pl-10 pr-10 text-sm text-ink outline-none transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
             {q && (
               <button
@@ -98,7 +98,7 @@ export default function FeaturesExplorer() {
             className={cn(
               "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
               cat === "All"
-                ? "bg-brand-600 text-white shadow-sm"
+                ? "bg-brand-600 text-white "
                 : "border border-line bg-surface text-body hover:border-brand-400"
             )}
           >
@@ -117,7 +117,7 @@ export default function FeaturesExplorer() {
                 className={cn(
                   "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
                   isSelected
-                    ? "bg-brand-600 text-white shadow-sm"
+                    ? "bg-brand-600 text-white "
                     : "border border-line bg-surface text-body hover:border-brand-400"
                 )}
               >
@@ -129,7 +129,7 @@ export default function FeaturesExplorer() {
       </div>
 
       {list.length === 0 ? (
-        <div className="grid place-items-center rounded-2xl border border-dashed border-line-strong py-16 text-center">
+        <div className="grid place-items-center rounded-lg border border-dashed border-line-strong py-16 text-center">
           <SearchX className="h-10 w-10 text-slate-400" />
           <p className="mt-3 text-base font-bold text-ink">No features match &quot;{q}&quot;</p>
           <p className="text-xs text-slate-500">Try searching for keywords like &quot;engine lock&quot;, &quot;fuel&quot;, &quot;playback&quot;, or &quot;speed&quot;.</p>
@@ -156,7 +156,7 @@ export default function FeaturesExplorer() {
               const on = picked.includes(f.id);
               return (
                 <motion.article key={f.id} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.3, delay: (i % 6) * 0.04 }}
-                  className={cn("group glass relative flex flex-col overflow-hidden rounded-lg border p-3.5 transition-all duration-300 hover:-translate-y-1   sm:p-4", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-white/60 hover:border-brand-400 dark:border-white/10")}>
+                  className={cn("group glass relative flex flex-col overflow-hidden rounded-lg border p-3.5 transition-all duration-300 hover:-translate-y-1   sm:p-4", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-line hover:border-brand-400")}>
                   <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-brand-500/15 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative flex items-start gap-2.5">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-navy-700 to-navy-950 text-white   ring-1 ring-white/10 transition-all duration-300 group-hover:from-brand-500 group-hover:to-brand-700 group-hover:scale-105"><DynIcon name={f.icon} className="h-4 w-4" /></span>
@@ -178,7 +178,7 @@ export default function FeaturesExplorer() {
       <AnimatePresence>
         {picked.length > 0 && (
           <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
-            className="glass fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 items-center gap-3 rounded-lg border border-white/60 p-3 dark:border-white/10 lg:bottom-5">
+            className="glass fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 items-center gap-3 rounded-lg border border-line p-3 lg:bottom-5">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white">{picked.length}</span>
             <div className="min-w-0 flex-1 text-sm">
               {match.list.length > 0 ? (

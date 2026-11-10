@@ -38,7 +38,7 @@ export default function PricingPage() {
           <SectionHeading eyebrow="Monthly pricing" title="How pricing works" />
           <div className="grid gap-4 md:grid-cols-3">
             {how.map((h) => (
-              <div key={h.t} className="rounded-lg glass border border-white/60 dark:border-white/10 p-5">
+              <div key={h.t} className="rounded-lg glass border border-line p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><h.icon className="h-5 w-5" /></span>
                 <h3 className="mt-3 text-[14px] md:text-base font-bold text-ink">{h.t}</h3><p className="mt-1 text-sm text-body">{h.d}</p>
               </div>

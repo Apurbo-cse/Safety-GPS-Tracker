@@ -4,6 +4,9 @@
 @import "swiper/css/effect-fade";
 @import "leaflet/dist/leaflet.css";
 
+/* Make `dark:` follow the .dark class set by the theme toggle (not the OS setting) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Theme tokens. Brand colour comes from the logo orange (#F05A22). */
 :root {
   --background: #f7f8fa;

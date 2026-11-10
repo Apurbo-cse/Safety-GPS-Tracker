@@ -173,7 +173,7 @@ export default function FleetCoverage() {
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Recommended Hardware Sensor Kit</h4>
                   <ul className="mt-3 space-y-2">
                     {active.hardware.map((hw) => (
-                      <li key={hw} className="flex items-center gap-2.5 rounded-lg glass border border-white/60 dark:border-white/10 p-3 text-xs font-bold text-ink">
+                      <li key={hw} className="flex items-center gap-2.5 rounded-lg glass border border-line p-3 text-xs font-bold text-ink">
                         <Radio className="h-3.5 w-3.5 text-brand-600 shrink-0" />
                         <span>{hw}</span>
                       </li>

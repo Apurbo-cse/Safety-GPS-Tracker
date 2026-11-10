@@ -75,7 +75,7 @@ export default function RoiCalculator() {
                         setVehicleCount(p.count);
                         setFuelCostPerVehicle(p.fuel);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg glass border border-white/60 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-body-strong transition-all hover:border-brand-500 hover:text-brand-text active:scale-95"
+                      className="inline-flex items-center gap-1.5 rounded-lg glass border border-line px-3 py-1.5 text-xs font-semibold text-body-strong transition-all hover:border-brand-500 hover:text-brand-text active:scale-95"
                     >
                       <span>{p.icon}</span>
                       <span>{p.label}</span>

@@ -61,7 +61,7 @@ export default function Overview() {
         <div className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
           {points.map((p, i) => (
             <Reveal key={p.t} delay={i * 0.05}>
-              <div className="group h-full rounded-lg glass border border-white/60 dark:border-white/10 p-5   transition-all hover:-translate-y-1 hover:border-brand-300  ">
+              <div className="group h-full rounded-lg glass border border-line p-5   transition-all hover:-translate-y-1 hover:border-brand-300  ">
                 <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
                   <p.icon className="h-5 w-5" />
                 </span>

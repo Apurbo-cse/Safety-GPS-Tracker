@@ -41,7 +41,7 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
           <p className="mt-2 text-sm leading-relaxed text-body">{s.description}</p>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-4">
+            <div className="rounded-lg glass border border-line p-4">
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-text">Core Tracking Features</h3>
               <ul className="space-y-2 text-xs font-semibold text-body-strong">
                 {s.features.map((f) => (
@@ -53,7 +53,7 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
               </ul>
             </div>
 
-            <div className="rounded-lg glass border border-white/60 dark:border-white/10 p-4">
+            <div className="rounded-lg glass border border-line p-4">
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Business Impact & ROI</h3>
               <ul className="space-y-2 text-xs font-semibold text-body-strong">
                 {s.benefits.map((f) => (

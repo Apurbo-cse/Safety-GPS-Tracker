@@ -32,7 +32,7 @@ export default function CostTimeline() {
     <section id="timeline" className="scroll-mt-32 bg-surface py-14">
       <Container>
         <SectionHeading eyebrow="Cost over time" title="See what each package costs as months go by" description="Each line starts at the device price and rises by the monthly charge. Hover or touch the chart to read any month." />
-        <div className="glass rounded-lg border border-white/60 p-4 dark:border-white/10 sm:p-6">
+        <div className="glass rounded-lg border border-line p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Packages on the chart">
             {plans.map((p, i) => { const on = sel.includes(i); return (
               <button key={p.id} onClick={() => toggle(i)} aria-pressed={on} className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors", on ? "border-line-strong bg-surface text-ink" : "border-line text-slate-400")}>
