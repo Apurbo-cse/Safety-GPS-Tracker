@@ -14,7 +14,7 @@ export default function PageHero({ eyebrow, title, description, children, art }:
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-300">{description}</p>
           {children && <div className="mt-6 flex flex-wrap gap-3">{children}</div>}
         </div>
-        <div className="hidden md:block">
+        <div className="mx-auto w-full max-w-md md:max-w-none">
           <GpsHeroArt art={art} />
         </div>
       </Container>
