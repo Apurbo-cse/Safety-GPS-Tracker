@@ -31,7 +31,7 @@ export default function ContactForm() {
 
   if (sent) {
     return (
-      <div className="grid place-items-center rounded-2xl border border-green-200 bg-green-50 p-10 text-center">
+      <div className="grid place-items-center rounded-lg border border-green-200 bg-green-50 p-10 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
         <h2 className="mt-3 text-xl font-bold text-ink">Thank you, {sent}</h2>
         <p className="mt-1 max-w-sm text-sm text-body">Your message has been recorded in this demo. No data was sent to a server; a live site would reply by phone or email.</p>
@@ -41,7 +41,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-7">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 rounded-lg glass border border-white/60 dark:border-white/10 p-5 shadow-sm sm:p-7">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Full name" error={errors.name?.message}><input className={inputCls} autoComplete="name" aria-invalid={!!errors.name} {...register("name")} /></Field>
         <Field label="Email" error={errors.email?.message}><input type="email" className={inputCls} autoComplete="email" aria-invalid={!!errors.email} {...register("email")} /></Field>

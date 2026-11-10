@@ -29,7 +29,7 @@ export function LiveTrackingScene() {
   const lng = (90.4163 + tick * 0.00017).toFixed(5);
 
   return (
-    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-[#12151d] shadow-2xl shadow-black/60">
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-lg border border-white/15 bg-[#12151d] shadow-2xl shadow-black/60">
       <div className="flex items-center justify-between border-b border-white/10 bg-black/40 px-4 py-3">
         <span className="flex items-center gap-2 text-xs font-bold text-white tracking-wide">
           <span className="relative flex h-2.5 w-2.5">
@@ -61,10 +61,10 @@ export function LiveTrackingScene() {
         </svg>
 
         {/* High-Tech HUD Telemetry Card */}
-        <div className="absolute bottom-3 left-3 w-64 rounded-xl border border-white/15 bg-[#141822]/95 p-3.5 text-white backdrop-blur-md shadow-2xl">
+        <div className="absolute bottom-3 left-3 w-64 rounded-lg border border-white/15 bg-[#141822]/95 p-3.5 text-white backdrop-blur-md shadow-2xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-extrabold text-white">Delivery Van 01</p>
+              <p className="text-xs font-bold text-white">Delivery Van 01</p>
               <p className="font-mono text-[11px] text-slate-400">DHAKA-DA 11-2401</p>
             </div>
             <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-bold text-emerald-400">Running</span>
@@ -108,7 +108,7 @@ export function SecurityScene() {
   const locked = i % 2 === 0;
   const visible = [0, 1, 2].map((k) => ALERTS[(i + k) % ALERTS.length]);
   return (
-    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#12151d] to-[#241510] shadow-2xl shadow-black/60">
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-lg border border-white/15 bg-gradient-to-br from-[#12151d] to-[#241510] shadow-2xl shadow-black/60">
       <div className="flex items-center justify-between border-b border-white/10 bg-black/40 px-4 py-3">
         <span className="flex items-center gap-2 text-xs font-bold text-white tracking-wide"><ShieldCheck className="h-4 w-4 text-brand-400" />IMMOBILIZER & PERIMETER RADAR</span>
         <Chip>Active Shield</Chip>
@@ -123,7 +123,7 @@ export function SecurityScene() {
         </div>
         <ul className="col-span-2 flex flex-col justify-center gap-2">
           {visible.map((a, k) => (
-            <li key={`${i}-${k}`} className={`flex items-center gap-2 rounded-xl border border-white/10 bg-[#161a24]/90 p-2.5 text-white shadow-lg backdrop-blur ${k === 0 ? "slide-in ring-1 ring-brand-500/40" : "opacity-75"}`}>
+            <li key={`${i}-${k}`} className={`flex items-center gap-2 rounded-lg border border-white/10 bg-[#161a24]/90 p-2.5 text-white shadow-lg backdrop-blur ${k === 0 ? "slide-in ring-1 ring-brand-500/40" : "opacity-75"}`}>
               <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white ${a.c}`}><a.icon className="h-3.5 w-3.5" /></span>
               <span className="min-w-0"><span className="block truncate text-[11px] font-bold">{a.t}</span><span className="block truncate text-[11px] text-slate-400">{a.d}</span></span>
             </li>
@@ -143,14 +143,14 @@ const LANES: { kind: VehicleKind; color?: string; name: string; speed: string; d
 /** Slide 3 — a fleet driving across lanes, each vehicle tagged with live details. */
 export function FleetScene() {
   return (
-    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#12151d] to-[#241510] shadow-2xl shadow-black/60">
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-lg border border-white/15 bg-gradient-to-br from-[#12151d] to-[#241510] shadow-2xl shadow-black/60">
       <div className="flex items-center justify-between border-b border-white/10 bg-black/40 px-4 py-3">
         <span className="flex items-center gap-2 text-xs font-bold text-white tracking-wide"><Radio className="h-4 w-4 text-brand-400" />12 FLEET UNITS · 8 MOVING</span>
         <Chip>GPS Relay</Chip>
       </div>
       <div className="space-y-2 bg-black/40 p-3">
         {LANES.map((l) => (
-          <div key={l.name} className="relative h-[104px] overflow-hidden rounded-xl bg-[#090b0e] border border-white/5">
+          <div key={l.name} className="relative h-[104px] overflow-hidden rounded-lg bg-[#090b0e] border border-white/5">
             <svg className="absolute inset-x-0 bottom-2.5 h-1 w-full" preserveAspectRatio="none"><line x1="0" y1="2" x2="100%" y2="2" stroke="#fff" strokeOpacity=".3" strokeWidth="2" strokeDasharray="14 14" className="road-dash" /></svg>
             <div className="drive-across top-1.5 w-[26%]" style={{ animationDuration: `${l.dur}s`, animationDelay: `${l.delay}s` }}>
               <span className="mb-0.5 ml-3 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#161a24] border border-white/15 px-2.5 py-0.5 text-[11px] font-bold text-white shadow"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />{l.name} · {l.speed}</span>

@@ -9,8 +9,8 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
   useEffect(() => {
     if (!inView || !ref.current) return;
     const el = ref.current;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = `${to}${suffix}`; return; }
-    const c = animate(0, to, { duration: 1.4, ease: "easeOut", onUpdate: (v) => { el.textContent = `${Math.round(v)}${suffix}`; } });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = animate(0, to, { duration: 1.1, ease: "easeOut", onUpdate: (v) => { el.textContent = `${Math.round(v)}${suffix}`; } });
     return () => c.stop();
   }, [inView, to, suffix]);
   return <span ref={ref}>{`${to}${suffix}`}</span>;
@@ -18,21 +18,20 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
 
 const stats = [
   { v: <CountUp to={8} />, l: "package options" },
-  { v: <CountUp to={10} suffix=" sec" />, l: "location update interval" },
+  { v: <CountUp to={10} suffix=" sec" />, l: "location updates" },
   { v: <CountUp to={8} />, l: "industries covered" },
-  { v: <>24×7</>, l: "helpline facility" },
+  { v: <>24×7</>, l: "helpline" },
 ];
 
 export default function Stats() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-r from-navy-900 to-navy-700 py-14 text-white">
-      <div className="grid-bg absolute inset-0 opacity-50" aria-hidden />
-      <Container className="relative">
-        <dl className="grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+    <section className="py-10">
+      <Container>
+        <dl className="glass grid grid-cols-2 divide-line rounded-lg border border-white/60 py-2 text-center dark:border-white/10 lg:grid-cols-4 lg:divide-x">
           {stats.map((s) => (
-            <div key={s.l} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-6 backdrop-blur">
-              <dd className="bg-gradient-to-b from-white to-brand-200 bg-clip-text text-3xl font-extrabold text-transparent tabular-nums sm:text-4xl">{s.v}</dd>
-              <dt className="mt-1 text-sm text-brand-200">{s.l}</dt>
+            <div key={s.l} className="px-4 py-5">
+              <dd className="text-2xl font-bold text-ink tabular-nums sm:text-3xl">{s.v}</dd>
+              <dt className="mt-1 text-sm text-body">{s.l}</dt>
             </div>
           ))}
         </dl>

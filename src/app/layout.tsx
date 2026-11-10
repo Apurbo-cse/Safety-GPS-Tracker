@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
     shortcut: "/favicon.ico",
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <noscript><style>{"#preloader{display:none!important}"}</style></noscript>
       </head>
       <body className="min-h-screen antialiased">
         <Providers>{children}</Providers>

@@ -3,15 +3,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Search, ShoppingCart, User } from "lucide-react";
+import { LogOut, ShoppingCart, User } from "lucide-react";
 import { toast } from "sonner";
+import { announceNavigation } from "@/lib/navigate";
 import Logo from "@/components/common/Logo";
-import ThemeToggle, { ThemeQuickToggle } from "./ThemeToggle";
+import ThemeToggle from "./ThemeToggle";
 import Container from "@/components/common/Container";
 import { LinkButton, Button } from "@/components/common/Button";
-import { NAV_LINKS, SITE } from "@/lib/site";
+import { NAV_LINKS } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setCartOpen, setMobileNav, setPalette } from "@/store/slices/uiSlice";
+import { setCartOpen, setMobileNav } from "@/store/slices/uiSlice";
 import { logout } from "@/store/slices/authSlice";
 import { cn } from "@/utils/format";
 
@@ -19,7 +20,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const open = useAppSelector((s) => s.ui.mobileNavOpen);
   const user = useAppSelector((s) => s.auth.user);
   const cartCount = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
 
@@ -35,6 +35,7 @@ export default function Navbar() {
     dispatch(logout());
     dispatch(setMobileNav(false));
     toast.success("Signed out (demo)");
+    announceNavigation();
     router.push("/");
   };
 
@@ -56,8 +57,7 @@ export default function Navbar() {
         </nav>
         <div className="flex items-center gap-2"> 
      
-          <div className="hidden sm:block"><ThemeToggle /></div>
-          <ThemeQuickToggle className="sm:hidden" />
+          <ThemeToggle />
           <button onClick={() => dispatch(setCartOpen(true))} aria-label={`Cart, ${cartCount} items`}
             className="relative grid h-10 w-10 place-items-center rounded-lg text-body-strong hover:bg-softer">
             <ShoppingCart className="h-5 w-5" />

@@ -6,7 +6,7 @@ import type { FaqItem } from "@/types";
 export default function Accordion({ items }: { items: FaqItem[] }) {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <div className="divide-y divide-line rounded-xl border border-line bg-surface">
+    <div className="divide-y divide-line rounded-lg glass border border-white/60 dark:border-white/10">
       {items.map((it, i) => {
         const isOpen = open === i;
         return (

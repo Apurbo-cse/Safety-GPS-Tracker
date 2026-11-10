@@ -1,393 +1,361 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import {
-  Compass,
-  Cpu,
-  Fuel,
-  Gauge,
-  Lock,
-  LockOpen,
-  ShieldCheck,
+  BarChart3, Bell, Check, Fence, Gauge, KeyRound, Lock, LockOpen, MapPin, Pause, Play, Radio, Route as RouteIcon, User, type LucideIcon,
 } from "lucide-react";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import { cn } from "@/utils/format";
 
-const PREVIEW_VEHICLES = [
-  {
-    id: "v1",
-    name: "Delivery Van 01",
-    plate: "DHAKA METRO-DA 11-2401",
-    type: "Pickup",
-    speed: 44,
-    rpm: 1950,
-    fuel: 68,
-    battery: 13.8,
-    temp: 88,
-    sats: 17,
-    status: "running",
-    location: "Gulshan Avenue, Dhaka",
-    locked: false,
-  },
-  {
-    id: "v2",
-    name: "Cargo Truck 07",
-    plate: "DHAKA METRO-TA 13-8820",
-    type: "Truck",
-    speed: 58,
-    rpm: 2200,
-    fuel: 48,
-    battery: 24.2,
-    temp: 92,
-    sats: 15,
-    status: "running",
-    location: "Mirpur Road, Dhanmondi",
-    locked: false,
-  },
-  {
-    id: "v4",
-    name: "Sedan — Executive",
-    plate: "DHAKA METRO-GA 20-5512",
-    type: "Car",
-    speed: 0,
-    rpm: 750,
-    fuel: 75,
-    battery: 13.6,
-    temp: 86,
-    sats: 18,
-    status: "idle",
-    location: "Farmgate Intersection",
-    locked: false,
-  },
+/* ------------------------------------------------------------------ data */
+type Status = "running" | "idle" | "parked" | "offline";
+interface Veh { id: string; name: string; driver: string; place: string; status: Status; x: number; y: number; speed: number }
+
+const VEHICLES: Veh[] = [
+  { id: "v1", name: "Delivery Van 01", driver: "Rafiq Ahmed", place: "Gulshan Avenue", status: "running", x: 372, y: 120, speed: 42 },
+  { id: "v2", name: "Cargo Truck 07", driver: "Kamal Hossain", place: "Mirpur Road", status: "running", x: 168, y: 232, speed: 58 },
+  { id: "v3", name: "Staff Bus 03", driver: "Jahid Karim", place: "Banani Depot", status: "parked", x: 470, y: 250, speed: 0 },
+  { id: "v4", name: "Sedan — Executive", driver: "Sumon Das", place: "Farmgate", status: "idle", x: 292, y: 308, speed: 0 },
+  { id: "v5", name: "CNG Auto 12", driver: "Abdul Malek", place: "Motijheel", status: "running", x: 104, y: 112, speed: 31 },
+  { id: "v6", name: "Cargo Truck 11", driver: "Mizanur Rahman", place: "Jatrabari", status: "offline", x: 520, y: 80, speed: 0 },
 ];
 
-export default function SoftwarePreview() {
-  const [activeTab, setActiveTab] = useState<"cockpit" | "obd" | "lock" | "geofence">("cockpit");
-  const [selectedVehIndex, setSelectedVehIndex] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const [relayAck, setRelayAck] = useState(false);
-  const [pulse, setPulse] = useState(0);
+const STATUS: Record<Status, { label: string; dot: string; hex: string }> = {
+  running: { label: "Running", dot: "bg-green-500", hex: "#22c55e" },
+  idle: { label: "Idle", dot: "bg-amber-500", hex: "#f59e0b" },
+  parked: { label: "Parked", dot: "bg-sky-500", hex: "#38bdf8" },
+  offline: { label: "Offline", dot: "bg-slate-500", hex: "#64748b" },
+};
 
-  useEffect(() => {
-    const t = setInterval(() => setPulse((p) => p + 1), 2000);
-    return () => clearInterval(t);
-  }, []);
+const ROADS = [
+  "M-20 300C120 260 200 330 320 290S520 220 640 250",
+  "M60 -20C110 120 90 220 150 400",
+  "M300 -20C330 90 300 200 360 400",
+  "M-20 90C160 130 300 60 640 130",
+  "M520 -20C500 120 560 260 540 400",
+];
+const ROUTE = "M40 320C120 300 150 220 230 210S330 250 400 170S520 110 570 60";
 
-  const veh = PREVIEW_VEHICLES[selectedVehIndex];
-  const currentSpeed = isLocked ? 0 : veh.speed + ((pulse * 3) % 7);
-  const currentRpm = isLocked ? 0 : veh.rpm + ((pulse * 40) % 150);
+const ALERTS = [
+  { id: "a1", sev: "critical", title: "Possible accident detected", who: "Cargo Truck 07", when: "9 min ago" },
+  { id: "a2", sev: "warning", title: "Speed violation · 64 km/h", who: "Pickup 09", when: "2 min ago" },
+  { id: "a3", sev: "warning", title: "Device offline for 3 hours", who: "Cargo Truck 11", when: "3 hr ago" },
+  { id: "a4", sev: "info", title: "Geo-fence exit · Gulshan depot", who: "Delivery Van 01", when: "18 min ago" },
+  { id: "a5", sev: "info", title: "Ignition ON", who: "Sedan — Executive", when: "35 sec ago" },
+  { id: "a6", sev: "warning", title: "BRTA papers expire in 15 days", who: "CNG Auto 12", when: "Today" },
+] as const;
+type Sev = (typeof ALERTS)[number]["sev"];
+const SEV: Record<Sev, string> = { critical: "bg-red-500", warning: "bg-amber-500", info: "bg-sky-500" };
 
-  const handleToggleLock = () => {
-    setRelayAck(true);
-    setTimeout(() => {
-      setIsLocked(!isLocked);
-      setRelayAck(false);
-    }, 450);
+const TABS: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "live", label: "Live map", icon: Radio },
+  { id: "playback", label: "Route playback", icon: RouteIcon },
+  { id: "fence", label: "Geo-fence", icon: Fence },
+  { id: "alerts", label: "Alerts", icon: Bell },
+  { id: "reports", label: "Reports", icon: BarChart3 },
+];
+
+/* --------------------------------------------------------------- map base */
+function MapBase({ children, className }: { children?: React.ReactNode; className?: string }) {
+  return (
+    <svg viewBox="0 0 600 380" className={cn("h-full w-full", className)} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Demo map">
+      <defs><pattern id="sp-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" strokeOpacity=".05" /></pattern></defs>
+      <rect width="600" height="380" fill="#171a21" /><rect width="600" height="380" fill="url(#sp-grid)" />
+      <rect x="20" y="20" width="90" height="56" rx="8" fill="#1d2129" /><rect x="400" y="300" width="130" height="60" rx="8" fill="#1d2129" /><rect x="210" y="130" width="70" height="50" rx="8" fill="#1d2129" />
+      <rect x="40" y="320" width="110" height="46" rx="8" fill="#17261f" />
+      {ROADS.map((d) => <path key={d} d={d} fill="none" stroke="#2b313c" strokeWidth="14" strokeLinecap="round" />)}
+      {children}
+    </svg>
+  );
+}
+
+const Marker = ({ x, y, color, selected, pulse }: { x: number; y: number; color: string; selected?: boolean; pulse?: boolean }) => (
+  <g transform={`translate(${x} ${y})`}>
+    {pulse && <circle r="16" fill={color} fillOpacity=".25"><animate attributeName="r" values="10;26" dur="1.8s" repeatCount="indefinite" /><animate attributeName="fill-opacity" values=".4;0" dur="1.8s" repeatCount="indefinite" /></circle>}
+    {selected && <circle r="17" fill="none" stroke="#f05a22" strokeWidth="2.5" />}
+    <circle r="9" fill={color} stroke="#fff" strokeWidth="2.5" />
+  </g>
+);
+
+/* ------------------------------------------------------------------ tabs */
+function LiveTab() {
+  const [sel, setSel] = useState("v1");
+  const [locked, setLocked] = useState<Record<string, boolean>>({});
+  const [tick, setTick] = useState(0);
+  useEffect(() => { const t = setInterval(() => setTick((n) => n + 1), 1400); return () => clearInterval(t); }, []);
+  const v = VEHICLES.find((x) => x.id === sel)!;
+  const speed = v.status === "running" ? v.speed + ((tick * 5) % 9) - 4 : 0;
+  const isLocked = !!locked[v.id];
+
+  const toggleLock = () => {
+    setLocked((l) => ({ ...l, [v.id]: !l[v.id] }));
+    toast.success(`${v.name}: engine ${isLocked ? "unlocked" : "locked"} (demo command)`);
   };
 
   return (
-    <section className="relative overflow-hidden bg-navy-950 py-16 text-white sm:py-24">
-      {/* Background radial glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/10 blur-[130px]" />
+    <div className="grid gap-3 lg:grid-cols-[230px_1fr]">
+      <ul className="max-h-[360px] space-y-1 overflow-y-auto pr-1" aria-label="Vehicles">
+        {VEHICLES.map((x) => (
+          <li key={x.id}>
+            <button onClick={() => setSel(x.id)} aria-pressed={sel === x.id}
+              className={cn("flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors", sel === x.id ? "border-brand-500/60 bg-brand-500/10" : "border-white/5 bg-white/[0.03] hover:bg-white/[0.06]")}>
+              <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", STATUS[x.status].dot)} />
+              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{x.name}</span><span className="block truncate text-xs text-slate-400">{x.place}</span></span>
+              <span className="text-xs tabular-nums text-slate-300">{x.status === "running" ? `${x.speed} km/h` : STATUS[x.status].label}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="grid gap-3 md:grid-cols-[1fr_210px] lg:grid-cols-1 xl:grid-cols-[1fr_220px]">
+        <div className="relative h-[260px] overflow-hidden rounded-lg border border-white/10 sm:h-[340px]">
+          <MapBase>
+            {VEHICLES.map((x) => <g key={x.id} onClick={() => setSel(x.id)} className="cursor-pointer"><Marker x={x.x} y={x.y} color={STATUS[x.status].hex} selected={x.id === sel} pulse={x.status === "running"} /></g>)}
+          </MapBase>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-sm font-bold text-white">{v.name}</p>
+          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400"><MapPin className="h-3 w-3" />{v.place}</p>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><Gauge className="h-3 w-3" />Speed</p><p className="mt-0.5 text-base font-bold tabular-nums text-white">{Math.max(speed, 0)}<span className="text-xs font-medium text-slate-400"> km/h</span></p></div>
+            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><KeyRound className="h-3 w-3" />Ignition</p><p className={cn("mt-0.5 text-base font-bold", v.status === "running" || v.status === "idle" ? "text-green-400" : "text-slate-300")}>{v.status === "running" || v.status === "idle" ? "ON" : "OFF"}</p></div>
+          </div>
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-300"><User className="h-3 w-3 text-slate-400" />{v.driver}</p>
+          <button onClick={toggleLock} disabled={v.status === "offline"}
+            className={cn("mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40", isLocked ? "bg-green-600 text-white hover:bg-green-500" : "gloss-btn text-white")}>
+            {isLocked ? <><LockOpen className="h-4 w-4" />Unlock engine</> : <><Lock className="h-4 w-4" />Lock engine</>}
+          </button>
+          {v.status === "offline" && <p className="mt-2 text-[11px] text-slate-500">Device offline — commands unavailable.</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      <Container className="relative">
-        <SectionHeading
-          light
-          eyebrow="Interactive Fleet Console"
-          title="Engineered for mission-critical fleet operations"
-          description="Explore real-time OBD-II telemetry, instant remote immobilizer relays, and geofence perimeter intelligence."
-        />
+function PlaybackTab() {
+  const pathRef = useRef<SVGPathElement>(null);
+  const progRef = useRef(0);
+  const [progress, setProgress] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [rate, setRate] = useState(1);
+  const [pt, setPt] = useState({ x: 40, y: 320 });
 
-        {/* Feature Tab Selector */}
-        <div className="mx-auto flex max-w-2xl flex-wrap justify-center gap-2">
-          {[
-            { id: "cockpit", label: "Live GPS Cockpit", icon: Compass },
-            { id: "obd", label: "OBD-II Diagnostics", icon: Cpu },
-            { id: "lock", label: "Remote Immobilizer", icon: Lock },
-            { id: "geofence", label: "Geofence Radar", icon: ShieldCheck },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as "cockpit" | "obd" | "lock" | "geofence")}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all sm:text-sm",
-                activeTab === t.id
-                  ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30 ring-2 ring-brand-400/40"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <t.icon className="h-4 w-4" />
-              {t.label}
+  const seek = useCallback((p: number) => {
+    const c = Math.min(1, Math.max(0, p));
+    progRef.current = c;
+    setProgress(c);
+    const el = pathRef.current;
+    if (el) { const q = el.getPointAtLength(c * el.getTotalLength()); setPt({ x: q.x, y: q.y }); }
+  }, []);
+
+  useEffect(() => {
+    if (!playing) return;
+    const t = setInterval(() => {
+      const n = progRef.current + 0.006 * rate;
+      if (n >= 1) { seek(1); setPlaying(false); } else seek(n);
+    }, 60);
+    return () => clearInterval(t);
+  }, [playing, rate, seek]);
+
+  const speeds = useMemo(() => Array.from({ length: 60 }, (_, i) => Math.round(34 + 22 * Math.sin(i / 5) + 10 * Math.sin(i / 2.2))), []);
+  const idx = Math.min(59, Math.floor(progress * 59));
+  const chart = speeds.map((s, i) => `${(i / 59) * 300},${70 - (s / 80) * 62}`).join(" ");
+  const maxSoFar = Math.max(...speeds.slice(0, idx + 1));
+  const stops = Math.floor(progress * 3);
+
+  return (
+    <div className="grid gap-3 lg:grid-cols-[1fr_240px]">
+      <div>
+        <div className="relative h-[260px] overflow-hidden rounded-lg border border-white/10 sm:h-[340px]">
+          <MapBase>
+            <path ref={pathRef} d={ROUTE} fill="none" stroke="#3a414d" strokeWidth="6" strokeLinecap="round" />
+            <path d={ROUTE} fill="none" stroke="#f05a22" strokeWidth="5" strokeLinecap="round" pathLength={1} strokeDasharray="1 1" strokeDashoffset={1 - progress} />
+            <Marker x={40} y={320} color="#22c55e" /><Marker x={570} y={60} color="#ef4444" />
+            <g transform={`translate(${pt.x} ${pt.y})`}><circle r="14" fill="#f05a22" fillOpacity=".25" /><circle r="8" fill="#f05a22" stroke="#fff" strokeWidth="2.5" /></g>
+          </MapBase>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
+        </div>
+        <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+          <button onClick={() => { if (progress >= 1) seek(0); setPlaying((p) => !p); }} aria-label={playing ? "Pause" : "Play"} className="gloss-btn grid h-10 w-10 shrink-0 place-items-center rounded-full text-white">
+            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+          <input type="range" min={0} max={1000} value={Math.round(progress * 1000)} onChange={(e) => { setPlaying(false); seek(Number(e.target.value) / 1000); }} aria-label="Trip position" className="h-1.5 flex-1 cursor-pointer accent-brand-600" />
+          <div className="flex shrink-0 rounded-md border border-white/10 p-0.5 text-xs font-semibold">
+            {[1, 2, 4].map((r) => <button key={r} onClick={() => setRate(r)} aria-pressed={rate === r} className={cn("rounded px-2 py-1", rate === r ? "bg-white/15 text-white" : "text-slate-400")}>{r}×</button>)}
+          </div>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+          {[["Distance", `${(progress * 18.6).toFixed(1)} km`], ["Duration", `${Math.round(progress * 42)} min`], ["Top speed", `${maxSoFar} km/h`]].map(([k, val]) => (
+            <div key={k} className="rounded-lg border border-white/10 bg-white/[0.03] p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-white">{val}</p></div>
+          ))}
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+          <p className="mb-1 flex justify-between text-xs text-slate-400"><span>Speed</span><span>{stops} stop{stops === 1 ? "" : "s"}</span></p>
+          <svg viewBox="0 0 300 76" className="h-16 w-full" role="img" aria-label="Speed over the trip">
+            <polyline points={chart} fill="none" stroke="#f05a22" strokeWidth="2" strokeLinejoin="round" />
+            <line x1={(idx / 59) * 300} x2={(idx / 59) * 300} y1="0" y2="76" stroke="#fff" strokeOpacity=".5" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FenceTab() {
+  const CX = 300, CY = 190;
+  const [radius, setRadius] = useState(110);
+  const [t, setT] = useState(0);
+  const [moving, setMoving] = useState(false);
+  const [log, setLog] = useState<{ id: number; text: string; out: boolean }[]>([{ id: 0, text: "Delivery Van 01 entered Gulshan zone", out: false }]);
+  const lastOut = useRef(false);
+  const pos = { x: CX + 40 + t * 210, y: CY - 20 - t * 100 };
+  const dist = Math.hypot(pos.x - CX, pos.y - CY);
+  const outside = dist > radius;
+
+  useEffect(() => {
+    if (outside !== lastOut.current) {
+      lastOut.current = outside;
+      const text = outside ? "Delivery Van 01 left Gulshan zone" : "Delivery Van 01 entered Gulshan zone";
+      setLog((l) => [{ id: l.length + 1, text, out: outside }, ...l].slice(0, 5));
+      if (outside) toast.warning("Geo-fence exit alert (demo)");
+    }
+  }, [outside]);
+
+  useEffect(() => {
+    if (!moving) return;
+    const i = setInterval(() => setT((p) => { const n = p + 0.015; if (n >= 1) { setMoving(false); return 1; } return n; }), 40);
+    return () => clearInterval(i);
+  }, [moving]);
+
+  return (
+    <div className="grid gap-3 lg:grid-cols-[1fr_250px]">
+      <div className="relative h-[260px] overflow-hidden rounded-lg border border-white/10 sm:h-[340px]">
+        <MapBase>
+          <circle cx={CX} cy={CY} r={radius} fill={outside ? "#ef4444" : "#f05a22"} fillOpacity=".14" stroke={outside ? "#ef4444" : "#f05a22"} strokeWidth="2.5" strokeDasharray="8 6" />
+          <Marker x={CX} y={CY} color="#38bdf8" />
+          <Marker x={pos.x} y={pos.y} color={outside ? "#ef4444" : "#22c55e"} pulse />
+        </MapBase>
+        <span className={cn("absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur", outside ? "bg-red-600/80 text-white" : "bg-green-600/80 text-white")}>
+          {outside ? "Outside zone" : <><Check className="h-3 w-3" />Inside zone</>}
+        </span>
+      </div>
+      <div className="space-y-3">
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+          <label className="flex justify-between text-xs text-slate-400"><span>Zone radius</span><span className="tabular-nums text-white">{Math.round(radius * 9)} m</span></label>
+          <input type="range" min={50} max={170} value={radius} onChange={(e) => setRadius(Number(e.target.value))} aria-label="Zone radius" className="mt-2 w-full cursor-pointer accent-brand-600" />
+          <div className="mt-3 flex gap-2">
+            <button onClick={() => { if (t >= 1) setT(0); setMoving(true); }} disabled={moving} className="gloss-btn flex-1 rounded-lg px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Drive out</button>
+            <button onClick={() => { setMoving(false); setT(0); }} className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-white/5">Reset</button>
+          </div>
+        </div>
+        <ul className="space-y-1.5" aria-live="polite">
+          {log.map((l) => (
+            <li key={l.id} className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-xs text-slate-200"><span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", l.out ? "bg-red-500" : "bg-green-500")} />{l.text}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function AlertsTab() {
+  const [filter, setFilter] = useState<"all" | Sev>("all");
+  const [done, setDone] = useState<string[]>([]);
+  const list = ALERTS.filter((a) => filter === "all" || a.sev === filter);
+  const open = ALERTS.filter((a) => !done.includes(a.id)).length;
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {(["all", "critical", "warning", "info"] as const).map((f) => (
+          <button key={f} onClick={() => setFilter(f)} aria-pressed={filter === f} className={cn("rounded-full border px-3 py-1 text-xs font-semibold capitalize", filter === f ? "border-brand-500 bg-brand-500/15 text-white" : "border-white/10 text-slate-300 hover:bg-white/5")}>{f}</button>
+        ))}
+        <span className="ml-auto text-xs text-slate-400">{open} open</span>
+      </div>
+      <ul className="grid gap-2 md:grid-cols-2">
+        {list.map((a) => {
+          const resolved = done.includes(a.id);
+          return (
+            <li key={a.id} className={cn("flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 transition-opacity", resolved && "opacity-45")}>
+              <span className={cn("h-9 w-1.5 shrink-0 rounded-full", SEV[a.sev])} />
+              <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold text-white", resolved && "line-through")}>{a.title}</span><span className="block truncate text-xs text-slate-400">{a.who} · {a.when}</span></span>
+              <button onClick={() => setDone((d) => (resolved ? d.filter((x) => x !== a.id) : [...d, a.id]))} aria-label={resolved ? "Reopen alert" : "Resolve alert"} className={cn("grid h-8 w-8 place-items-center rounded-full border", resolved ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/15 text-slate-400 hover:text-white")}><Check className="h-4 w-4" /></button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function ReportsTab() {
+  const [range, setRange] = useState<7 | 30>(7);
+  const [hover, setHover] = useState<number | null>(null);
+  const data = useMemo(() => Array.from({ length: range }, (_, i) => Math.round(520 + 190 * Math.sin(i * 0.9) + 90 * Math.cos(i * 0.4) + (i % 3) * 30)), [range]);
+  const max = Math.max(...data);
+  const total = data.reduce((a, b) => a + b, 0);
+  const shown = hover !== null ? data[hover] : Math.round(total / data.length);
+  return (
+    <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
+      <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <div><p className="text-xs text-slate-400">{hover !== null ? `Day ${hover + 1}` : "Daily average"}</p><p className="text-2xl font-bold tabular-nums text-white">{shown} <span className="text-sm font-medium text-slate-400">km</span></p></div>
+          <div className="flex rounded-md border border-white/10 p-0.5 text-xs font-semibold">
+            {([7, 30] as const).map((r) => <button key={r} onClick={() => { setRange(r); setHover(null); }} aria-pressed={range === r} className={cn("rounded px-2.5 py-1", range === r ? "bg-white/15 text-white" : "text-slate-400")}>{r} days</button>)}
+          </div>
+        </div>
+        <div className="flex h-44 items-end gap-1" onMouseLeave={() => setHover(null)}>
+          {data.map((d, i) => (
+            <button key={i} onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} aria-label={`Day ${i + 1}: ${d} km`} className="group flex h-full flex-1 items-end">
+              <motion.span initial={{ height: 0 }} animate={{ height: `${(d / max) * 100}%` }} transition={{ duration: 0.5, delay: i * 0.012 }} className={cn("block w-full rounded-t-sm transition-colors", hover === i ? "bg-brand-400" : "bg-brand-600/80")} />
             </button>
           ))}
         </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+        {[["Total distance", `${total.toLocaleString("en-US")} km`], ["Running time", `${Math.round(total / 38)} h`], ["Parked time", `${Math.round(total / 22)} h`]].map(([k, v]) => (
+          <div key={k} className="rounded-lg border border-white/10 bg-white/[0.03] p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-white">{v}</p></div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-        {/* Console Container */}
-        <div className="mx-auto mt-8 max-w-5xl overflow-hidden rounded-2xl border border-white/15 bg-[#12151c]/90 shadow-2xl backdrop-blur-md">
-          {/* Top Console Bar */}
-          <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-3 text-xs">
-            {/* Vehicle Selector Chips */}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-slate-400">Target Vehicle:</span>
-              <div className="flex gap-1.5">
-                {PREVIEW_VEHICLES.map((v, i) => (
-                  <button
-                    key={v.id}
-                    onClick={() => {
-                      setSelectedVehIndex(i);
-                      setIsLocked(false);
-                    }}
-                    className={cn(
-                      "rounded-lg px-2.5 py-1 text-xs font-bold transition-all",
-                      selectedVehIndex === i
-                        ? "bg-brand-600 text-white"
-                        : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
-                    )}
-                  >
-                    {v.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+const PANELS: Record<string, React.ReactNode> = {
+  live: <LiveTab />, playback: <PlaybackTab />, fence: <FenceTab />, alerts: <AlertsTab />, reports: <ReportsTab />,
+};
 
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                </span>
-                OBD-II CAN Synchronized
-              </span>
-              <span className="hidden text-slate-500 sm:inline">|</span>
-              <span className="hidden font-mono text-[11px] text-slate-400 sm:inline">
-                Ping: 12ms
-              </span>
-            </div>
+/* --------------------------------------------------------------- section */
+export default function SoftwarePreview() {
+  const [tab, setTab] = useState("live");
+  return (
+    <section className="relative overflow-hidden bg-navy-950 py-16 text-white sm:py-20">
+      <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl" aria-hidden />
+      <Container className="relative">
+        <SectionHeading light eyebrow="Tracking software preview" title="Try the fleet console" description="An interactive demo with simulated data — lock an engine, replay a trip, drag a geo-fence, clear alerts." />
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-white/10 bg-[#0f1217] shadow-[0_30px_70px_-30px_rgb(0_0_0/0.8),inset_0_1px_0_rgb(255_255_255/0.08)]">
+          <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.03] px-4 py-2.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" /><span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
+            <span className="ml-2 truncate text-xs text-slate-400">Fleet console · demo</span>
           </div>
-
-          {/* Interactive Screen Body */}
-          <div className="p-5 sm:p-7">
-            {/* TAB 1: LIVE GPS COCKPIT */}
-            {activeTab === "cockpit" && (
-              <div className="grid gap-6 lg:grid-cols-3">
-                {/* Visual HUD Map Mockup */}
-                <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 bg-[#161a22] p-4 lg:col-span-2">
-                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#f05a22_1px,transparent_1px)] [background-size:16px_16px]" />
-                  <div className="relative flex h-full flex-col justify-between">
-                    <div className="flex items-start justify-between">
-                      <div className="rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur border border-white/10">
-                        <p className="text-xs font-bold text-white">{veh.name}</p>
-                        <p className="font-mono text-[11px] text-brand-400">{veh.location}</p>
-                      </div>
-                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
-                        GNSS Lock (18 Sats)
-                      </span>
-                    </div>
-
-                    {/* Central Radar Pulse */}
-                    <div className="relative mx-auto my-auto flex h-32 w-32 items-center justify-center">
-                      <div className="absolute h-full w-full animate-ping-slow rounded-full border border-brand-500/40 bg-brand-500/10" />
-                      <div className="absolute h-24 w-24 rounded-full border border-white/10" />
-                      <div className="grid h-12 w-12 place-items-center rounded-full bg-brand-600 text-white shadow-xl shadow-brand-500/50">
-                        <Compass className="h-6 w-6 animate-spin text-white" style={{ animationDuration: "12s" }} />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between rounded-lg bg-black/60 p-2 text-xs backdrop-blur border border-white/10 font-mono">
-                      <span>LAT: 23.78082</span>
-                      <span className="text-slate-400">|</span>
-                      <span>LNG: 90.41631</span>
-                      <span className="text-slate-400">|</span>
-                      <span className="text-emerald-400">HEADING: 080° ENE</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Telemetry Readout Gauges */}
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                      <Gauge className="h-4 w-4 text-brand-400" /> Ground Velocity
-                    </p>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="font-mono text-4xl font-black text-white">{currentSpeed}</span>
-                      <span className="text-xs font-semibold text-slate-400">km/h</span>
-                    </div>
-                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full bg-brand-500 transition-all duration-300"
-                        style={{ width: `${Math.min(100, (currentSpeed / 80) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                      <Fuel className="h-4 w-4 text-blue-400" /> Fuel Reserve (CAN-Bus)
-                    </p>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="font-mono text-3xl font-black text-white">{veh.fuel}</span>
-                      <span className="text-xs font-semibold text-slate-400">% (~38 Liters)</span>
-                    </div>
-                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full bg-blue-500" style={{ width: `${veh.fuel}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-lg bg-white/[0.03] p-2.5 border border-white/5">
-                      <span className="text-slate-400">Battery</span>
-                      <p className="font-mono text-sm font-bold text-emerald-400">{veh.battery}V</p>
-                    </div>
-                    <div className="rounded-lg bg-white/[0.03] p-2.5 border border-white/5">
-                      <span className="text-slate-400">Coolant</span>
-                      <p className="font-mono text-sm font-bold text-amber-400">{veh.temp}°C</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: OBD-II CAN-BUS DIAGNOSTICS */}
-            {activeTab === "obd" && (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="text-xs text-slate-400">Engine Tachometer</span>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="font-mono text-3xl font-black text-white">{currentRpm}</span>
-                    <span className="text-xs text-slate-400">RPM</span>
-                  </div>
-                  <p className="mt-2 text-xs text-emerald-400">Normal Idle / Cruise Range</p>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="text-xs text-slate-400">Alternator & Voltage</span>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="font-mono text-3xl font-black text-white">{veh.battery}</span>
-                    <span className="text-xs text-slate-400">Volts DC</span>
-                  </div>
-                  <p className="mt-2 text-xs text-emerald-400">Healthy Charging Relay</p>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="text-xs text-slate-400">Coolant Temp Sensor</span>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="font-mono text-3xl font-black text-white">{veh.temp}</span>
-                    <span className="text-xs text-slate-400">°C</span>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-400">Optimal Operating Temp</p>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="text-xs text-slate-400">DTC Diagnostic Codes</span>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="font-mono text-3xl font-black text-emerald-400">0</span>
-                    <span className="text-xs text-slate-400">Faults</span>
-                  </div>
-                  <p className="mt-2 text-xs text-emerald-400">All CAN-Bus ECU Clear</p>
-                </div>
-
-                <div className="sm:col-span-2 lg:col-span-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs font-mono">
-                  <p className="text-slate-400 font-bold mb-2">OBD-II CAN Data Feed [J1939 Protocol]:</p>
-                  <p className="text-slate-300">
-                    ID: 0x18FEEE00 · SPEED: {currentSpeed} km/h · THROTTLE: 34% · OIL_PRESS: 3.8 bar · CABIN_AC: ON · ODO: 48,320 km
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: REMOTE IMMOBILIZER */}
-            {activeTab === "lock" && (
-              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.02] to-red-500/10 p-6">
-                <div className="mx-auto max-w-xl text-center">
-                  <div
-                    className={cn(
-                      "mx-auto grid h-20 w-20 place-items-center rounded-full transition-all duration-500",
-                      isLocked ? "bg-red-500/20 text-red-400 ring-4 ring-red-500/30" : "bg-emerald-500/20 text-emerald-400 ring-4 ring-emerald-500/30"
-                    )}
-                  >
-                    {isLocked ? <Lock className="h-10 w-10" /> : <LockOpen className="h-10 w-10" />}
-                  </div>
-
-                  <h4 className="mt-4 text-xl font-bold">
-                    {isLocked ? "Engine Locked (Immobilized)" : "Engine Ignition Active"}
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-300">
-                    {isLocked
-                      ? "Fuel solenoid relay opened. Starter motor blocked. Vehicle cannot be driven."
-                      : "Ignition relay closed. Vehicle is authorized for normal operation."}
-                  </p>
-
-                  <div className="mt-6 flex flex-col items-center gap-3">
-                    <button
-                      onClick={handleToggleLock}
-                      disabled={relayAck}
-                      className={cn(
-                        "rounded-xl px-6 py-3 text-sm font-bold shadow-lg transition-all",
-                        isLocked
-                          ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-500/25"
-                          : "bg-red-600 text-white hover:bg-red-700 shadow-red-500/25"
-                      )}
-                    >
-                      {relayAck
-                        ? "Transmitting 4G Relay Command..."
-                        : isLocked
-                        ? "Restore Engine Ignition"
-                        : "Test Remote Fuel Cut-Off"}
-                    </button>
-
-                    <p className="text-[11px] font-mono text-slate-400">
-                      Target: {veh.name} ({veh.plate}) · Simulated Demo Command
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 4: GEOFENCE RADAR */}
-            {activeTab === "geofence" && (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="relative aspect-video overflow-hidden rounded-xl border border-white/10 bg-[#161a22] p-4 flex items-center justify-center">
-                  <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:16px_16px]" />
-                  {/* Radar Circles */}
-                  <div className="relative flex h-48 w-48 items-center justify-center">
-                    <div className="absolute h-full w-full rounded-full border-2 border-dashed border-emerald-500/50 bg-emerald-500/10" />
-                    <div className="absolute h-32 w-32 rounded-full border border-emerald-500/30" />
-                    <span className="absolute -top-3 rounded bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-400">
-                      Gulshan Depot Zone (1,000m)
-                    </span>
-                    <div className="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-white">
-                      <Compass className="h-5 w-5" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 flex flex-col justify-center">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold">Automated Geofence Alerts</h4>
-                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
-                        Active Monitoring
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-400">
-                      Receive instant SMS, push notification, and siren alert the second a vehicle crosses depot borders.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center justify-between rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                      <span className="text-slate-300">Delivery Van 01:</span>
-                      <span className="text-emerald-400 font-bold">Inside Safe Zone</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg bg-white/[0.03] p-3 border border-white/5">
-                      <span className="text-slate-300">Cargo Truck 07:</span>
-                      <span className="text-amber-400 font-bold">Zone Exit 18m ago (Notified)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div role="tablist" aria-label="Software preview" className="flex gap-1 overflow-x-auto border-b border-white/10 p-2 [scrollbar-width:none]">
+            {TABS.map((t) => (
+              <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
+                className={cn("relative flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors", tab === t.id ? "text-white" : "text-slate-400 hover:text-white")}>
+                {tab === t.id && <motion.span layoutId="sp-tab" className="gloss-btn absolute inset-0 -z-0 rounded-lg" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+                <t.icon className="relative h-4 w-4" /><span className="relative">{t.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="p-3 sm:p-4" role="tabpanel">
+            <AnimatePresence mode="wait">
+              <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>
+                {PANELS[tab]}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </Container>

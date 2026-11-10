@@ -8,12 +8,13 @@ interface UiState {
   paletteOpen: boolean;
   deviceModalId: string | null;
   featureModalId: string | null;
+  planModalId: string | null;
   demoModalSolution: string | null;
 }
 const initialState: UiState = {
   theme: "light",
   mobileNavOpen: false, cartOpen: false, paletteOpen: false,
-  deviceModalId: null, featureModalId: null, demoModalSolution: null,
+  deviceModalId: null, featureModalId: null, planModalId: null, demoModalSolution: null,
 };
 
 const uiSlice = createSlice({
@@ -25,9 +26,10 @@ const uiSlice = createSlice({
     setPalette(s, a: PayloadAction<boolean>) { s.paletteOpen = a.payload; },
     setCartOpen(s, a: PayloadAction<boolean>) { s.cartOpen = a.payload; },
     openDeviceModal(s, a: PayloadAction<string | null>) { s.deviceModalId = a.payload; },
+    openPlanModal(s, a: PayloadAction<string | null>) { s.planModalId = a.payload; },
     openFeatureModal(s, a: PayloadAction<string | null>) { s.featureModalId = a.payload; },
     openDemoModal(s, a: PayloadAction<string | null>) { s.demoModalSolution = a.payload; },
   },
 });
-export const { setPalette, setTheme, setMobileNav, setCartOpen, openDeviceModal, openFeatureModal, openDemoModal } = uiSlice.actions;
+export const { setPalette, setTheme, setMobileNav, setCartOpen, openDeviceModal, openFeatureModal, openPlanModal, openDemoModal } = uiSlice.actions;
 export default uiSlice.reducer;

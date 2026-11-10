@@ -38,3 +38,4 @@ export const DEVICE_PARTNERS = DEVICE_PARTNER_LOGOS.map((p) => p.name);
 export const TELECOM_PARTNERS = TELECOM_PARTNER_LOGOS.map((p) => p.name);
 
 export const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.safetygpsrackerclient.android&hl=en";
+export const APP_STORE_URL = "https://apps.apple.com/app/safety-gps-tracker/id1528492041";

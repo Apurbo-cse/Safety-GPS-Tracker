@@ -48,28 +48,8 @@ const rows: Row[] = [
   ["Platform", "Popup Notifications", "BellRing", "Instant on-screen alerts on the platform.", "Critical events stand out immediately."],
 ];
 
-const featureImages: Record<string, string> = {
-  "parking-time-reports": "/img/features/parking.png",
-  "multiple-vehicle-monitoring": "/img/features/cars.png",
-  "live-traffic-updates": "/img/features/traffic.png",
-  "live-vehicle-location": "/img/features/location.png",
-  "vehicle-maintenance-alerts": "/img/features/maintenance.png",
-  "engine-oil-change-reminders": "/img/features/engine.png",
-  "10-second-location-updates": "/img/features/ten.png",
-  "travel-history": "/img/features/route.png",
-  "fuel-monitoring": "/img/features/fuel.png",
-  "multiple-map-views": "/img/features/mapviews.png",
-  "route-history-playback": "/img/features/playback.png",
-  "google-street-view": "/img/features/streetview.png",
-  "remote-engine-lock": "/img/features/engstop.png",
-  "brta-document-expiry-alerts": "/img/features/brta.png",
-  "android-application": "/img/features/appicon.png",
-  "ios-application": "/img/features/appicon.png",
-};
-
 export const features: FeatureItem[] = rows.map(([category, title, icon, description, detail]) => ({
   id: slug(title),
-  image: featureImages[slug(title)],
   category,
   title,
   icon,

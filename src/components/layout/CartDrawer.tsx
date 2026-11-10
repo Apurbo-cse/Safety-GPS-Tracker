@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { announceNavigation } from "@/lib/navigate";
 import { Button } from "@/components/common/Button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearCart, removeFromCart, setQty } from "@/store/slices/cartSlice";
@@ -32,13 +33,13 @@ export default function CartDrawer() {
                 <ShoppingCart className="mx-auto h-10 w-10 text-slate-300" />
                 <p className="mt-3 text-sm font-medium text-body-strong">Your cart is empty</p>
                 <p className="mt-1 text-sm text-slate-500">Add a package or device to start an order.</p>
-                <Button className="mt-4" variant="outline" size="sm" onClick={() => { close(); router.push("/pricing"); }}>View pricing</Button>
+                <Button className="mt-4" variant="outline" size="sm" onClick={() => { close(); announceNavigation(); router.push("/pricing"); }}>View pricing</Button>
               </div>
             </div>
           ) : (
             <ul className="space-y-3">
               {items.map((i) => (
-                <li key={i.id} className="rounded-xl border border-line p-3">
+                <li key={i.id} className="rounded-lg border border-line p-3">
                   <div className="flex justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-ink">{i.name}</p>

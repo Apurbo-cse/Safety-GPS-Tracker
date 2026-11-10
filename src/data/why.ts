@@ -1,10 +1,54 @@
-import { Headset, Lock, PackageCheck, Smartphone, Timer, FileCheck2, type LucideIcon } from "lucide-react";
+import {
+  Headset,
+  Lock,
+  Timer,
+  FileCheck2,
+  Fuel,
+  Radio,
+  ShieldCheck,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 
 export const whyUs: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: Timer, title: "Frequent location updates", text: "10-second updates keep what you see close to what is happening." },
-  { icon: Lock, title: "Security built in", text: "Engine lock & unlock, panic button, accident and device removal alerts." },
-  { icon: Smartphone, title: "Apps and web", text: "Android, iOS and a web platform from the same account." },
-  { icon: FileCheck2, title: "Compliance reminders", text: "BRTA papers, insurance and engine oil alerts so nothing lapses." },
-  { icon: PackageCheck, title: "Clear package pricing", text: "Published device prices and monthly charges, no hidden tiers." },
-  { icon: Headset, title: "24×7 helpline", text: "Every published package includes helpline support." },
+  {
+    icon: Timer,
+    title: "10-Second Satellite Telemetry",
+    text: "Ultra-low latency GNSS updates ensure that vehicle position, speed, and turns are tracked on the road in real time.",
+  },
+  {
+    icon: Lock,
+    title: "Safe-Speed Engine Immobilizer",
+    text: "Cut fuel and stop vehicle theft in under 400ms from your smartphone app with intelligent safety latch controls.",
+  },
+  {
+    icon: Radio,
+    title: "Multi-Carrier 4G IoT Roaming",
+    text: "Automated failover across Grameenphone, Robi, and Banglalink towers guarantees zero blind spots on remote highways.",
+  },
+  {
+    icon: Fuel,
+    title: "Precision Fuel Rod Telematics",
+    text: "Ultrasonic sensor integration detects sudden fuel drops, tank siphoning, and unauthorized AC idling with ±1% accuracy.",
+  },
+  {
+    icon: FileCheck2,
+    title: "Automated BRTA Paper Compliance",
+    text: "Never face BRTA traffic police fines again with automated 30-day reminders for tax tokens, fitness, and insurance renewal.",
+  },
+  {
+    icon: Wrench,
+    title: "64 Districts Onsite Support",
+    text: "Certified telematics technicians provide professional doorstep installation and wiring anywhere in Bangladesh.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "100% Stolen Asset Recovery",
+    text: "Dedicated rapid emergency response team coordinates directly with Bangladesh Police using encrypted live tracking links.",
+  },
+  {
+    icon: Headset,
+    title: "24×7 Live Emergency Helpline",
+    text: "Round-the-clock operations center based in Shukrabad, Dhaka. Real human assistance available day and night at 01713546487.",
+  },
 ];

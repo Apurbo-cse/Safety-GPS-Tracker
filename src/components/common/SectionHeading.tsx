@@ -5,7 +5,6 @@ export default function SectionHeading({
 }: { eyebrow?: string; title: string; description?: string; align?: "center" | "left"; light?: boolean }) {
   return (
     <div className={cn("mb-10 max-w-2xl", align === "center" && "mx-auto text-center")}>
-      <span aria-hidden className={cn("mb-3 block h-1 w-10 rounded-full bg-gradient-to-r from-brand-400 to-brand-600", align === "center" && "mx-auto")} />
       {eyebrow && (
         <p className={cn("mb-2 text-xs font-semibold uppercase tracking-wider", light ? "text-brand-200" : "text-brand-text")}>
           {eyebrow}

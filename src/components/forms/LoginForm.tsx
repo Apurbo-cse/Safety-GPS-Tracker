@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { announceNavigation } from "@/lib/navigate";
 import { Button } from "@/components/common/Button";
 import { Field, inputCls } from "./Field";
 import PasswordInput from "./PasswordInput";
@@ -30,6 +31,7 @@ export default function LoginForm() {
     await new Promise((r) => setTimeout(r, 900));
     dispatch(loginSuccess({ name: "Demo Customer", identifier: v.identifier }));
     toast.success("Signed in (demo)");
+    announceNavigation();
     router.push("/");
   };
 

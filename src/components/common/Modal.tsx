@@ -27,7 +27,7 @@ export default function Modal({
         >
           <motion.div
             role="dialog" aria-modal="true" aria-label={title}
-            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-surface pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-2xl ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
+            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-lg bg-surface pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-lg ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
             initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}

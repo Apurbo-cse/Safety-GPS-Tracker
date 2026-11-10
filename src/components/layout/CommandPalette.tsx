@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CornerDownLeft, CreditCard, FileText, Globe, HardDrive, Layers, Mail, Moon, Phone, Search, ShoppingCart, Sparkles, Sun, Tag, type LucideIcon } from "lucide-react";
+import { announceNavigation } from "@/lib/navigate";
 import { features } from "@/data/features";
 import { devices } from "@/data/devices";
 import { plans } from "@/data/pricing";
@@ -45,7 +46,7 @@ export default function CommandPalette() {
   }, [open]);
 
   const commands = useMemo<Cmd[]>(() => {
-    const go = (href: string) => () => router.push(href);
+    const go = (href: string) => () => { announceNavigation(); router.push(href); };
     return [
       ...[...NAV_LINKS, { href: "/pay-bill", label: "Pay Bill" }, { href: "/login", label: "Login" }, { href: "/register", label: "Register" }].map((l): Cmd => ({ id: `p-${l.href}`, group: "Pages", label: l.label, hint: l.href, icon: Globe, run: go(l.href) })),
       { id: "a-call", group: "Actions", label: `Call sales ${SITE.phone}`, icon: Phone, keywords: "phone contact support", run: () => { window.location.href = `tel:${SITE.phone}`; } },
@@ -53,7 +54,7 @@ export default function CommandPalette() {
       { id: "a-demo", group: "Actions", label: "Request a demo", icon: Sparkles, run: () => dispatch(openDemoModal("Demo request (command palette)")) },
       { id: "a-cart", group: "Actions", label: "Open cart", icon: ShoppingCart, run: () => dispatch(setCartOpen(true)) },
       { id: "a-theme", group: "Actions", label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme", icon: theme === "dark" ? Sun : Moon, keywords: "dark light mode appearance", run: () => { const n = theme === "dark" ? "light" : "dark"; applyTheme(n); dispatch(setTheme(n)); } },
-      ...plans.map((p): Cmd => ({ id: `pl-${p.id}`, group: "Packages", label: p.name, hint: `${formatBDT(p.devicePrice)} + ${formatBDT(p.monthlyCharge)}/mo`, icon: Tag, keywords: `${p.siteTitle ?? ""} price package`, run: () => { dispatch(selectPlan(p.id)); router.push("/pricing"); } })),
+      ...plans.map((p): Cmd => ({ id: `pl-${p.id}`, group: "Packages", label: p.name, hint: `${formatBDT(p.devicePrice)} + ${formatBDT(p.monthlyCharge)}/mo`, icon: Tag, keywords: `${p.siteTitle ?? ""} price package`, run: () => { dispatch(selectPlan(p.id)); announceNavigation(); router.push("/pricing"); } })),
       ...devices.map((d): Cmd => ({ id: `d-${d.id}`, group: "Devices", label: d.name, hint: d.category, icon: HardDrive, keywords: "tracker hardware", run: () => dispatch(openDeviceModal(d.id)) })),
       ...features.map((f): Cmd => ({ id: `f-${f.id}`, group: "Features", label: f.title, hint: f.category, icon: f.category === "Reports & Analytics" ? FileText : f.category === "Platform" ? Layers : CreditCard, keywords: f.description, run: () => dispatch(openFeatureModal(f.id)) })),
     ];
@@ -81,7 +82,7 @@ export default function CommandPalette() {
       {open && (
         <motion.div className="fixed inset-0 z-[100] flex items-start justify-center bg-navy-950/60 px-4 pt-[12vh] backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
           <motion.div role="dialog" aria-modal="true" aria-label="Search and commands" onClick={(e) => e.stopPropagation()} onKeyDown={onKey}
-            className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl"
+            className="w-full max-w-xl overflow-hidden rounded-lg glass border border-white/60 dark:border-white/10 shadow-2xl"
             initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.98 }} transition={{ duration: 0.18 }}>
             <div className="flex items-center gap-3 border-b border-line px-4">
               <Search className="h-5 w-5 text-slate-400" />

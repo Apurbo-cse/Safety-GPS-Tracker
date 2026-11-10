@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { announceNavigation } from "@/lib/navigate";
 import { Button } from "@/components/common/Button";
 import { Field, inputCls } from "./Field";
 import PasswordInput from "./PasswordInput";
@@ -33,6 +34,7 @@ export default function RegisterForm() {
     await new Promise((r) => setTimeout(r, 1000));
     dispatch(loginSuccess({ name: v.name, identifier: v.email, vehicleType: v.vehicleType }));
     toast.success("Account created (demo)");
+    announceNavigation();
     router.push("/");
   };
 

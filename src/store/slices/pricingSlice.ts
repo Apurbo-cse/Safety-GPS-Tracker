@@ -18,10 +18,11 @@ const pricingSlice = createSlice({
         ? s.compareIds.filter((i) => i !== a.payload)
         : [...s.compareIds, a.payload];
     },
+    setCompare(s, a: PayloadAction<string[]>) { s.compareIds = a.payload; },
     clearCompare(s) { s.compareIds = []; },
     setSort(s, a: PayloadAction<PricingState["sort"]>) { s.sort = a.payload; },
     setMaxMonthly(s, a: PayloadAction<number | null>) { s.maxMonthly = a.payload; },
   },
 });
-export const { selectPlan, toggleCompare, clearCompare, setSort, setMaxMonthly } = pricingSlice.actions;
+export const { selectPlan, toggleCompare, setCompare, clearCompare, setSort, setMaxMonthly } = pricingSlice.actions;
 export default pricingSlice.reducer;

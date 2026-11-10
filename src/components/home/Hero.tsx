@@ -62,25 +62,25 @@ export default function Hero() {
                 <Image src={s.photo} alt="" fill priority={i === 0} sizes="100vw" className="scale-105 object-cover opacity-40 blur-[2px]" />
                 <Image src={s.bg} alt="" fill unoptimized sizes="100vw" className="object-cover opacity-70 mix-blend-screen" />
                 <div className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/55 to-navy-950/10" aria-hidden />
-                <Container className="relative grid min-h-[560px] items-center gap-12 py-14 pb-20 sm:py-20 sm:pb-24 lg:grid-cols-2">
+                <Container className="relative grid items-center gap-12 py-12 pb-16 sm:py-16 sm:pb-20 lg:min-h-[560px] lg:grid-cols-2">
                   <div>
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-brand-200">
                       <BadgeCheck className="h-3.5 w-3.5" /> {s.badge}
                     </span>
-                    <Title className="mt-5 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{s.title}</Title>
-                    <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">{s.text}</p>
+                    <Title className="mt-5 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{s.title}</Title>
+                    <p className="mt-4 line-clamp-4 max-w-xl text-base leading-relaxed text-slate-300 sm:line-clamp-none sm:text-lg">{s.text}</p>
                     <div className="mt-8 flex flex-wrap gap-3">
                       <LinkButton href="/features" variant="light" size="lg">Explore Features</LinkButton>
                       <LinkButton href="/pricing" variant="outline" size="lg" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">View Pricing</LinkButton>
                       <LinkButton href="/register" size="lg">Get Started <ArrowRight className="h-4 w-4" /></LinkButton>
                     </div>
                     {s.stats && (
-                      <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/10 pt-6">
+                      <dl className="mt-10 hidden max-w-md sm:grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
                         {s.stats.map(([v, l]) => (<div key={l}><dt className="text-sm font-bold text-white sm:text-base">{v}</dt><dd className="mt-0.5 text-xs text-slate-400">{l}</dd></div>))}
                       </dl>
                     )}
                   </div>
-                  <div className="pb-6 lg:pb-0">{[<LiveTrackingScene key="l" />, <SecurityScene key="s" />, <FleetScene key="f" />][i]}</div>
+                  <div className="hidden pb-6 lg:block lg:pb-0">{[<LiveTrackingScene key="l" />, <SecurityScene key="s" />, <FleetScene key="f" />][i]}</div>
                 </Container>
               </div>
             </SwiperSlide>
