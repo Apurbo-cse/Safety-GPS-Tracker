@@ -11,6 +11,8 @@ import Industries from "@/components/home/Industries";
 import AppPlatform from "@/components/home/AppPlatform";
 import WhyUs from "@/components/home/WhyUs";
 import Testimonials from "@/components/home/Testimonials";
+import UseCases from "@/components/home/UseCases";
+import PackageGallery from "@/components/home/PackageGallery";
 import HomeFaq from "@/components/home/HomeFaq";
 import ContactCta from "@/components/home/ContactCta";
 import { pageMeta } from "@/lib/metadata";
@@ -29,8 +31,10 @@ export default function HomePage() {
       <Overview />
       <FeaturesGrid />
       <HowItWorks />
+      <UseCases />
       <SoftwarePreview />
       <DeviceShowcase />
+      <PackageGallery />
       <PricingPreview />
       <Industries />
       <AppPlatform />

@@ -60,7 +60,7 @@ export default function CostTimeline() {
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORS[i] }} />
                     <span className="min-w-0 flex-1 truncate font-medium text-ink">{plans[i].name}</span>
                     <span className="font-bold tabular-nums text-ink">{formatBDT(cost(i, m))}</span>
-                    {rank === 0 && readout.length > 1 && <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] md:text-xs font-semibold text-green-600">Lowest</span>}
+                    {rank === 0 && readout.length > 1 && <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-xs font-semibold text-green-600">Lowest</span>}
                   </li>
                 ))}
               </ul>

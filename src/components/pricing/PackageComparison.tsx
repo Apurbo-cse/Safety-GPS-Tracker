@@ -19,7 +19,7 @@ const MAX = 4;
 const GROUPS = groupFeatures(comparisonFeatures);
 const firstYear = (p: PricingPlan) => p.devicePrice + p.monthlyCharge * 12;
 
-const Best = () => <span className="ml-1.5 rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] md:text-xs font-semibold text-green-600">Lowest</span>;
+const Best = () => <span className="ml-1.5 rounded-full bg-green-500/15 px-1.5 py-0.5 text-xs font-semibold text-green-600">Lowest</span>;
 const Mark = ({ on }: { on: boolean }) => on ? <Check className="mx-auto h-4 w-4 text-green-600" aria-label="Included" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="Not listed" />;
 
 export default function PackageComparison() {
@@ -101,7 +101,7 @@ export default function PackageComparison() {
                         {cols.length > 2 && <button onClick={() => toggle(p.id)} aria-label={`Remove ${p.name}`} className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-softer hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
                         <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
                         <span className="mt-1.5 block text-sm font-bold leading-tight text-ink">{p.name}</span>
-                        {p.siteTitle && <span className="block text-[11px] md:text-xs font-normal text-body">{p.siteTitle}</span>}
+                        {p.siteTitle && <span className="block text-xs font-normal text-body">{p.siteTitle}</span>}
                         <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
                       </div>
                     </th>
@@ -139,7 +139,7 @@ export default function PackageComparison() {
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
             {[[aId, setAId, "Package A"], [bId, setBId, "Package B"]].map(([val, set, label], i) => (
               <label key={String(label)} className={cn("block", i === 1 && "col-start-3 row-start-1")}>
-                <span className="mb-1 block text-[11px] md:text-xs font-semibold uppercase tracking-wide text-body">{String(label)}</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-body">{String(label)}</span>
                 <select value={val as string} onChange={(e) => (set as (v: string) => void)(e.target.value)} className="w-full rounded-lg border border-line-strong bg-surface px-2.5 py-2.5 text-sm font-medium text-ink">
                   {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>

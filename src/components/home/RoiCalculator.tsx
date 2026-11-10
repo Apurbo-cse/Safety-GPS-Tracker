@@ -102,7 +102,7 @@ export default function RoiCalculator() {
                     onChange={(e) => setVehicleCount(Number(e.target.value))}
                     className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
                   />
-                  <div className="mt-1 flex justify-between text-[11px] md:text-xs text-slate-400">
+                  <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>1 vehicle</span>
                     <span>50 vehicles</span>
                     <span>100+ vehicles</span>
@@ -129,7 +129,7 @@ export default function RoiCalculator() {
                     onChange={(e) => setFuelCostPerVehicle(Number(e.target.value))}
                     className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
                   />
-                  <div className="mt-1 flex justify-between text-[11px] md:text-xs text-slate-400">
+                  <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>{formatBDT(5000)}</span>
                     <span>{formatBDT(60000)}</span>
                     <span>{formatBDT(120000)}</span>
@@ -186,7 +186,7 @@ export default function RoiCalculator() {
                     </div>
                   </div>
 
-                  <p className="mt-4 text-[11px] md:text-xs text-slate-400 leading-relaxed">
+                  <p className="mt-4 text-xs text-slate-400 leading-relaxed">
                     Based on verified telematics data from 45,000+ commercial vehicles in Dhaka, Chittagong, and Sylhet. Payback period is under 30 days.
                   </p>
                 </div>
@@ -195,7 +195,7 @@ export default function RoiCalculator() {
                   <LinkButton href="/contact" size="lg" className="w-full text-center justify-center font-bold">
                     Claim Fleet Discount & Free Demo
                   </LinkButton>
-                  <p className="text-center text-[10px] md:text-xs text-slate-400">
+                  <p className="text-center text-xs text-slate-400">
                     Includes Free Onsite Technician Installation in 64 Districts
                   </p>
                 </div>

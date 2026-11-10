@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUp, Headset, Mail, MapPin, Phone } from "lucide-react";
 import Logo from "@/components/common/Logo";
 import Container from "@/components/common/Container";
 import AppStoreBadges from "@/components/common/AppStoreBadges";
@@ -11,80 +11,163 @@ const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURICom
   "Meem Tower, 104 Shukrabad Main Road, Dhaka, Bangladesh"
 )}`;
 
-const FLEET_SOLUTIONS = [
-  { label: "Corporate Logistics & Cargo", href: "/solutions#corporate-logistics" },
-  { label: "Cold-Chain Refrigerated Fleets", href: "/solutions#cold-chain" },
-  { label: "Construction & Heavy Dumpers", href: "/solutions#construction" },
-  { label: "School Bus & Student Safety", href: "/solutions#school-buses" },
-  { label: "Ride-Sharing & Rental Fleets", href: "/solutions#rental-cars" },
-  { label: "Motorbike Courier & Delivery", href: "/solutions#motorbikes" },
+const PRODUCT_LINKS = [
+  { label: "Features", href: "/features" },
+  { label: "Pricing & Packages", href: "/pricing" },
+  { label: "Tracking Devices", href: "/devices" },
+  { label: "Fleet Solutions", href: "/solutions" },
+  { label: "Pay Bill Online", href: "/pay-bill" },
 ];
 
 const COMPANY_LINKS = [
-  { label: "About Telematics Lab", href: "/about" },
-  { label: "Pricing Packages & ROI", href: "/pricing" },
-  { label: "Tracking Devices & Specs", href: "/devices" },
-  { label: "Features Matrix", href: "/features" },
-  { label: "Pay Bill Online", href: "/pay-bill" },
-  { label: "Contact Dispatch Center", href: "/contact" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 
-
-function LinkList({ title, items }: { title: string; items: { label: string; href: string }[] }) {
-  return (
-    <div className="space-y-3">
-      <h4 className="text-xs font-bold uppercase tracking-wider text-white">{title}</h4>
-      <ul className="space-y-2 text-xs">
-        {items.map((s) => (
-          <li key={s.label}>
-            <Link href={s.href} className="group flex items-center gap-1.5 text-slate-400 transition-colors hover:text-white">
-              <ChevronRight className="h-3 w-3 text-brand-400 transition-transform group-hover:translate-x-0.5" />
-              <span>{s.label}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export default function Footer() {
-  return (
-    <footer className="relative overflow-hidden bg-navy-950 text-slate-300 antialiased">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/80 to-transparent" />
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
-      <Container className="py-10 sm:py-12">
+  return (
+    <footer className="relative border-t border-white/10 bg-navy-950 text-slate-300 antialiased">
+      <Container className="py-12 sm:py-16">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-12">
+          {/* Brand & App Download */}
           <div className="space-y-4 lg:col-span-4">
             <Logo light />
-            <p className="text-xs leading-relaxed text-slate-400">
-              Real-time GPS tracking, engine lock, fuel monitoring and 24/7 theft recovery assistance for vehicles across Bangladesh.
+            <p className="max-w-sm text-sm leading-relaxed text-slate-400">
+              Real-time GPS tracking and vehicle security across Bangladesh. Track live location, monitor fuel consumption, and lock engines remotely.
             </p>
-            <AppStoreBadges showQr={true} />
+            <div className="pt-2">
+              <p className="mb-2.5 text-xs font-semibold text-slate-400">Download Mobile Apps</p>
+              <AppStoreBadges showQr={false} />
+            </div>
           </div>
 
-          <div className="lg:col-span-3 lg:col-start-6"><LinkList title="Fleet Solutions" items={FLEET_SOLUTIONS} /></div>
-          <div className="lg:col-span-3"><LinkList title="Company" items={COMPANY_LINKS} /></div>
+          {/* Product Links */}
+          <div className="lg:col-span-2 lg:col-start-6">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
+              Product
+            </h4>
+            <ul className="space-y-2 text-sm">
+              {PRODUCT_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-slate-400 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          <div className="space-y-3 text-xs lg:col-span-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Contact</h4>
-            <a href={`tel:${SITE.phone}`} className="flex items-center gap-2 text-slate-400 hover:text-white"><Phone className="h-3.5 w-3.5 shrink-0 text-brand-400" />{SITE.phone}</a>
-            <a href={`mailto:${SITE.email}`} className="flex items-center gap-2 break-all text-slate-400 hover:text-white"><Mail className="h-3.5 w-3.5 shrink-0 text-brand-400" />{SITE.email}</a>
-            <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 text-slate-400 hover:text-white"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" />{SITE.address}</a>
+          {/* Company Links */}
+          <div className="lg:col-span-2">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
+              Company
+            </h4>
+            <ul className="space-y-2 text-sm">
+              {COMPANY_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-slate-400 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact Details */}
+          <div className="space-y-3 sm:col-span-2 lg:col-span-3">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
+              Contact & Support
+            </h4>
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+              <Headset className="h-3.5 w-3.5 text-brand-400" />
+              <span>24/7 Customer Helpline</span>
+            </div>
+
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <a
+                  href={`tel:${SITE.phone}`}
+                  className="flex items-center gap-2.5 text-slate-400 transition-colors hover:text-white"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-brand-400" />
+                  <span>{SITE.phone}</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href={`mailto:${SITE.email}`}
+                  className="flex items-center gap-2.5 text-slate-400 transition-colors hover:text-white"
+                >
+                  <Mail className="h-4 w-4 shrink-0 text-brand-400" />
+                  <span>{SITE.email}</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href={MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2.5 text-slate-400 transition-colors hover:text-white"
+                >
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
+                  <span className="leading-snug">{SITE.address}</span>
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </Container>
 
-      <div className="border-t border-white/5 bg-black/60 py-3 text-xs text-slate-500">
-        <Container className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* Clean Bottom Copyright Bar */}
+      <div className="border-t border-white/10 bg-black/40 py-4 text-xs text-slate-500">
+        <Container className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Image src="/img/app/icon.png" alt="Safety GPS Tracker icon" width={20} height={20} className="h-5 w-auto" />
-            <span>© {new Date().getFullYear()} Safety GPS Tracker Bangladesh. All rights reserved.</span>
+            <Image
+              src="/img/app/icon.png"
+              alt="Safety GPS Tracker"
+              width={20}
+              height={20}
+              className="h-5 w-auto"
+            />
+            <span>
+              © {new Date().getFullYear()} Safety GPS Tracker. All rights reserved.
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-[11px] md:text-xs">
-            <Link href="/privacy" className="hover:text-slate-300">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-slate-300">Terms of Service</Link>
-            <Link href="/pay-bill" className="hover:text-slate-300">Online Bill Pay</Link>
+
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="transition-colors hover:text-slate-300">
+              Privacy Policy
+            </Link>
+            <span>·</span>
+            <Link href="/terms" className="transition-colors hover:text-slate-300">
+              Terms of Service
+            </Link>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              aria-label="Scroll to top"
+              className="grid h-6 w-6 place-items-center rounded-full border border-white/15 text-slate-400 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white"
+            >
+              <ArrowUp className="h-3 w-3" />
+            </button>
           </div>
         </Container>
       </div>

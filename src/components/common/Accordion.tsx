@@ -12,7 +12,7 @@ export default function Accordion({ items }: { items: FaqItem[] }) {
         return (
           <div key={it.q}>
             <button
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[14px] md:text-base font-semibold text-ink hover:bg-soft"
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-base font-semibold text-ink hover:bg-soft"
               aria-expanded={isOpen}
               onClick={() => setOpen(isOpen ? null : i)}
             >

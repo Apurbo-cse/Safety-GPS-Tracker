@@ -54,7 +54,7 @@ export default function PlanCard({
     >
       {plan.image && (
         <div className="relative -mx-1 mb-4 h-40 shrink-0 overflow-hidden rounded-lg border border-line bg-white  ">
-          {plan.highlight && <span className="absolute bottom-2 left-2 z-10 rounded-full border border-brand-500/30 bg-surface/90 px-2.5 py-0.5 text-[11px] md:text-xs font-bold text-brand-text   backdrop-blur">{plan.highlight}</span>}
+          {plan.highlight && <span className="absolute bottom-2 left-2 z-10 rounded-full border border-brand-500/30 bg-surface/90 px-2.5 py-0.5 text-xs font-bold text-brand-text   backdrop-blur">{plan.highlight}</span>}
           <Image
             src={plan.image}
             alt={plan.siteTitle ?? plan.name}
@@ -66,15 +66,15 @@ export default function PlanCard({
       )}
 
       <h3 className="line-clamp-2 min-h-[2.6rem] text-base font-bold leading-snug text-ink" title={plan.name}>{plan.name}</h3>
-      <p className="mt-1 h-4 truncate text-[11px] md:text-xs text-slate-500">{plan.siteTitle ? `Hardware: ${plan.siteTitle}` : "\u00a0"}</p>
+      <p className="mt-1 h-4 truncate text-xs text-slate-500">{plan.siteTitle ? `Hardware: ${plan.siteTitle}` : "\u00a0"}</p>
 
       <div className="mt-4 grid grid-cols-2 gap-3 rounded-lg bg-soft/60 p-3.5 border border-line-soft">
         <div>
-          <p className="text-[11px] md:text-xs font-semibold text-slate-500 uppercase tracking-wide">Device Price</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Device Price</p>
           <p className="text-xl font-black text-ink">{formatBDT(plan.devicePrice)}</p>
         </div>
         <div>
-          <p className="text-[11px] md:text-xs font-semibold text-slate-500 uppercase tracking-wide">Monthly Plan</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Monthly</p>
           <p className="text-xl font-black text-brand-text">
             {formatBDT(plan.monthlyCharge)}
             <span className="text-xs font-normal text-slate-400">/mo</span>
@@ -112,7 +112,7 @@ export default function PlanCard({
           Contact Sales
         </Button>
         {showCompare && (
-          <label className="mt-1 flex cursor-pointer items-center justify-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 hover:text-ink">
+          <label className="mt-1 flex cursor-pointer items-center justify-center gap-1.5 text-xs font-bold text-slate-500 hover:text-ink">
             <input
               type="checkbox"
               checked={comparing}

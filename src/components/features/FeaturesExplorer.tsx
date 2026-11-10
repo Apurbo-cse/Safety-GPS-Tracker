@@ -17,10 +17,10 @@ import { cn, formatBDT } from "@/utils/format";
 import type { FeatureCategory } from "@/types";
 
 function Availability({ id }: { id: string }) {
-  if (!isPackageFeature(id)) return <span className="rounded-full bg-softer px-2 py-0.5 text-[10px] md:text-xs font-semibold text-body">Platform feature</span>;
+  if (!isPackageFeature(id)) return <span className="rounded-full bg-softer px-2 py-0.5 text-xs font-semibold text-body">Platform feature</span>;
   const n = packagesFor(id).length;
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[10px] md:text-xs font-semibold", n === plans.length ? "bg-green-500/15 text-green-600" : "bg-amber-500/15 text-amber-600")}>
+    <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", n === plans.length ? "bg-green-500/15 text-green-600" : "bg-amber-500/15 text-amber-600")}>
       {n === plans.length ? `All ${n} packages` : `${n} of ${plans.length} packages`}
     </span>
   );
@@ -160,7 +160,7 @@ export default function FeaturesExplorer() {
                   <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-brand-500/15 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative flex items-start gap-2.5">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-navy-700 to-navy-950 text-white   ring-1 ring-white/10 transition-all duration-300 group-hover:from-brand-500 group-hover:to-brand-700 group-hover:scale-105"><DynIcon name={f.icon} className="h-4 w-4" /></span>
-                    <div className="min-w-0 flex-1"><h3 className="text-[13px] md:text-base font-bold leading-snug text-ink">{f.title}</h3><div className="mt-1"><Availability id={f.id} /></div></div>
+                    <div className="min-w-0 flex-1"><h3 className="text-base font-bold leading-snug text-ink">{f.title}</h3><div className="mt-1"><Availability id={f.id} /></div></div>
                     <button onClick={() => toggle(f.id)} aria-pressed={on} aria-label={on ? `Remove ${f.title} from shortlist` : `Add ${f.title} to shortlist`} className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full border transition-all active:scale-90", on ? "border-brand-500 bg-brand-600 text-white" : "border-line-strong text-slate-400 hover:text-brand-text")}>
                       <Star className={cn("h-3.5 w-3.5", on && "fill-current")} />
                     </button>

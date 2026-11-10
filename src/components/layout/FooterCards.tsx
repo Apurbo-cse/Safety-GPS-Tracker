@@ -43,7 +43,7 @@ export function CallbackCard() {
           <button type="submit" disabled={isSubmitting} className="gloss-btn h-[2.6rem] rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Sending…" : "Call me"}</button>
         </form>
       )}
-      <p className="mt-3 text-[11px] md:text-xs text-slate-500">Demo form — nothing is sent to a server.</p>
+      <p className="mt-3 text-xs text-slate-500">Demo form — nothing is sent to a server.</p>
     </div>
   );
 }
@@ -68,7 +68,7 @@ export function AppCard() {
         <div className="grid h-[104px] w-[104px] place-items-center overflow-hidden rounded-lg bg-white p-1" role="img" aria-label="QR code for the Android app on Google Play">
           {qr ? <span className="block h-24 w-24 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} /> : <span className="h-24 w-24 animate-pulse rounded bg-slate-200" />}
         </div>
-        <p className="mt-1.5 text-[10px] md:text-xs text-slate-500">Scan for Android</p>
+        <p className="mt-1.5 text-xs text-slate-500">Scan for Android</p>
       </div>
     </div>
   );

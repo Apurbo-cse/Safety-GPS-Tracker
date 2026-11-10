@@ -99,7 +99,7 @@ function ReportDemo() {
         {BARS.map((b, i) => (
           <button key={i} onMouseEnter={() => setHov(i)} onFocus={() => setHov(i)} aria-label={`${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]}: ${b * 9} km`} className="flex h-full flex-1 flex-col justify-end gap-1.5">
             <motion.span initial={{ height: 0 }} whileInView={{ height: `${b}%` }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.06 }} className={cn("block w-full rounded-t-md transition-colors", hov === i ? "bg-brand-400" : "bg-brand-600/80")} />
-            <span className="text-center text-[10px] md:text-xs text-slate-400">{["M", "T", "W", "T", "F", "S", "S"][i]}</span>
+            <span className="text-center text-xs text-slate-400">{["M", "T", "W", "T", "F", "S", "S"][i]}</span>
           </button>
         ))}
       </div>
@@ -141,7 +141,7 @@ export default function FeaturesShowcase() {
             </AnimatePresence>
           </div>
           <div className="relative min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#0f1217]  ">
-            <span className="absolute right-3 top-3 z-10 rounded-full bg-black/50 px-2.5 py-1 text-[10px] md:text-xs font-semibold text-white/90 backdrop-blur">Demo · simulated data</span>
+            <span className="absolute right-3 top-3 z-10 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Demo · simulated data</span>
             <AnimatePresence mode="wait"><motion.div key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="h-full">{d.view()}</motion.div></AnimatePresence>
           </div>
         </div>

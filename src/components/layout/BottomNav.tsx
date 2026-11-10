@@ -21,7 +21,7 @@ export default function BottomNav() {
   const moreOpen = useAppSelector((s) => s.ui.mobileNavOpen);
   const moreActive = moreOpen || ["/solutions", "/about", "/contact", "/pay-bill"].some((h) => pathname.startsWith(h));
 
-  const item = "relative flex flex-1 flex-col items-center justify-center gap-0.5 pt-1.5 text-[11px] md:text-xs font-semibold transition-colors active:scale-95";
+  const item = "relative flex flex-1 flex-col items-center justify-center gap-0.5 pt-1.5 text-xs font-semibold transition-colors active:scale-95";
   return (
     <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)]   backdrop-blur-xl lg:hidden">
       <div className="mx-auto flex h-[3.6rem] max-w-xl items-stretch">

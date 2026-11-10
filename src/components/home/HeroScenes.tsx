@@ -16,7 +16,7 @@ function useReducedMotion() {
 }
 
 const Chip = ({ children }: { children: React.ReactNode }) => (
-  <span className="rounded-full bg-brand-500/20 border border-brand-500/30 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-brand-300 backdrop-blur">{children}</span>
+  <span className="rounded-full bg-brand-500/20 border border-brand-500/30 px-2.5 py-1 text-xs font-semibold text-brand-300 backdrop-blur">{children}</span>
 );
 
 /** Slide 1 — a car drives along a route on a map while its live readout updates. */
@@ -65,25 +65,25 @@ export function LiveTrackingScene() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-white">Delivery Van 01</p>
-              <p className="font-mono text-[11px] md:text-xs text-slate-400">DHAKA-DA 11-2401</p>
+              <p className="font-mono text-xs text-slate-400">DHAKA-DA 11-2401</p>
             </div>
-            <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[11px] md:text-xs font-bold text-emerald-400">Running</span>
+            <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-xs font-bold text-emerald-400">Running</span>
           </div>
 
-          <p className="mt-2 flex items-center gap-1 text-[11px] md:text-xs text-slate-300"><MapPin className="h-3 w-3 text-brand-400" />Gulshan Avenue, Dhaka</p>
+          <p className="mt-2 flex items-center gap-1 text-xs text-slate-300"><MapPin className="h-3 w-3 text-brand-400" />Gulshan Avenue, Dhaka</p>
 
           <div className="mt-2.5 grid grid-cols-2 gap-2 rounded-lg bg-white/5 p-2 text-xs">
             <div>
-              <span className="flex items-center gap-1 text-[11px] md:text-xs text-slate-400"><Gauge className="h-3 w-3 text-brand-400" />Speed</span>
-              <p className="font-mono text-base font-black text-white">{speed} <span className="text-[11px] md:text-xs text-slate-400 font-normal">km/h</span></p>
+              <span className="flex items-center gap-1 text-xs text-slate-400"><Gauge className="h-3 w-3 text-brand-400" />Speed</span>
+              <p className="font-mono text-base font-black text-white">{speed} <span className="text-xs text-slate-400 font-normal">km/h</span></p>
             </div>
             <div>
-              <span className="flex items-center gap-1 text-[11px] md:text-xs text-slate-400"><KeyRound className="h-3 w-3 text-emerald-400" />Ignition</span>
-              <p className="font-mono text-base font-black text-emerald-400">ON <span className="text-[11px] md:text-xs text-slate-400 font-normal">(CAN)</span></p>
+              <span className="flex items-center gap-1 text-xs text-slate-400"><KeyRound className="h-3 w-3 text-emerald-400" />Ignition</span>
+              <p className="font-mono text-base font-black text-emerald-400">ON <span className="text-xs text-slate-400 font-normal">(CAN)</span></p>
             </div>
           </div>
 
-          <div className="mt-2 flex items-center justify-between text-[11px] md:text-xs text-slate-400 font-mono">
+          <div className="mt-2 flex items-center justify-between text-xs text-slate-400 font-mono">
             <span>{lat}, {lng}</span>
             <span className="text-brand-300">Ping 12ms</span>
           </div>
@@ -119,13 +119,13 @@ export function SecurityScene() {
           <span className="absolute h-44 w-44 rounded-full border-2 border-dashed border-white/25" />
           <div className="relative w-36"><VehicleArt kind="car" className="h-auto w-full drop-shadow-[0_8px_10px_rgba(0,0,0,.5)]" />
             <span className={`absolute -right-2 -top-6 grid h-9 w-9 place-items-center rounded-full text-white   transition-colors ${locked ? "bg-emerald-600 ring-2 ring-emerald-400/50" : "bg-amber-500 ring-2 ring-amber-400/50"}`}>{locked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}</span></div>
-          <p className="absolute bottom-0 text-[11px] md:text-xs font-bold text-white/90">Safe Zone Radar · {locked ? "Engine Locked" : "Ignition Active"}</p>
+          <p className="absolute bottom-0 text-xs font-bold text-white/90">Safe Zone Radar · {locked ? "Engine Locked" : "Ignition Active"}</p>
         </div>
         <ul className="col-span-2 flex flex-col justify-center gap-2">
           {visible.map((a, k) => (
             <li key={`${i}-${k}`} className={`flex items-center gap-2 rounded-lg border border-white/10 bg-[#161a24]/90 p-2.5 text-white   backdrop-blur ${k === 0 ? "slide-in ring-1 ring-brand-500/40" : "opacity-75"}`}>
               <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white ${a.c}`}><a.icon className="h-3.5 w-3.5" /></span>
-              <span className="min-w-0"><span className="block truncate text-[11px] md:text-xs font-bold">{a.t}</span><span className="block truncate text-[11px] md:text-xs text-slate-400">{a.d}</span></span>
+              <span className="min-w-0"><span className="block truncate text-xs font-bold">{a.t}</span><span className="block truncate text-xs text-slate-400">{a.d}</span></span>
             </li>
           ))}
         </ul>
@@ -153,7 +153,7 @@ export function FleetScene() {
           <div key={l.name} className="relative h-[104px] overflow-hidden rounded-lg bg-[#090b0e] border border-white/5">
             <svg className="absolute inset-x-0 bottom-2.5 h-1 w-full" preserveAspectRatio="none"><line x1="0" y1="2" x2="100%" y2="2" stroke="#fff" strokeOpacity=".3" strokeWidth="2" strokeDasharray="14 14" className="road-dash" /></svg>
             <div className="drive-across top-1.5 w-[26%]" style={{ animationDuration: `${l.dur}s`, animationDelay: `${l.delay}s` }}>
-              <span className="mb-0.5 ml-3 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#161a24] border border-white/15 px-2.5 py-0.5 text-[11px] md:text-xs font-bold text-white  "><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />{l.name} · {l.speed}</span>
+              <span className="mb-0.5 ml-3 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#161a24] border border-white/15 px-2.5 py-0.5 text-xs font-bold text-white  "><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />{l.name} · {l.speed}</span>
               <VehicleArt kind={l.kind} color={l.color} className="h-auto w-full" />
             </div>
           </div>

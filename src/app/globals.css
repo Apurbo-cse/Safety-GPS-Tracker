@@ -73,16 +73,17 @@
 
 @theme {
   /* Type scale — compact so text sits comfortably on every device */
-  --text-xs: 0.625rem;
-  --text-sm: 0.71875rem;
-  --text-base: 0.78125rem;
-  --text-lg: 0.875rem;
-  --text-xl: 0.96rem;
-  --text-2xl: 1.06rem;
-  --text-3xl: clamp(1.2rem, 1.05rem + 0.5vw, 1.4rem);
-  --text-4xl: clamp(1.32rem, 1.1rem + 0.8vw, 1.65rem);
-  --text-5xl: clamp(1.5rem, 1.15rem + 1.3vw, 2.1rem);
-  --text-6xl: clamp(1.7rem, 1.25rem + 1.8vw, 2.5rem);
+  /* Phone-first type scale (≈ native app sizes) */
+  --text-xs: 0.6875rem;   /* 11px */
+  --text-sm: 0.8125rem;   /* 13px */
+  --text-base: 0.875rem;  /* 14px */
+  --text-lg: 1rem;        /* 16px */
+  --text-xl: 1.125rem;    /* 18px */
+  --text-2xl: 1.25rem;    /* 20px */
+  --text-3xl: 1.5rem;     /* 24px */
+  --text-4xl: 1.625rem;   /* 26px */
+  --text-5xl: 1.875rem;   /* 30px */
+  --text-6xl: 2.125rem;   /* 34px */
 
   /* Always-dark surfaces (hero, footer, sidebar) */
   --color-navy-950: #101216;
@@ -105,7 +106,7 @@ html {
 }
 
 body {
-  font-size: 0.78125rem;
+  font-size: 0.875rem;
   background:
     radial-gradient(900px 480px at 88% -6%, rgb(240 90 34 / 0.10), transparent 60%),
     radial-gradient(760px 420px at -6% 18%, rgb(120 140 190 / 0.10), transparent 60%),
@@ -237,35 +238,33 @@ button { -webkit-user-select: none; user-select: none; }
 @media (max-width: 767px) {
   input, select, textarea { font-size: 16px; } /* stop iOS zoom on focus */
 }
-/* Phones: one step smaller, like a native app */
-@media (max-width: 639px) {
-  :root {
-    --text-xs: 0.5625rem;
-    --text-sm: 0.65625rem;
-    --text-base: 0.71875rem;
-    --text-lg: 0.8125rem;
-    --text-xl: 0.875rem;
-    --text-2xl: 0.96rem;
-    --text-3xl: 1.1rem;
-    --text-4xl: 1.2rem;
-    --text-5xl: 1.35rem;
-    --text-6xl: 1.5rem;
-  }
-  body { font-size: 0.71875rem; }
-}
-/* Tablet / desktop: larger again */
+/* Tablet */
 @media (min-width: 768px) {
   :root {
-    --text-xs: 0.78125rem;
-    --text-sm: 0.90625rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.45rem;
-    --text-3xl: clamp(1.65rem, 1.4rem + 0.7vw, 1.9rem);
-    --text-4xl: clamp(1.85rem, 1.5rem + 1.1vw, 2.3rem);
-    --text-5xl: clamp(2.1rem, 1.6rem + 1.6vw, 2.9rem);
-    --text-6xl: clamp(2.3rem, 1.7rem + 2.2vw, 3.4rem);
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 0.9375rem;  /* 15px */
+    --text-lg: 1.0625rem;    /* 17px */
+    --text-xl: 1.1875rem;    /* 19px */
+    --text-2xl: 1.375rem;    /* 22px */
+    --text-3xl: 1.75rem;     /* 28px */
+    --text-4xl: 2rem;        /* 32px */
+    --text-5xl: 2.375rem;    /* 38px */
+    --text-6xl: 2.75rem;     /* 44px */
+  }
+  body { font-size: 0.9375rem; }
+}
+/* Desktop */
+@media (min-width: 1280px) {
+  :root {
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 2.75rem;     /* 44px */
+    --text-6xl: 3.25rem;     /* 52px */
   }
   body { font-size: 1rem; }
 }

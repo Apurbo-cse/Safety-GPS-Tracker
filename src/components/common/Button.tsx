@@ -15,9 +15,9 @@ const variants: Record<Variant, string> = {
   light: "bg-white text-navy-950 hover:bg-white/90",
 };
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-5 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-8 px-3 text-xs sm:h-9 sm:text-sm",
+  md: "h-9 px-4 text-sm sm:h-11 sm:px-5",
+  lg: "h-10 px-4 text-sm sm:h-12 sm:px-6 sm:text-base",
 };
 
 interface Common { variant?: Variant; size?: Size; className?: string; children: React.ReactNode }

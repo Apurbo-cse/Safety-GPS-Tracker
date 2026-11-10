@@ -66,7 +66,7 @@ export default function SecurityResponseTimeline() {
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-bold text-slate-400">STAGE {s.step}</span>
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-[11px] md:text-xs font-bold text-brand-300">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-xs font-bold text-brand-300">
                         {s.time}
                       </span>
                     </div>
@@ -76,11 +76,11 @@ export default function SecurityResponseTimeline() {
                     </div>
 
                     <h3 className="mt-4 text-base font-bold text-white">{s.title}</h3>
-                    <span className="mt-1 inline-block text-[11px] md:text-xs font-bold text-brand-400">{s.badge}</span>
+                    <span className="mt-1 inline-block text-xs font-bold text-brand-400">{s.badge}</span>
                     <p className="mt-2 text-xs leading-relaxed text-slate-300">{s.description}</p>
                   </div>
 
-                  <div className="mt-6 border-t border-white/10 pt-3 text-[11px] md:text-xs font-mono text-slate-400">
+                  <div className="mt-6 border-t border-white/10 pt-3 text-xs font-mono text-slate-400">
                     Response SLA: <b className="text-white">Active (24/7)</b>
                   </div>
                 </div>

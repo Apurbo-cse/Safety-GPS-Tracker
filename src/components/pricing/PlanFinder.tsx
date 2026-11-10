@@ -139,7 +139,7 @@ export default function PlanFinder() {
               )}
             </motion.div>
           </AnimatePresence>
-          <p className="mt-5 text-[11px] md:text-xs text-slate-500">Recommendations use only the published prices, feature lists and the product shown for each package on the price list. Sales confirms the right device for your vehicle.</p>
+          <p className="mt-5 text-xs text-slate-500">Recommendations use only the published prices, feature lists and the product shown for each package on the price list. Sales confirms the right device for your vehicle.</p>
         </div>
       </Container>
     </section>

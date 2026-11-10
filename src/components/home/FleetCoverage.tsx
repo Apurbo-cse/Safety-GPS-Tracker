@@ -183,7 +183,7 @@ export default function FleetCoverage() {
                   <div className="mt-6 rounded-lg border border-brand-500/20 bg-brand-500/5 p-4 text-xs">
                     <p className="font-bold text-ink">Pricing Recommendation:</p>
                     <p className="mt-0.5 text-brand-text font-semibold">{active.pricingHint}</p>
-                    <p className="mt-1 text-[11px] md:text-xs text-slate-500">Includes Free Installation + 1 Year Device Replacement Warranty.</p>
+                    <p className="mt-1 text-xs text-slate-500">Includes Free Installation + 1 Year Device Replacement Warranty.</p>
                   </div>
                 </div>
 

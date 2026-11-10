@@ -33,7 +33,7 @@ export default function WhyUs() {
                 <p className="mt-2 text-xs leading-relaxed text-body">{w.text}</p>
               </div>
 
-              <div className="mt-4 border-t border-line-soft pt-3 flex items-center justify-between text-[11px] md:text-xs text-slate-400">
+              <div className="mt-4 border-t border-line-soft pt-3 flex items-center justify-between text-xs text-slate-400">
                 <span>Standard</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">Verified</span>
               </div>

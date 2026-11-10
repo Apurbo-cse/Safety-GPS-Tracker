@@ -113,7 +113,7 @@ function LiveTab() {
           <MapBase>
             {VEHICLES.map((x) => <g key={x.id} onClick={() => setSel(x.id)} className="cursor-pointer"><Marker x={x.x} y={x.y} color={STATUS[x.status].hex} selected={x.id === sel} pulse={x.status === "running"} /></g>)}
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
         </div>
         <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
           <p className="text-sm font-bold text-white">{v.name}</p>
@@ -127,7 +127,7 @@ function LiveTab() {
             className={cn("mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40", isLocked ? "bg-green-600 text-white hover:bg-green-500" : "gloss-btn text-white")}>
             {isLocked ? <><LockOpen className="h-4 w-4" />Unlock engine</> : <><Lock className="h-4 w-4" />Lock engine</>}
           </button>
-          {v.status === "offline" && <p className="mt-2 text-[11px] md:text-xs text-slate-500">Device offline — commands unavailable.</p>}
+          {v.status === "offline" && <p className="mt-2 text-xs text-slate-500">Device offline — commands unavailable.</p>}
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ function PlaybackTab() {
             <Marker x={40} y={320} color="#22c55e" /><Marker x={570} y={60} color="#ef4444" />
             <g transform={`translate(${pt.x} ${pt.y})`}><circle r="14" fill="#f05a22" fillOpacity=".25" /><circle r="8" fill="#f05a22" stroke="#fff" strokeWidth="2.5" /></g>
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] md:text-xs font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
+          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
         </div>
         <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3">
           <button onClick={() => { if (progress >= 1) seek(0); setPlaying((p) => !p); }} aria-label={playing ? "Pause" : "Play"} className="gloss-btn grid h-10 w-10 shrink-0 place-items-center rounded-full text-white">
@@ -239,7 +239,7 @@ function FenceTab() {
           <Marker x={CX} y={CY} color="#38bdf8" />
           <Marker x={pos.x} y={pos.y} color={outside ? "#ef4444" : "#22c55e"} pulse />
         </MapBase>
-        <span className={cn("absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] md:text-xs font-semibold backdrop-blur", outside ? "bg-red-600/80 text-white" : "bg-green-600/80 text-white")}>
+        <span className={cn("absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur", outside ? "bg-red-600/80 text-white" : "bg-green-600/80 text-white")}>
           {outside ? "Outside zone" : <><Check className="h-3 w-3" />Inside zone</>}
         </span>
       </div>

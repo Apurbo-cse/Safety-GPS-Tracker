@@ -61,7 +61,7 @@ export default function Navbar() {
           <button onClick={() => dispatch(setCartOpen(true))} aria-label={`Cart, ${cartCount} items`}
             className="relative grid h-10 w-10 place-items-center rounded-lg text-body-strong hover:bg-softer">
             <ShoppingCart className="h-5 w-5" />
-            {cartCount > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[11px] md:text-xs font-bold text-white">{cartCount}</span>}
+            {cartCount > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-xs font-bold text-white">{cartCount}</span>}
           </button>
           <div className="hidden items-center gap-2 lg:flex">
             {user ? (

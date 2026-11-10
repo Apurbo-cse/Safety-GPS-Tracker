@@ -23,7 +23,7 @@ export default function FeaturesGrid() {
               <Reveal key={f.id} delay={(i % 4) * 0.05}>
                 <div className="group flex h-full flex-col rounded-lg border border-line bg-soft/50 p-5 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:bg-surface  ">
                   {f.image ? <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-lg bg-white p-1.5 ring-1 ring-line"><Image src={f.image} alt="" width={56} height={56} className="h-full w-full object-contain" /></span> : <span className="grid h-14 w-14 place-items-center rounded-lg bg-navy-900 text-white transition-colors group-hover:bg-brand-600"><DynIcon name={f.icon} className="h-6 w-6" /></span>}
-                  <h3 className="mt-4 text-[14px] md:text-base font-bold text-ink">{f.title}</h3>
+                  <h3 className="mt-4 text-base font-bold text-ink">{f.title}</h3>
                   <p className="mt-1.5 flex-1 text-sm leading-relaxed text-body">{f.description}</p>
                   <button onClick={() => dispatch(openFeatureModal(f.id))} className="mt-3 inline-flex items-center gap-1 self-start text-sm font-semibold text-brand-text hover:underline">Learn more <ArrowRight className="h-3.5 w-3.5" /></button>
                 </div>

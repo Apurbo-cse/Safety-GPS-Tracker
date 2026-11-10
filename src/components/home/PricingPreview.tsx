@@ -127,7 +127,7 @@ export default function PricingPreview() {
                 <Button onClick={buy}><ShoppingCart className="h-4 w-4" />Buy Now</Button>
                 <Button variant="outline" onClick={() => dispatch(openDemoModal(`Sales enquiry: ${qty} × ${plan.name}`))}>Contact Sales</Button>
               </div>
-              <p className="mt-3 text-[11px] md:text-xs leading-relaxed text-slate-500">Estimate = device price + monthly charge × months, using the published prices. No discounts are applied; sales confirms the final quote.</p>
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">Estimate = device price + monthly charge × months, using the published prices. No discounts are applied; sales confirms the final quote.</p>
             </div>
           </div>
         </div>

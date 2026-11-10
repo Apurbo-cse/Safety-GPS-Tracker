@@ -30,7 +30,7 @@ export default function DeviceCard({ device }: { device: Device }) {
         <DeviceVisual kind={device.visual} />
       )}
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-brand-text">{device.category}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-brand-text">{device.category}</p>
         <h3 className="mt-1 text-base font-bold text-ink">{device.name}</h3>
         <dl className="mt-3 space-y-1.5 text-xs">
           {device.specs.slice(0, 3).map((s) => (

@@ -24,7 +24,7 @@ const how = [
 export default function PricingPage() {
   return (
     <>
-      <PageHero art="van" eyebrow="Pricing" title="Clear device prices and monthly plans" description="Eight packages from the published price list. Device prices range from ৳4,000 to ৳16,000 and monthly charges from ৳300 to ৳500.">
+      <PageHero art="van" eyebrow="Pricing" title="Clear device prices and Monthlys" description="Eight packages from the published price list. Device prices range from ৳4,000 to ৳16,000 and monthly charges from ৳300 to ৳500.">
         <LinkButton href="#finder" variant="light">Find my plan</LinkButton>
         <LinkButton href="#compare" variant="outline" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">Compare packages</LinkButton>
       </PageHero>
@@ -40,7 +40,7 @@ export default function PricingPage() {
             {how.map((h) => (
               <div key={h.t} className="rounded-lg glass border border-line p-5">
                 <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-text"><h.icon className="h-5 w-5" /></span>
-                <h3 className="mt-3 text-[14px] md:text-base font-bold text-ink">{h.t}</h3><p className="mt-1 text-sm text-body">{h.d}</p>
+                <h3 className="mt-3 text-base font-bold text-ink">{h.t}</h3><p className="mt-1 text-sm text-body">{h.d}</p>
               </div>
             ))}
           </div>

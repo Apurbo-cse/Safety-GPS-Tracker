@@ -41,9 +41,9 @@ export default function PlanFeaturesModal() {
             <div className="min-w-0 flex-1">
               {plan.siteTitle && <p className="text-xs text-body">Device: {plan.siteTitle}</p>}
               <div className="mt-1 grid grid-cols-3 gap-2 text-sm">
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-[11px] md:text-xs text-body">Device price</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice)}</p></div>
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-[11px] md:text-xs text-body">Monthly</p><p className="font-bold text-brand-text">{formatBDT(plan.monthlyCharge)}</p></div>
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-[11px] md:text-xs text-body">First 12 months</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice + plan.monthlyCharge * 12)}</p></div>
+                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">Device price</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice)}</p></div>
+                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">Monthly</p><p className="font-bold text-brand-text">{formatBDT(plan.monthlyCharge)}</p></div>
+                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">First 12 months</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice + plan.monthlyCharge * 12)}</p></div>
               </div>
             </div>
           </div>
