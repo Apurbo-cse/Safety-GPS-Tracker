@@ -1,0 +1,255 @@
+@import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/effect-fade";
+@import "leaflet/dist/leaflet.css";
+
+/* Theme tokens. Brand colour comes from the logo orange (#F05A22). */
+:root {
+  --background: #f7f8fa;
+  --foreground: #14161b;
+  --surface: #ffffff;
+  --soft: #f7f8fa;
+  --softer: #eef0f3;
+  --line: #e3e6eb;
+  --line-soft: #eef0f3;
+  --line-strong: #cdd2da;
+  --ink: #14161b;
+  --body: #4b5563;
+  --body-strong: #2f3641;
+  --brand-text: #c2410c;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #0d0f13;
+  --foreground: #f3f4f6;
+  --surface: #151920;
+  --soft: #1a1f28;
+  --softer: #222833;
+  --line: #2a303b;
+  --line-soft: #222833;
+  --line-strong: #3a4250;
+  --ink: #f3f4f6;
+  --body: #aab2c0;
+  --body-strong: #d2d8e2;
+  --brand-text: #fb9a63;
+  color-scheme: dark;
+
+  --color-brand-50: #2b1a11;
+  --color-brand-100: #3d2316;
+  --color-brand-200: #fdba8c;
+  --color-green-50: #10261a;
+  --color-green-200: #1c4a31;
+  --color-green-700: #4ade80;
+  --color-amber-50: #2b2110;
+  --color-amber-200: #5a4416;
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fcd34d;
+  --color-amber-900: #fde68a;
+  --color-red-50: #2d1515;
+  --color-blue-50: #11213b;
+  --color-blue-700: #93c5fd;
+  --color-slate-200: #2a303b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-soft: var(--soft);
+  --color-softer: var(--softer);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-body: var(--body);
+  --color-body-strong: var(--body-strong);
+  --color-brand-text: var(--brand-text);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* Type scale — compact so text sits comfortably on every device */
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg: 0.96rem;
+  --text-xl: 1.06rem;
+  --text-2xl: 1.2rem;
+  --text-3xl: clamp(1.4rem, 1.2rem + 0.7vw, 1.65rem);
+  --text-4xl: clamp(1.55rem, 1.25rem + 1.1vw, 1.95rem);
+  --text-5xl: clamp(1.75rem, 1.3rem + 1.7vw, 2.55rem);
+  --text-6xl: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+
+  /* Always-dark surfaces (hero, footer, sidebar) */
+  --color-navy-950: #101216;
+  --color-navy-900: #181b21;
+  --color-navy-800: #22262e;
+  --color-navy-700: #323843;
+
+  /* Brand orange from the logo */
+  --color-brand-50: #fff3ec;
+  --color-brand-100: #ffe3d2;
+  --color-brand-200: #fec7a5;
+  --color-brand-400: #f98a55;
+  --color-brand-500: #f46a31;
+  --color-brand-600: #f05a22;
+  --color-brand-700: #c9460f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-size: 0.875rem;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+.no-ring:focus-visible { outline: none; }
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.hero-swiper .swiper-pagination { bottom: 22px !important; }
+.hero-swiper .swiper-pagination-bullet { background: #fff; opacity: .45; }
+.hero-swiper .swiper-pagination-bullet-active { opacity: 1; background: var(--color-brand-600) !important; }
+
+.swiper-pagination-bullet-active {
+  background: var(--color-brand-600) !important;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  z-index: 0;
+}
+
+.veh-marker {
+  background: transparent;
+  border: 0;
+}
+
+@keyframes ping-slow {
+  0% { transform: scale(1); opacity: 0.6; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.animate-ping-slow {
+  animation: ping-slow 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--softer);
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.25), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Motion used by the illustrated scenes */
+@keyframes road-dash { to { stroke-dashoffset: -44; } }
+.road-dash { animation: road-dash 4s linear infinite; }
+@keyframes drive-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.drive-bob { animation: drive-bob 1.6s ease-in-out infinite; }
+@keyframes drive-across { from { left: -34%; } to { left: 108%; } }
+.drive-across { position: absolute; animation: drive-across linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -44; } }
+.route-flow { animation: flow 1.4s linear infinite; }
+@keyframes ring { 0% { transform: scale(.3); opacity: .7; } 100% { transform: scale(1.4); opacity: 0; } }
+.ring-pulse { animation: ring 3s ease-out infinite; transform-origin: center; }
+@keyframes slide-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+.slide-in { animation: slide-in .35s ease-out; }
+
+/* Custom sleek telemetry cockpit scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f05a22;
+}
+
+
+/* Circular theme reveal (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+
+/* Spotlight cards (cursor-following glow) */
+.spotlight { position: relative; overflow: hidden; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgb(240 90 34 / .16), transparent 70%);
+}
+.spotlight:hover::before { opacity: 1; }
+
+/* Partner marquee */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 40s linear infinite; }
+.marquee-reverse { animation-direction: reverse; }
+.marquee-mask:hover .marquee-track { animation-play-state: paused; }
+.marquee-mask { mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* ---- Mobile app feel ---- */
+html { -webkit-text-size-adjust: 100%; }
+body { min-height: 100dvh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+a, button, [role="button"], label, select, summary { touch-action: manipulation; }
+button { -webkit-user-select: none; user-select: none; }
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px; } /* stop iOS zoom on focus */
+}
+@media (max-width: 1023px) {
+  html { scroll-padding-top: 4rem; }
+  body { overscroll-behavior-y: contain; }
+}
+
+/* Swipeable card rows on phones (grid on tablet and up) */
+@media (max-width: 767px) {
+  .swipe-row {
+    display: flex; overflow-x: auto; gap: 14px; margin-inline: -1rem; padding: 4px 1rem 10px;
+    scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  }
+  .swipe-row::-webkit-scrollbar { display: none; }
+  .swipe-row > * { flex: 0 0 84%; scroll-snap-align: center; opacity: 1 !important; transform: none !important; }
+}
