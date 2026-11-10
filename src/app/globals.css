@@ -121,6 +121,12 @@ body {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
 }
+/* Form controls draw their own focus ring (see forms/Field.tsx) */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
 .no-ring:focus-visible { outline: none; }
 
 .grid-bg {

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { announceNavigation } from "@/lib/navigate";
 import { Button } from "@/components/common/Button";
-import { Field, inputCls } from "./Field";
+import { Field, Select, inputCls } from "./Field";
 import PasswordInput from "./PasswordInput";
 import { emailSchema, mobileSchema, passwordSchema } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -48,7 +48,7 @@ export default function RegisterForm() {
         <Field label="Confirm password" error={errors.confirm?.message}><PasswordInput autoComplete="new-password" {...register("confirm")} /></Field>
       </div>
       <Field label="Vehicle type" error={errors.vehicleType?.message}>
-        <select className={inputCls} {...register("vehicleType")}><option value="">Select…</option>{VEHICLES.map((v) => <option key={v}>{v}</option>)}</select>
+        <Select {...register("vehicleType")}><option value="">Select…</option>{VEHICLES.map((v) => <option key={v}>{v}</option>)}</Select>
       </Field>
       <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading ? "Creating account…" : "Create account"}</Button>
     </form>

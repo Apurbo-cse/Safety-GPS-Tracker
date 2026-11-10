@@ -159,15 +159,6 @@ export default function Footer() {
             <Link href="/terms" className="transition-colors hover:text-slate-300">
               Terms of Service
             </Link>
-            <span>·</span>
-            <button
-              type="button"
-              onClick={scrollToTop}
-              aria-label="Scroll to top"
-              className="grid h-6 w-6 place-items-center rounded-full border border-white/15 text-slate-400 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white"
-            >
-              <ArrowUp className="h-3 w-3" />
-            </button>
           </div>
         </Container>
       </div>
