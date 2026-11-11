@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Building2, ChevronRight, Cpu, CreditCard, HelpCircle, Home, Info, LayoutGrid, LogIn, LogOut, Mail, Phone, Tag, UserPlus, X, type LucideIcon,
+  Building2, ChevronRight, Cpu, CreditCard, HelpCircle, Home, Info, LayoutGrid, LogIn, LogOut, Mail, Package, Phone, Settings, Tag, UserPlus, UserRound, X, type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/common/Logo";
@@ -26,6 +26,9 @@ const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/faq", label: "FAQ", icon: HelpCircle },
   { href: "/pay-bill", label: "Pay Bill", icon: CreditCard },
+  { href: "/orders", label: "My Orders", icon: Package },
+  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 /** Left-side app drawer opened from the "More" tab / menu button on phones and tablets. */

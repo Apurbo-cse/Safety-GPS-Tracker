@@ -82,6 +82,8 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const cartCount = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useAppSelector((s) => s.wishlist.ids.length);
+  const user = useAppSelector((s) => s.auth.user);
+  const orderCount = useAppSelector((s) => s.orders.list.filter((o) => o.status !== "cancelled").length);
 
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null);
@@ -148,7 +150,8 @@ export default function Navbar() {
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-brand-400" />BTRC approved</span>
             <Link href="/pay-bill" className="hover:text-white">Pay bill</Link>
             <Link href="/faq" className="hover:text-white">Help centre</Link>
-            <Link href="/login" className="inline-flex items-center gap-1 font-semibold text-white hover:text-brand-300"><UserRound className="h-3 w-3" />Log in</Link>
+            <Link href="/orders" className="hover:text-white">My orders</Link>
+            <Link href={user ? "/profile" : "/login"} className="inline-flex items-center gap-1 font-semibold text-white hover:text-brand-300"><UserRound className="h-3 w-3" />{user ? user.name.split(" ")[0] : "Log in"}</Link>
           </div>
         </Container>
       </div>
@@ -193,6 +196,10 @@ export default function Navbar() {
             <Search className="h-4.5 w-4.5" />
           </button>
           <ThemeToggle />
+          <Link href="/profile" aria-label="My account" className={cn("relative grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-softer dark:hover:bg-navy-900", ["/profile", "/orders", "/settings"].some((p) => pathname.startsWith(p)) ? "text-brand-600 dark:text-brand-400" : "text-body-strong")}>
+            <UserRound className="h-4.5 w-4.5" />
+            {orderCount > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-surface dark:ring-navy-950" />}
+          </Link>
           <Link href="/products#wishlist" aria-label={`Wishlist, ${wishCount} items`} className="relative grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer dark:hover:bg-navy-900">
             <Heart className="h-4.5 w-4.5" />
             {wishCount > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{wishCount}</span>}

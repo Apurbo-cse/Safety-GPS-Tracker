@@ -1,11 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
-import { toast } from "sonner";
 import { announceNavigation } from "@/lib/navigate";
 import { Button } from "@/components/common/Button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { clearCart, removeFromCart, setQty } from "@/store/slices/cartSlice";
+import { removeFromCart, setQty } from "@/store/slices/cartSlice";
 import { setCartOpen } from "@/store/slices/uiSlice";
 import { formatBDT } from "@/utils/format";
 
@@ -63,10 +62,10 @@ export default function CartDrawer() {
               <div className="flex justify-between"><dt className="text-body">Device total (one-time)</dt><dd className="font-semibold">{formatBDT(device)}</dd></div>
               <div className="flex justify-between"><dt className="text-body">Monthly subscription</dt><dd className="font-semibold">{formatBDT(monthly)}</dd></div>
             </dl>
-            <Button className="mt-4 w-full" size="lg" onClick={() => { toast.success("Order request recorded (demo). Our sales team would contact you."); dispatch(clearCart()); close(); }}>
-              Place order request
+            <Button className="mt-4 w-full" size="lg" onClick={() => { close(); announceNavigation(); router.push("/checkout"); }}>
+              Checkout
             </Button>
-            <p className="mt-2 text-center text-xs text-slate-500">Demo only — no payment is taken and nothing is sent.</p>
+            <p className="mt-2 text-center text-xs text-slate-500">Free doorstep installation · no payment taken in this demo.</p>
           </div>
         )}
       </aside>
