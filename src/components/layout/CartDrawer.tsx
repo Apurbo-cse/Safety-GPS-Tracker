@@ -24,7 +24,7 @@ export default function CartDrawer() {
       <aside className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface   transition-transform ${open ? "translate-x-0" : "translate-x-full"}`} role="dialog" aria-label="Cart">
         <div className="flex items-center justify-between border-b border-line-soft px-5 py-4">
           <h2 className="flex items-center gap-2 text-base font-bold text-ink"><ShoppingCart className="h-5 w-5" />Your order</h2>
-          <button onClick={close} aria-label="Close cart" className="grid h-9 w-9 place-items-center rounded-lg hover:bg-softer"><X className="h-5 w-5" /></button>
+          <button onClick={close} aria-label="Close cart" className="grid h-9 w-9 place-items-center rounded-md hover:bg-softer"><X className="h-5 w-5" /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {items.length === 0 ? (
@@ -39,7 +39,7 @@ export default function CartDrawer() {
           ) : (
             <ul className="space-y-3">
               {items.map((i) => (
-                <li key={i.id} className="rounded-lg border border-line p-3">
+                <li key={i.id} className="rounded-md border border-line p-3">
                   <div className="flex justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-ink">{i.name}</p>
@@ -47,7 +47,7 @@ export default function CartDrawer() {
                     </div>
                     <button onClick={() => dispatch(removeFromCart(i.id))} aria-label={`Remove ${i.name}`} className="text-slate-400 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
                   </div>
-                  <div className="mt-2 inline-flex items-center rounded-lg border border-line">
+                  <div className="mt-2 inline-flex items-center rounded-md border border-line">
                     <button className="grid h-8 w-8 place-items-center" aria-label="Decrease" onClick={() => dispatch(setQty({ id: i.id, qty: i.qty - 1 }))}><Minus className="h-3.5 w-3.5" /></button>
                     <span className="w-8 text-center text-sm font-semibold">{i.qty}</span>
                     <button className="grid h-8 w-8 place-items-center" aria-label="Increase" onClick={() => dispatch(setQty({ id: i.id, qty: i.qty + 1 }))}><Plus className="h-3.5 w-3.5" /></button>

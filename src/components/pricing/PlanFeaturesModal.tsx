@@ -35,15 +35,15 @@ export default function PlanFeaturesModal() {
       {plan && (
         <div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-line bg-white sm:w-40">
+            <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-md border border-line bg-white sm:w-40">
               {plan.image && <Image quality={90} src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="160px" className="object-contain p-1.5" />}
             </div>
             <div className="min-w-0 flex-1">
               {plan.siteTitle && <p className="text-xs text-body">Device: {plan.siteTitle}</p>}
               <div className="mt-1 grid grid-cols-3 gap-2 text-sm">
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">Device price</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice)}</p></div>
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">Monthly</p><p className="font-bold text-brand-text">{formatBDT(plan.monthlyCharge)}</p></div>
-                <div className="rounded-lg bg-soft p-2.5"><p className="text-xs text-body">First 12 months</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice + plan.monthlyCharge * 12)}</p></div>
+                <div className="rounded-md bg-soft p-2.5"><p className="text-xs text-body">Device price</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice)}</p></div>
+                <div className="rounded-md bg-soft p-2.5"><p className="text-xs text-body">Monthly</p><p className="font-bold text-brand-text">{formatBDT(plan.monthlyCharge)}</p></div>
+                <div className="rounded-md bg-soft p-2.5"><p className="text-xs text-body">First 12 months</p><p className="font-bold text-ink">{formatBDT(plan.devicePrice + plan.monthlyCharge * 12)}</p></div>
               </div>
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function PlanFeaturesModal() {
           <p className="mt-5 text-sm font-semibold text-ink">{plan.features.length} features included</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             {grouped.map((g) => (
-              <section key={g.title} className="rounded-lg border border-line p-3.5">
+              <section key={g.title} className="rounded-md border border-line p-3.5">
                 <h3 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-brand-text"><g.icon className="h-4 w-4" />{g.title}</h3>
                 <ul className="space-y-1.5 text-sm text-body-strong">
                   {g.items.map((f) => <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />{f}</li>)}

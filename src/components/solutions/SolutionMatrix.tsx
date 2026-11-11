@@ -10,7 +10,7 @@ export default function SolutionMatrix() {
     <section className="py-12 sm:py-16">
       <Container>
         <SectionHeading eyebrow="At a glance" title="Compare industries side by side" description="The core features each industry uses most." />
-        <div className="glass overflow-x-auto rounded-lg border border-line">
+        <div className="glass overflow-x-auto rounded-md border border-line">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-line bg-softer/60">

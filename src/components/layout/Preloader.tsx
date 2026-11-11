@@ -45,91 +45,13 @@ export function PinLoader({ size = 64 }: { size?: number }) {
   );
 }
 
-const STEPS_INITIAL = ["Connecting to satellites", "Syncing your vehicles", "Fetching live positions", "Almost there"];
-const STEPS_NAV = ["Loading page", "Preparing map", "Almost there"];
-
-/** Rotating status line with a counting percentage. */
-function LoaderStatus({ initial }: { initial: boolean }) {
-  const steps = initial ? STEPS_INITIAL : STEPS_NAV;
-  const [step, setStep] = useState(0);
-  const [pct, setPct] = useState(0);
-  useEffect(() => {
-    const a = window.setInterval(() => setStep((n) => Math.min(n + 1, steps.length - 1)), initial ? 380 : 260);
-    const b = window.setInterval(() => setPct((p) => (p >= 99 ? 99 : p + Math.max(1, Math.round((99 - p) / 6)))), 60);
-    return () => { window.clearInterval(a); window.clearInterval(b); };
-  }, [initial, steps.length]);
-  return (
-    <div className="relative mt-1 flex w-full items-center justify-between gap-2 font-mono text-[11px] text-slate-400">
-      <span className="flex min-w-0 items-center gap-1.5">
-        <span className="relative flex h-1.5 w-1.5 shrink-0"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-400" /></span>
-        <AnimatePresence mode="wait">
-          <motion.span key={step} className="truncate" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18 }}>
-            {steps[step]}…
-          </motion.span>
-        </AnimatePresence>
-      </span>
-      <span className="shrink-0 font-bold tabular-nums text-brand-400">{pct}%</span>
-    </div>
-  );
-}
-
-const ROUTE_D = "M4 22 C 40 22, 46 6, 84 8 S 130 26, 166 14 S 214 4, 236 12";
-
-/** Mini route with a vehicle dot travelling along it. */
-function RouteLine() {
-  return (
-    <svg viewBox="0 0 240 30" className="relative mt-3 h-8 w-full" aria-hidden>
-      <path d={ROUTE_D} fill="none" stroke="rgb(255 255 255 / 0.1)" strokeWidth="5" strokeLinecap="round" />
-      <path d={ROUTE_D} fill="none" stroke="#f05a22" strokeWidth="2" strokeLinecap="round" strokeDasharray="6 6" className="route-flow" />
-      <circle cx="4" cy="22" r="3.5" fill="#4ade80" />
-      <g>
-        <animateMotion dur="2.2s" repeatCount="indefinite" path={ROUTE_D} />
-        <circle r="7" fill="#f05a22" opacity=".25" />
-        <circle r="4" fill="#fff" stroke="#f05a22" strokeWidth="2" />
-      </g>
-      <path d="M236 4 a5 5 0 0 1 5 5 c0 4-5 9-5 9 s-5-5-5-9 a5 5 0 0 1 5-5z" fill="#f05a22" transform="translate(-5 -3)" />
-    </svg>
-  );
-}
-
-/** Navigation loader: top shimmer bar + spinning rings around the app icon. */
-function NavLoader() {
-  return (
-    <>
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px] overflow-hidden">
-        <motion.div
-          className="h-full w-1/2 bg-gradient-to-r from-transparent via-brand-500 to-transparent"
-          initial={{ x: "-100%" }}
-          animate={{ x: "200%" }}
-          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-      <div className="relative grid size-32 place-items-center" role="status" aria-label="Loading page">
-        <div className="absolute size-28 rounded-full border border-dashed border-brand-500/45 animate-[spin_9s_linear_infinite]" />
-        <div className="absolute flex size-28 justify-center animate-[spin_3s_linear_infinite]">
-          <span className="-mt-1 size-2.5 rounded-full bg-brand-500 ring-2 ring-brand-500/25" />
-        </div>
-        <div className="absolute size-20 rounded-full border-2 border-transparent border-y-brand-500 animate-spin" />
-        <div className="absolute size-14 rounded-full border border-brand-500/45 opacity-40 animate-ping" />
-        <motion.div
-          className="relative z-10 grid size-14 place-items-center  border border-line bg-surface p-2"
-          animate={{ scale: [0.94, 1.05, 0.94] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Image src="/img/app/icon.png" alt="" width={32} height={34} priority className="h-8 w-auto" />
-        </motion.div>
-      </div>
-    </>
-  );
-}
-
 const MIN_INITIAL_MS = 1100; // first page load
 const SHOW_DELAY_MS = 120;   // don't flash the loader for instant navigations
 const MIN_NAV_MS = 450;      // once shown, keep it long enough to read as a loader
 const FAILSAFE_MS = 8000;
 
 /**
- * Full-screen loader.
+ * Full-screen loader — the same radar pin loader for first load and page navigation.
  *  - first load: solid overlay until the page has loaded
  *  - navigation: translucent overlay on top of the *previous* page, shown from the click
  *    until the new route has rendered
@@ -163,7 +85,15 @@ export default function Preloader() {
     // wait for the new page to paint, and for the loader to have been visible long enough
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const visibleFor = shownAt.current ? performance.now() - shownAt.current : MIN_NAV_MS;
-      window.setTimeout(() => { shownAt.current = 0; setNavigating(false); }, Math.max(0, MIN_NAV_MS - visibleFor));
+      window.setTimeout(() => {
+        shownAt.current = 0;
+        setNavigating(false);
+        if (!window.location.hash) {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }
+      }, Math.max(0, MIN_NAV_MS - visibleFor));
     }));
   }, []);
 
@@ -208,18 +138,10 @@ export default function Preloader() {
       {visible && (
         <motion.div
           id="preloader" key="preloader"
-          className={initial ? "fixed inset-0 z-[200] grid place-items-center bg-black/30" : "fixed inset-0 z-[200] grid select-none place-items-center bg-black/20"}
+          className="fixed inset-0 z-[200] grid select-none place-items-center bg-black/30"
           initial={{ opacity: initial ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28, ease: "easeInOut" }} aria-live="polite" aria-busy="true"
         >
-          {!initial ? <NavLoader /> : (
-          <div className="relative  p-px">
-      
-            <div className="relative flex w-[17rem] flex-col items-center overflow-hidden ">
-          
-              <div className="relative"><PinLoader size={initial ? 52 : 46} /></div> 
-            </div>
-          </div>
-          )}
+          <PinLoader size={50} />
         </motion.div>
       )}
     </AnimatePresence>

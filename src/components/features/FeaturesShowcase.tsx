@@ -30,7 +30,7 @@ function LiveDemo() {
           <rect x="-14" y="-8" width="28" height="16" rx="5" fill="#f05a22" stroke="#fff" strokeWidth="1.6" /><rect x="-2" y="-6" width="9" height="12" rx="2" fill="#12141a" />
         </g>
       </svg>
-      <div className="absolute bottom-3 left-3 rounded-lg bg-white/95 p-3 text-slate-900  ">
+      <div className="absolute bottom-3 left-3 rounded-md bg-white/95 p-3 text-slate-900  ">
         <p className="flex items-center gap-1.5 text-xs font-bold"><MapPin className="h-3.5 w-3.5 text-brand-600" />Delivery Van 01</p>
         <p className="mt-1 text-xs text-slate-600"><b className="tabular-nums">{38 + ((tick * 7) % 19)}</b> km/h · updated {tick % 10 || 10} sec ago</p>
       </div>
@@ -59,7 +59,7 @@ function LockDemo() {
         </div>
         <p className="mt-3 text-base font-bold text-white">{locked ? "Engine locked" : "Engine running"}</p>
         <p className="text-xs text-slate-400">Tap the button to send the command</p>
-        <ul className="mt-4 space-y-1.5 text-left" aria-live="polite">{log.map((l, i) => <li key={l + i} className={cn("rounded-lg bg-white/5 px-3 py-2 text-xs text-slate-200", i === 0 && "slide-in")}>{l}</li>)}</ul>
+        <ul className="mt-4 space-y-1.5 text-left" aria-live="polite">{log.map((l, i) => <li key={l + i} className={cn("rounded-md bg-white/5 px-3 py-2 text-xs text-slate-200", i === 0 && "slide-in")}>{l}</li>)}</ul>
       </div>
     </div>
   );
@@ -126,8 +126,8 @@ export default function FeaturesShowcase() {
           <div className="min-w-0">
             <div role="tablist" aria-label="Feature demos" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible">
               {DEMOS.map((x) => (
-                <button key={x.id} role="tab" aria-selected={id === x.id} onClick={() => setId(x.id)} className={cn("flex shrink-0 items-center gap-3 rounded-lg border px-3 py-2 text-left text-sm font-semibold transition-all lg:w-full", id === x.id ? "border-brand-500 bg-brand-50 text-ink" : "border-line-strong bg-surface text-body hover:border-brand-400")}>
-                  <span className={cn("grid h-8 w-8 place-items-center rounded-lg", id === x.id ? "bg-brand-600 text-white" : "bg-softer text-brand-text")}><x.icon className="h-4.5 w-4.5" /></span>{x.label}
+                <button key={x.id} role="tab" aria-selected={id === x.id} onClick={() => setId(x.id)} className={cn("flex shrink-0 items-center gap-3 rounded-md border px-3 py-2 text-left text-sm font-semibold transition-all lg:w-full", id === x.id ? "border-brand-500 bg-brand-50 text-ink" : "border-line-strong bg-surface text-body hover:border-brand-400")}>
+                  <span className={cn("grid h-8 w-8 place-items-center rounded-md", id === x.id ? "bg-brand-600 text-white" : "bg-softer text-brand-text")}><x.icon className="h-4.5 w-4.5" /></span>{x.label}
                 </button>
               ))}
             </div>
@@ -140,7 +140,7 @@ export default function FeaturesShowcase() {
               </motion.div>
             </AnimatePresence>
           </div>
-          <div className="relative min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[#0f1217]  ">
+          <div className="relative min-w-0 overflow-hidden rounded-md border border-white/10 bg-[#0f1217]  ">
             <span className="absolute right-3 top-3 z-10 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Demo · simulated data</span>
             <AnimatePresence mode="wait"><motion.div key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="h-full">{d.view()}</motion.div></AnimatePresence>
           </div>

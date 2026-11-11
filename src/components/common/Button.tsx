@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "light
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap";
+  "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap";
 const variants: Record<Variant, string> = {
   primary: "gloss-btn text-white",
   secondary: "bg-navy-900 text-white hover:bg-navy-800",

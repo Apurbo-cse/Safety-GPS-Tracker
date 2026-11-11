@@ -34,7 +34,7 @@ export default function LeadModal() {
   return (
     <Modal open={!!context} onClose={() => dispatch(openDemoModal(null))} title="Talk to our team">
       <form onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
-        <p className="rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-text">{context}</p>
+        <p className="rounded-md bg-brand-50 px-3 py-2 text-sm font-medium text-brand-text">{context}</p>
         <Field label="Full name" error={errors.name?.message}><input className={inputCls} autoComplete="name" {...register("name")} /></Field>
         <Field label="Mobile number" error={errors.phone?.message}><input className={inputCls} inputMode="tel" placeholder="01XXXXXXXXX" autoComplete="tel" {...register("phone")} /></Field>
         <Field label="Notes (optional)" error={errors.note?.message}><textarea rows={3} className={inputCls} {...register("note")} /></Field>

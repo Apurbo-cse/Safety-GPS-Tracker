@@ -39,8 +39,8 @@ const PRIORITY = [
 ];
 
 const Option = ({ on, label, hint, icon: Icon, onClick }: { on?: boolean; label: string; hint: string; icon?: LucideIcon; onClick: () => void }) => (
-  <button onClick={onClick} className={cn("flex items-center gap-3 rounded-lg border p-3.5 text-left transition-all hover:border-brand-400 active:scale-[.98]", on ? "border-brand-500 bg-brand-50" : "border-line-strong bg-surface")}>
-    {Icon && <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-softer text-brand-text"><Icon className="h-5 w-5" /></span>}
+  <button onClick={onClick} className={cn("flex items-center gap-3 rounded-md border p-3.5 text-left transition-all hover:border-brand-400 active:scale-[.98]", on ? "border-brand-500 bg-brand-50" : "border-line-strong bg-surface")}>
+    {Icon && <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-softer text-brand-text"><Icon className="h-5 w-5" /></span>}
     <span><span className="block text-sm font-semibold text-ink">{label}</span><span className="block text-xs text-body">{hint}</span></span>
   </button>
 );
@@ -84,7 +84,7 @@ export default function PlanFinder() {
     <section id="finder" className="scroll-mt-32 py-14">
       <Container>
         <SectionHeading eyebrow="Find my plan" title="Not sure which package?" description="Answer three quick questions and we'll point you to the best-fitting published package." />
-        <div className="glass mx-auto max-w-3xl rounded-lg border border-line p-5 sm:p-7">
+        <div className="glass mx-auto max-w-3xl rounded-md border border-line p-5 sm:p-7">
           {!done && (
             <div className="mb-5 flex items-center gap-3">
               {step > 0 && <button onClick={() => setStep((s) => s - 1)} aria-label="Back" className="grid h-8 w-8 place-items-center rounded-full border border-line-strong text-body hover:text-ink"><ArrowLeft className="h-4 w-4" /></button>}
@@ -110,7 +110,7 @@ export default function PlanFinder() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-brand-text">Best match</p>
                   <div className="mt-2 grid gap-5 sm:grid-cols-[200px_1fr]">
-                    <div className="relative h-36 overflow-hidden rounded-lg border border-line bg-white sm:h-full sm:min-h-40">{result.best.image && <Image quality={90} src={result.best.image} alt={result.best.siteTitle ?? result.best.name} fill sizes="200px" className="object-contain p-2" />}</div>
+                    <div className="relative h-36 overflow-hidden rounded-md border border-line bg-white sm:h-full sm:min-h-40">{result.best.image && <Image quality={90} src={result.best.image} alt={result.best.siteTitle ?? result.best.name} fill sizes="200px" className="object-contain p-2" />}</div>
                     <div>
                       <h3 className="text-xl font-bold text-ink">{result.best.name}</h3>
                       <p className="text-sm text-body">{formatBDT(result.best.devicePrice)} device + {formatBDT(result.best.monthlyCharge)}/month · first 12 months {formatBDT(year(result.best))}</p>
@@ -126,7 +126,7 @@ export default function PlanFinder() {
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-body">Also consider</p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {result.alts.map((a) => (
-                          <button key={a.id} onClick={() => { dispatch(setCompare([result.best.id, a.id])); document.getElementById("compare")?.scrollIntoView({ behavior: "smooth" }); }} className="flex items-center gap-3 rounded-lg border border-line-strong bg-surface p-2.5 text-left transition-colors hover:border-brand-400">
+                          <button key={a.id} onClick={() => { dispatch(setCompare([result.best.id, a.id])); document.getElementById("compare")?.scrollIntoView({ behavior: "smooth" }); }} className="flex items-center gap-3 rounded-md border border-line-strong bg-surface p-2.5 text-left transition-colors hover:border-brand-400">
                             <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded bg-white">{a.image && <Image quality={90} src={a.image} alt="" fill sizes="56px" className="object-contain" />}</span>
                             <span className="min-w-0"><span className="block truncate text-sm font-semibold text-ink">{a.name}</span><span className="block text-xs text-body">{formatBDT(a.devicePrice)} + {formatBDT(a.monthlyCharge)}/mo · compare →</span></span>
                           </button>

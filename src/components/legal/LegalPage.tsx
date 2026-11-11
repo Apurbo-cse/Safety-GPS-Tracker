@@ -26,7 +26,7 @@ export default function LegalPage({ updated, intro, sections }: { updated: strin
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-text">On this page</p>
         <nav className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible">
           {sections.map((s, i) => (
-            <a key={s.id} href={`#${s.id}`} className={cn("flex shrink-0 items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors lg:border-transparent", active === s.id ? "border-brand-500 bg-brand-500/10 font-semibold text-brand-text" : "border-line text-body hover:text-ink")}>
+            <a key={s.id} href={`#${s.id}`} className={cn("flex shrink-0 items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors lg:border-transparent", active === s.id ? "border-brand-500 bg-brand-500/10 font-semibold text-brand-text" : "border-line text-body hover:text-ink")}>
               <span className="font-mono text-xs opacity-60">{String(i + 1).padStart(2, "0")}</span>{s.title}
             </a>
           ))}
@@ -34,7 +34,7 @@ export default function LegalPage({ updated, intro, sections }: { updated: strin
       </aside>
 
       <article className="min-w-0">
-        <div className="glass rounded-lg border border-line p-4 sm:p-5">
+        <div className="glass rounded-md border border-line p-4 sm:p-5">
           <p className="text-xs text-body">Last updated: <b className="text-ink">{updated}</b></p>
           <div className="mt-2 text-sm leading-relaxed text-body-strong">{intro}</div>
         </div>
@@ -43,14 +43,14 @@ export default function LegalPage({ updated, intro, sections }: { updated: strin
           {sections.map((s, i) => (
             <section key={s.id} id={s.id} className="scroll-mt-28">
               <h2 className="flex items-center gap-2.5 text-lg font-bold text-ink">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-600 text-xs font-bold text-white">{i + 1}</span>{s.title}
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand-600 text-xs font-bold text-white">{i + 1}</span>{s.title}
               </h2>
               <div className="legal-body mt-3 space-y-3 text-sm leading-relaxed text-body [&_li]:ml-5 [&_li]:list-disc [&_li]:pl-1 [&_strong]:text-ink [&_ul]:space-y-1.5">{s.body}</div>
             </section>
           ))}
         </div>
 
-        <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
+        <div className="mt-10 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3">
           {[
             { icon: Phone, label: "Helpline (24×7)", value: SITE.phone, href: `tel:${SITE.phone}` },
             { icon: Mail, label: "Email", value: SITE.email, href: `mailto:${SITE.email}` },

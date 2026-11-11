@@ -32,7 +32,7 @@ export default function CostTimeline() {
     <section id="timeline" className="scroll-mt-32 bg-surface py-14">
       <Container>
         <SectionHeading eyebrow="Cost over time" title="See what each package costs as months go by" description="Each line starts at the device price and rises by the monthly charge. Hover or touch the chart to read any month." />
-        <div className="glass rounded-lg border border-line p-4 sm:p-6">
+        <div className="glass rounded-md border border-line p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Packages on the chart">
             {plans.map((p, i) => { const on = sel.includes(i); return (
               <button key={p.id} onClick={() => toggle(i)} aria-pressed={on} className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors", on ? "border-line-strong bg-surface text-ink" : "border-line text-slate-400")}>
@@ -56,7 +56,7 @@ export default function CostTimeline() {
               <p className="text-xs font-semibold uppercase tracking-wider text-body">{hover === null ? "After 24 months" : hover === 0 ? "At purchase" : `After ${hover} month${hover === 1 ? "" : "s"}`}</p>
               <ul className="mt-2 space-y-1.5">
                 {readout.map((i, rank) => (
-                  <li key={i} className="flex items-center gap-2 rounded-lg bg-soft px-3 py-2 text-sm">
+                  <li key={i} className="flex items-center gap-2 rounded-md bg-soft px-3 py-2 text-sm">
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORS[i] }} />
                     <span className="min-w-0 flex-1 truncate font-medium text-ink">{plans[i].name}</span>
                     <span className="font-bold tabular-nums text-ink">{formatBDT(cost(i, m))}</span>

@@ -3,7 +3,7 @@ import { AlertCircle, ChevronDown, type LucideIcon } from "lucide-react";
 
 /** Shared control styling: plain border that turns brand orange on focus, red when invalid. */
 export const inputCls =
-  "w-full rounded-lg border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 " +
+  "w-full rounded-md border border-line-strong bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 " +
   "transition-colors focus:border-brand-500 focus:outline-none " +
   "aria-[invalid=true]:border-red-500 disabled:cursor-not-allowed disabled:opacity-60";
 

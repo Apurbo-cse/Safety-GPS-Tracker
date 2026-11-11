@@ -23,14 +23,14 @@ export default function DeviceModal() {
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             {d.image ? (
-              <div className="relative h-56 overflow-hidden rounded-lg border border-line bg-white"><Image quality={90} src={d.image} alt={d.siteTitle ?? d.name} fill sizes="400px" className="object-contain p-3" /></div>
-            ) : <DeviceVisual kind={d.visual} className="h-56 rounded-lg" />}
+              <div className="relative h-56 overflow-hidden rounded-md border border-line bg-white"><Image quality={90} src={d.image} alt={d.siteTitle ?? d.name} fill sizes="400px" className="object-contain p-3" /></div>
+            ) : <DeviceVisual kind={d.visual} className="h-56 rounded-md" />}
             <p className="mt-3 text-xs text-slate-500">{d.image ? "Product image from the company price list. Exact hardware model is confirmed by the sales team." : "Illustration. Actual hardware model is confirmed by the sales team."}</p>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-text">{d.category}</p>
             <p className="mt-2 text-sm leading-relaxed text-body">{d.summary}</p>
-            <dl className="mt-4 divide-y divide-line-soft rounded-lg border border-line text-sm">
+            <dl className="mt-4 divide-y divide-line-soft rounded-md border border-line text-sm">
               {d.specs.map((s) => (
                 <div key={s.label} className="flex justify-between gap-4 px-3 py-2"><dt className="text-slate-500">{s.label}</dt><dd className="text-right font-medium text-ink">{s.value}</dd></div>
               ))}

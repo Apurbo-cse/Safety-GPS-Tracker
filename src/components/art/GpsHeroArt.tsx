@@ -82,7 +82,7 @@ export default function GpsHeroArt({ art }: { art?: string }) {
       </span>
 
       {/* Telemetry card */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-3 rounded-lg border border-white/10 bg-navy-950/85 p-2.5 pr-3.5 shadow-xl backdrop-blur">
+      <div className="absolute bottom-3 right-3 flex items-center gap-3 rounded-md border border-white/10 bg-navy-950/85 p-2.5 pr-3.5 shadow-xl backdrop-blur">
         {kind ? (
           <span className="grid h-10 w-14 place-items-center rounded-md bg-white/5">
             <VehicleArt kind={kind} className="h-auto w-12" />

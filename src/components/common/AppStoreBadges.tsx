@@ -11,7 +11,7 @@ export function AppleAppStoreBadge({ className }: { className?: string }) {
       rel="noopener noreferrer"
       aria-label="Download Safety GPS Tracker on the Apple App Store"
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-md transition-all hover:scale-[1.02] hover:border-brand-500 hover:bg-black hover:shadow-brand-500/20 active:scale-95",
+        "group relative flex items-center gap-3 rounded-md border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-md transition-all hover:scale-[1.02] hover:border-brand-500 hover:bg-black hover:shadow-brand-500/20 active:scale-95",
         className
       )}
     >
@@ -38,7 +38,7 @@ export function GooglePlayStoreBadge({ className }: { className?: string }) {
       rel="noopener noreferrer"
       aria-label="Get Safety GPS Tracker on Google Play"
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-md transition-all hover:scale-[1.02] hover:border-brand-500 hover:bg-black hover:shadow-brand-500/20 active:scale-95",
+        "group relative flex items-center gap-3 rounded-md border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-md transition-all hover:scale-[1.02] hover:border-brand-500 hover:bg-black hover:shadow-brand-500/20 active:scale-95",
         className
       )}
     >

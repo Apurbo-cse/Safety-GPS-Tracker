@@ -40,6 +40,8 @@ export default function HomePage() {
       <WhyUs />
       <Stats />
       <Testimonials /> 
+      <HomeFaq />
+      <ContactCta className="bg-sec-white pt-16 sm:pt-20" />
       <Partners />
     </>
   );

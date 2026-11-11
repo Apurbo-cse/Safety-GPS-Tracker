@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp, Phone } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 export default function FloatingActions() {
   const [show, setShow] = useState(false);

@@ -2,63 +2,60 @@
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
-import { ArrowRight, Bell, Check, ChevronLeft, ChevronRight, FileBarChart, Fuel, Lock, MapPin, Route, Siren, type LucideIcon } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, ChevronRight, MapPin, Satellite, ShieldCheck, Truck, type LucideIcon } from "lucide-react";
+import { FleetScene, LiveTrackingScene, SecurityScene } from "./HeroScenes";
 import Container from "@/components/common/Container";
 import { LinkButton } from "@/components/common/Button";
 import { features } from "@/data/features";
 import { plans } from "@/data/pricing";
-import { SITE, TELECOM_PARTNERS } from "@/lib/site";
+import { SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
 import { formatBDT } from "@/utils/format";
 
 interface Slide {
+  id: string;
+  icon: LucideIcon;
+  scene: () => React.ReactNode;
   image: string;
   badge: string;
   title: string;
   highlight: string;
   text: string;
   points: string[];
-  cards: { icon: LucideIcon; title: string; sub: string; tone: string }[];
 }
 
 const slides: Slide[] = [
   {
-    image: "/img/hero-car.jpg",
+    id: "live",
+    icon: MapPin,
+    scene: LiveTrackingScene,
+    image: "/hero/hero-live.svg",
     badge: "Live GPS tracking",
     title: "Know where your vehicle is,",
     highlight: "every second",
     text: "Live location, speed and ignition status on one map — from your phone or the web.",
     points: ["10-second location updates", "Route history playback", "Google Street View"],
-    cards: [
-      { icon: MapPin, title: "Delivery Van 01", sub: "Moving · 42 km/h", tone: "bg-brand-600" },
-      { icon: Bell, title: "Ignition ON", sub: "Mirpur · just now", tone: "bg-green-600" },
-      { icon: Route, title: "Trip finished", sub: "Gulshan → Uttara", tone: "bg-sky-600" },
-    ],
   },
   {
-    image: "/img/hero-bike.jpg",
+    id: "security",
+    icon: ShieldCheck,
+    scene: SecurityScene,
+    image: "/hero/hero-security.svg",
     badge: "Vehicle security",
     title: "Lock the engine",
     highlight: "from your phone",
     text: "Remote engine lock, geo-fence alerts and a panic button — help when you need it.",
     points: ["Remote engine lock & unlock", "Geo-fence entry/exit alerts", "Device removal alerts"],
-    cards: [
-      { icon: Lock, title: "Engine locked", sub: "Command sent from app", tone: "bg-green-600" },
-      { icon: Bell, title: "Left geo-fence", sub: "Depot zone · alert", tone: "bg-red-600" },
-      { icon: Siren, title: "Panic button", sub: "Alert sent to owner", tone: "bg-amber-600" },
-    ],
   },
   {
-    image: "/img/hero-truck.jpg",
+    id: "fleet",
+    icon: Truck,
+    scene: FleetScene,
+    image: "/hero/hero-fleet.svg",
     badge: "Fleet management",
     title: "One dashboard for",
     highlight: "your whole fleet",
     text: "Daily mileage, route history and BRTA paper reminders for every vehicle.",
     points: ["Daily mileage & parking reports", "Driver details management", "BRTA & insurance reminders"],
-    cards: [
-      { icon: FileBarChart, title: "Daily report ready", sub: "Mileage · trips · stops", tone: "bg-brand-600" },
-      { icon: Bell, title: "Insurance renewal", sub: "Reminder before expiry", tone: "bg-amber-600" },
-      { icon: Fuel, title: "Fuel monitoring", sub: "Usage across the fleet", tone: "bg-green-600" },
-    ],
   },
 ];
 
@@ -88,37 +85,45 @@ export default function Hero() {
         {slides.map((s, i) => {
           const Title = i === 0 ? "h1" : "h2";
           return (
-            <SwiperSlide key={s.image} className="!h-auto">
+            <SwiperSlide key={s.id} className="!h-auto">
               <div className="relative h-full overflow-hidden">
-                <Image src={s.image} alt="" fill priority={i === 0} quality={90} sizes="100vw" className="object-cover object-center" />
-                <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/55 to-transparent" />
-                <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy-950/80 to-transparent" />
+                <Image src={s.image} alt="" fill priority={i === 0} unoptimized sizes="100vw" className="object-cover object-center" />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/55 to-navy-950/20" />
+                <div aria-hidden className="grid-bg absolute inset-0 opacity-40" />
+                <div aria-hidden className="absolute -right-32 -top-40 h-[28rem] w-[28rem] rounded-full bg-brand-600/25 blur-3xl" />
+                <div aria-hidden className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl" />
+                <svg aria-hidden className="absolute inset-0 h-full w-full opacity-[.12]" preserveAspectRatio="none" viewBox="0 0 1200 600">
+                  <path d="M-20 520 C 200 480, 320 300, 560 320 S 900 160, 1220 90" fill="none" stroke="#f05a22" strokeWidth="2" strokeDasharray="8 10" />
+                  <path d="M-20 200 C 220 260, 420 140, 700 220 S 1000 420, 1220 360" fill="none" stroke="#fff" strokeWidth="1.5" strokeDasharray="4 10" />
+                </svg>
+                <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy-950 to-transparent" />
 
-                <Container className="relative grid h-full items-center gap-8 py-8 pb-12 sm:py-12 sm:pb-14 lg:min-h-[500px] lg:grid-cols-2">
+                <Container className="relative grid h-full items-center gap-6 py-6 pb-10 sm:py-8 sm:pb-12 lg:grid-cols-2 lg:gap-10">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-brand-200 backdrop-blur">
-                      <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-400" /></span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1 pl-1 pr-3 text-xs font-medium text-brand-200 backdrop-blur">
+                      <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-600 text-white"><s.icon className="h-3 w-3" /></span>
                       {s.badge}
+                      <span className="flex items-center gap-1 border-l border-white/15 pl-2 text-slate-300"><Satellite className="h-3 w-3 text-green-400" />GPS online</span>
                     </span>
-                    <Title className="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                    <Title className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
                       {s.title} <span className="text-brand-400">{s.highlight}</span>
                     </Title>
-                    <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">{s.text}</p>
-                    <ul className="mt-4 grid max-w-lg gap-1.5 text-sm text-slate-200 sm:grid-cols-2">
+                    <p className="mt-3 max-w-lg text-base leading-relaxed text-slate-300">{s.text}</p>
+                    <ul className="mt-3 grid max-w-lg gap-1.5 text-sm text-slate-200 sm:grid-cols-2">
                       {s.points.map((p) => (
                         <li key={p} className="flex items-center gap-2"><span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-brand-600"><Check className="h-2.5 w-2.5" /></span>{p}</li>
                       ))}
                     </ul>
-                    <p className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm backdrop-blur">
+                    <p className="mt-4 inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm backdrop-blur">
                       <span className="text-slate-400">Starting from</span>
                       <b className="text-white">{formatBDT(cheapest.devicePrice)}</b>
                       <span className="text-slate-400">+ {formatBDT(lowestMonthly)}/mo</span>
                     </p>
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-5 flex flex-wrap gap-3">
                       <LinkButton href="/pricing" size="lg">View packages <ArrowRight className="h-4 w-4" /></LinkButton>
                       <LinkButton href="/features" variant="outline" size="lg" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">Explore features</LinkButton>
                     </div>
-                    <dl className="mt-6 grid max-w-lg grid-cols-4 gap-3 border-t border-white/10 pt-5">
+                    <dl className="mt-5 grid max-w-lg grid-cols-4 gap-3 border-t border-white/10 pt-4">
                       {STATS.map(([v, l]) => (
                         <div key={l}>
                           <dt className="text-base font-bold text-white sm:text-lg">{v}</dt>
@@ -128,16 +133,9 @@ export default function Hero() {
                     </dl>
                   </div>
 
-                  <div className="hidden flex-col items-end gap-3 lg:flex">
-                    {s.cards.map((c) => (
-                      <div key={c.title} className="flex w-64 items-center gap-2.5 rounded-lg border border-white/10 bg-navy-950/80 p-2.5 backdrop-blur">
-                        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${c.tone}`}><c.icon className="h-4 w-4" /></span>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold">{c.title}</p>
-                          <p className="truncate text-xs text-slate-400">{c.sub}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="relative">
+                    <div aria-hidden className="absolute -inset-6 rounded-full bg-brand-600/15 blur-3xl" />
+                    <div className="relative mx-auto w-full max-w-md lg:mr-0"><s.scene /></div>
                   </div>
                 </Container>
               </div>
@@ -147,7 +145,14 @@ export default function Hero() {
       </Swiper>
       <div className="relative border-t border-white/10 bg-navy-950">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-3 text-xs text-slate-400 sm:justify-between sm:px-6 lg:px-8">
-          <span>Networks: <b className="font-semibold text-slate-200">{TELECOM_PARTNERS.join(" · ")}</b></span>
+          <span className="flex items-center gap-2">
+            Networks:
+            <span className="flex items-center gap-0.5">
+              {TELECOM_PARTNER_LOGOS.map((p) => (
+                <Image key={p.name} src={p.logo} alt={p.name} title={p.name} width={428} height={186} className="h-6 w-auto" />
+              ))}
+            </span>
+          </span>
           <span>Apps: <b className="font-semibold text-slate-200">Android · iOS · Web</b></span>
           <span>Helpline: <a href={`tel:${SITE.phone}`} className="font-semibold text-slate-200 hover:text-white">{SITE.phone}</a> (24×7)</span>
         </div>

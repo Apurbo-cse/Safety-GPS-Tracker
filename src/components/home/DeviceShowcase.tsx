@@ -8,7 +8,7 @@ import { devices } from "@/data/devices";
 export default function DeviceShowcase() {
   const show = ["premium-without-voice", "premium-pro-voice", "live-video-tracking"].map((id) => devices.find((d) => d.id === id)!);
   return (
-    <section className="py-16 sm:py-20">
+    <section className="bg-sec-warm py-16 sm:py-20">
       <Container>
         <SectionHeading eyebrow="Tracking devices" title="Hardware for every kind of vehicle" description="GPS, voice monitoring and video & voice monitoring devices." />
         <div className="swipe-row grid gap-5 md:grid-cols-3">{show.map((d) => <DeviceCard key={d.id} device={d} />)}</div>

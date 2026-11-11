@@ -57,7 +57,7 @@ export default function PricingExplorer() {
       <AnimatePresence>
         {compareIds.length > 0 && (
           <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
-            className="glass fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center gap-2 rounded-lg border border-line p-2.5 lg:bottom-5">
+            className="glass fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center gap-2 rounded-md border border-line p-2.5 lg:bottom-5">
             <GitCompare className="ml-1 h-5 w-5 shrink-0 text-brand-text" />
             <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [scrollbar-width:none]">
               {compareIds.map((id) => { const p = plans.find((x) => x.id === id)!; return (

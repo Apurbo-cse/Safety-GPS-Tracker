@@ -16,7 +16,7 @@ export default function ForgotForm() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<V>({ resolver: zodResolver(schema) });
   if (sentTo) return (
-    <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
+    <div className="rounded-md border border-green-200 bg-green-50 p-6 text-center">
       <MailCheck className="mx-auto h-10 w-10 text-green-600" />
       <p className="mt-2 font-semibold text-ink">Reset instructions “sent” to {sentTo}</p>
       <p className="mt-1 text-sm text-body">Demo only — no message was actually sent.</p>

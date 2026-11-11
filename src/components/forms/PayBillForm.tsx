@@ -39,7 +39,7 @@ export default function PayBillForm() {
   };
 
   const banner = (
-    <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+    <div className="flex gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
       <Info className="mt-0.5 h-4 w-4 shrink-0" /><p><strong>Demo only.</strong> No actual payment is processed and no data leaves your browser.</p>
     </div>
   );
@@ -49,7 +49,7 @@ export default function PayBillForm() {
       <div className="space-y-4 text-center">
         <CheckCircle2 className="mx-auto h-14 w-14 text-green-600" />
         <h2 className="text-xl font-bold text-ink">Payment confirmation (demo)</h2>
-        <dl className="mx-auto max-w-sm divide-y divide-line-soft rounded-lg glass border border-line text-left text-sm">
+        <dl className="mx-auto max-w-sm divide-y divide-line-soft rounded-md glass border border-line text-left text-sm">
           {[["Reference", ref], ["Invoice", data.invoice], ["Method", data.method], ["Amount", formatBDT(data.amount)]].map(([k, v]) => (
             <div key={k} className="flex justify-between px-4 py-2.5"><dt className="text-slate-500">{k}</dt><dd className="font-semibold text-ink">{v}</dd></div>
           ))}
@@ -64,7 +64,7 @@ export default function PayBillForm() {
     return (
       <div className="space-y-4">
         {banner}
-        <div className="rounded-lg glass border border-line p-5">
+        <div className="rounded-md glass border border-line p-5">
           <div className="flex items-start justify-between">
             <div><p className="text-xs uppercase tracking-wide text-slate-500">Invoice preview</p><p className="text-lg font-bold text-ink">{data.invoice}</p></div>
             <p className="text-sm font-semibold text-brand-text">Safety GPS Tracker</p>
@@ -99,7 +99,7 @@ export default function PayBillForm() {
         <legend className="mb-1.5 text-sm font-medium text-body-strong">Payment method</legend>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {METHODS.map((m) => (
-            <label key={m} className={cn("flex cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-semibold transition-colors", method === m ? "border-brand-600 bg-brand-50 text-brand-text" : "border-line-strong text-body-strong hover:border-brand-400")}>
+            <label key={m} className={cn("flex cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-3 text-sm font-semibold transition-colors", method === m ? "border-brand-600 bg-brand-50 text-brand-text" : "border-line-strong text-body-strong hover:border-brand-400")}>
               <input type="radio" value={m} className="sr-only" {...register("method")} onChange={() => setValue("method", m, { shouldValidate: true })} />
               {m === "Bank Transfer" ? <Landmark className="h-4 w-4" /> : <Smartphone className="h-4 w-4" />}{m}
             </label>

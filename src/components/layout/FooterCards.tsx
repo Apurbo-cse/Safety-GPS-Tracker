@@ -13,7 +13,7 @@ import { PLAY_STORE_URL, SITE } from "@/lib/site";
 const schema = z.object({ name: z.string().min(2, "Enter your name"), mobile: mobileSchema });
 type V = z.infer<typeof schema>;
 
-const field = "w-full rounded-lg border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 aria-[invalid=true]:border-red-500";
+const field = "w-full rounded-md border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 aria-[invalid=true]:border-red-500";
 
 /** Inline "request a call back" form (frontend demo — nothing is sent). */
 export function CallbackCard() {
@@ -26,13 +26,13 @@ export function CallbackCard() {
     reset();
   };
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
+    <div className="rounded-md border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-600/20 text-brand-400"><PhoneCall className="h-5 w-5" /></span>
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-brand-600/20 text-brand-400"><PhoneCall className="h-5 w-5" /></span>
         <div><h3 className="text-base font-semibold text-white">Request a call back</h3><p className="text-xs text-slate-400">Leave your number and our team will call you. Or call {SITE.phone} any time — helpline is 24×7.</p></div>
       </div>
       {doneFor ? (
-        <div className="mt-4 flex items-center gap-3 rounded-lg border border-green-500/30 bg-green-500/10 p-3.5 text-sm text-green-300" role="status">
+        <div className="mt-4 flex items-center gap-3 rounded-md border border-green-500/30 bg-green-500/10 p-3.5 text-sm text-green-300" role="status">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <span>Thanks, {doneFor}. In a live site our team would call you back. <button onClick={() => setDoneFor(null)} className="font-semibold underline">Send another</button></span>
         </div>
@@ -40,7 +40,7 @@ export function CallbackCard() {
         <form onSubmit={handleSubmit(submit)} noValidate className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <label className="block"><span className="sr-only">Your name</span><input className={field} placeholder="Your name" autoComplete="name" aria-invalid={!!errors.name} {...register("name")} />{errors.name && <span role="alert" className="mt-1 block text-xs text-red-400">{errors.name.message}</span>}</label>
           <label className="block"><span className="sr-only">Mobile number</span><input className={field} placeholder="01XXXXXXXXX" inputMode="tel" autoComplete="tel" aria-invalid={!!errors.mobile} {...register("mobile")} />{errors.mobile && <span role="alert" className="mt-1 block text-xs text-red-400">{errors.mobile.message}</span>}</label>
-          <button type="submit" disabled={isSubmitting} className="gloss-btn h-[2.6rem] rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Sending…" : "Call me"}</button>
+          <button type="submit" disabled={isSubmitting} className="gloss-btn h-[2.6rem] rounded-md px-5 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Sending…" : "Call me"}</button>
         </form>
       )}
       <p className="mt-3 text-xs text-slate-500">Demo form — nothing is sent to a server.</p>
@@ -57,15 +57,15 @@ export function AppCard() {
     return () => { alive = false; };
   }, []);
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
+    <div className="flex items-center gap-4 rounded-md border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
       <Image src="/img/app/icon.png" alt="Safety GPS Tracker app icon" width={48} height={52} className="h-14 w-auto shrink-0 drop-shadow-lg" />
       <div className="min-w-0 flex-1">
         <h3 className="flex items-center gap-1.5 text-base font-semibold text-white"><Smartphone className="h-4 w-4 text-brand-400" />Track on the go</h3>
         <p className="mt-0.5 text-xs text-slate-400">Android and iOS tracking apps are included with every package.</p>
-        <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get the Android app on Google Play" className="mt-3 inline-block transition-transform hover:-translate-y-0.5"><Image src="/img/app/play-badge.png" alt="Get it on Google Play" width={130} height={40} className="h-9 w-auto rounded-lg" /></a>
+        <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get the Android app on Google Play" className="mt-3 inline-block transition-transform hover:-translate-y-0.5"><Image src="/img/app/play-badge.png" alt="Get it on Google Play" width={130} height={40} className="h-9 w-auto rounded-md" /></a>
       </div>
       <div className="hidden shrink-0 text-center sm:block">
-        <div className="grid h-[104px] w-[104px] place-items-center overflow-hidden rounded-lg bg-white p-1" role="img" aria-label="QR code for the Android app on Google Play">
+        <div className="grid h-[104px] w-[104px] place-items-center overflow-hidden rounded-md bg-white p-1" role="img" aria-label="QR code for the Android app on Google Play">
           {qr ? <span className="block h-24 w-24 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} /> : <span className="h-24 w-24 animate-pulse rounded bg-slate-200" />}
         </div>
         <p className="mt-1.5 text-xs text-slate-500">Scan for Android</p>

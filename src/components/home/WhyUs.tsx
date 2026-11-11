@@ -6,8 +6,9 @@ import { whyUs } from "@/data/why";
 
 export default function WhyUs() {
   return (
-    <section className="py-16 sm:py-24 bg-soft/30 border-t border-line">
-      <Container>
+    <section className="bg-sec-white relative overflow-hidden py-16 sm:py-24 border-t border-line">
+      <div aria-hidden className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-brand-500/10 blur-3xl" />
+      <Container className="relative">
         <SectionHeading
           eyebrow="The Safety GPS Advantage"
           title="Engineered for reliability on Bangladeshi roads"
@@ -21,10 +22,10 @@ export default function WhyUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.35, delay: idx * 0.05 }}
-              className="group flex flex-col justify-between rounded-lg glass border border-line p-5   transition-all hover:-translate-y-1 hover:border-brand-400  "
+              className="spotlight card-pro group flex flex-col justify-between rounded-md glass border border-line p-5"
             >
               <div>
-                <span className="grid h-12 w-12 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+                <span className="grid h-12 w-12 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
                   <w.icon className="h-6 w-6" />
                 </span>
                 <h3 className="mt-4 text-sm font-black text-ink transition-colors group-hover:text-brand-text">

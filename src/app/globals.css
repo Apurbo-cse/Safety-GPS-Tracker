@@ -169,7 +169,7 @@ textarea:focus-visible {
   position: relative;
   overflow: hidden;
   background: var(--softer);
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
 }
 .skeleton::after {
   content: "";
@@ -329,3 +329,68 @@ button { -webkit-user-select: none; user-select: none; }
 @keyframes pin-shadow { 0%, 100% { transform: scale(1); opacity: .5; } 50% { transform: scale(.6); opacity: .25; } }
 .pin-shadow { animation: pin-shadow 1s cubic-bezier(.45, 0, .55, 1) infinite; }
 @media (prefers-reduced-motion: reduce) { .pin-bounce, .pin-shadow { animation: none; } }
+
+/* ---- Advanced card surfaces ---- */
+/* Cursor-following glow (driven by SpotlightEffect setting --mx/--my) */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  opacity: 0; transition: opacity .3s;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(240 90 34 / 0.10), transparent 70%);
+}
+.spotlight:hover::before { opacity: 1; }
+
+/* Gradient border that lights up on hover */
+.card-pro { position: relative; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.card-pro::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, var(--color-brand-500), transparent 45%, transparent 60%, var(--color-brand-400));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .3s;
+}
+.card-pro:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -18px rgb(240 90 34 / 0.35); }
+.card-pro:hover::after { opacity: 1; }
+
+/* Footer watermark: an orange glow follows the cursor through the letters */
+.footer-mark {
+  background-image:
+    radial-gradient(220px circle at var(--wx, -500px) var(--wy, -500px), rgb(249 138 85 / 0.85), transparent 70%),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.01));
+}
+
+/* Footer: GPS tracker dot travelling along the top route line */
+@keyframes footer-track { 0% { left: -1%; } 100% { left: 101%; } }
+.footer-tracker { animation: footer-track 14s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .footer-tracker { animation: none; left: 30%; } }
+
+/* Live data equalizer bars (partners hub) */
+@keyframes eq { 0%, 100% { height: 25%; } 50% { height: 100%; } }
+.eq-bar { height: 40%; animation: eq 0.9s ease-in-out infinite; }
+
+/* Brand gradient text */
+.text-gradient {
+  background: linear-gradient(90deg, var(--color-brand-600), var(--color-brand-400));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Subtle dotted backdrop for light sections */
+.dot-bg {
+  background-image: radial-gradient(rgb(120 130 150 / 0.18) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ---- Section backgrounds: three theme tones that alternate down the page (home) ---- */
+:root {
+  --sec-white: #ffffff;   /* surface */
+  --sec-warm: #fff7f2;    /* white with a hint of brand orange */
+  --sec-gray: #f5f6f8;    /* theme soft neutral */
+}
+.dark {
+  --sec-white: #13171e;
+  --sec-warm: #17130f;
+  --sec-gray: #0f1217;
+}
+.bg-sec-white { background-color: var(--sec-white); }
+.bg-sec-warm { background-color: var(--sec-warm); }
+.bg-sec-gray { background-color: var(--sec-gray); }

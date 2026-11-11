@@ -13,8 +13,8 @@ import { setCartOpen, setMobileNav, setPalette } from "@/store/slices/uiSlice";
 import { logout } from "@/store/slices/authSlice";
 
 const Tile = ({ icon: Icon, label, onClick, href }: { icon: LucideIcon; label: string; onClick?: () => void; href?: string }) => {
-  const cls = "flex flex-col items-center gap-2 rounded-lg border border-line bg-soft p-3.5 text-center text-xs font-semibold text-ink transition-transform active:scale-95";
-  const body = (<><span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-50 text-brand-text"><Icon className="h-5 w-5" /></span>{label}</>);
+  const cls = "flex flex-col items-center gap-2 rounded-md border border-line bg-soft p-3.5 text-center text-xs font-semibold text-ink transition-transform active:scale-95";
+  const body = (<><span className="grid h-11 w-11 place-items-center rounded-md bg-brand-50 text-brand-text"><Icon className="h-5 w-5" /></span>{label}</>);
   return href ? <Link href={href} onClick={onClick} className={cls}>{body}</Link> : <button onClick={onClick} className={cls}>{body}</button>;
 };
 
@@ -43,7 +43,7 @@ export default function MoreSheet() {
           <div className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm" onClick={close} />
           <motion.div
             role="dialog" aria-modal="true" aria-label="More"
-            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-lg border-t border-line bg-surface px-4 pb-[calc(4.8rem+env(safe-area-inset-bottom))] pt-2  "
+            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-md border-t border-line bg-surface px-4 pb-[calc(4.8rem+env(safe-area-inset-bottom))] pt-2  "
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
             drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }} onDragEnd={(_, i) => { if (i.offset.y > 90 || i.velocity.y > 600) close(); }}
           >
@@ -67,7 +67,7 @@ export default function MoreSheet() {
               </>)}
               <Tile icon={Briefcase} label="Sales" href={`tel:${SITE.phone}`} onClick={close} />
             </div>
-            <a href={`tel:${SITE.phone}`} className="mt-4 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 py-3.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
+            <a href={`tel:${SITE.phone}`} className="mt-4 flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-3.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
           </motion.div>
         </motion.div>
       )}

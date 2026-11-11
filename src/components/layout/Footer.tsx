@@ -1,15 +1,21 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
-import { ArrowUp, Headset, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowRight, ArrowUp, ArrowUpRight, CheckCircle2, Headset, Mail, MapPin, Phone, PhoneCall, type LucideIcon } from "lucide-react";
 import Logo from "@/components/common/Logo";
 import Container from "@/components/common/Container";
 import AppStoreBadges from "@/components/common/AppStoreBadges";
-import { SITE } from "@/lib/site";
+import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { phoneRegex } from "@/lib/validation";
 
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   "Meem Tower, 104 Shukrabad Main Road, Dhaka, Bangladesh"
 )}`;
+
+const PARTNERS = [...TELECOM_PARTNER_LOGOS, ...DEVICE_PARTNER_LOGOS].map((p) => ({ ...p, logo: p.logo.replace("/img/partners/", "/img/partners/clean/") }));
+const ROUTE = "M0 30 C 160 30, 220 8, 380 10 S 620 44, 820 26 S 1080 4, 1240 18 S 1400 34, 1440 30";
 
 const PRODUCT_LINKS = [
   { label: "Features", href: "/features" },
@@ -26,139 +32,198 @@ const COMPANY_LINKS = [
   { label: "Terms of Service", href: "/terms" },
 ];
 
-export default function Footer() {
-  const scrollToTop = () => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+const CONTACTS: { icon: LucideIcon; label: string; value: string; href: string; external?: boolean; live?: boolean }[] = [
+  { icon: Phone, label: "24/7 helpline", value: SITE.phone, href: `tel:${SITE.phone}`, live: true },
+  { icon: Mail, label: "Email us", value: SITE.email, href: `mailto:${SITE.email}` },
+  { icon: MapPin, label: "Visit our office", value: SITE.address, href: MAPS_URL, external: true },
+];
+
+function LinkColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+  return (
+    <div>
+      <h4 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+        <span className="h-px w-4 bg-brand-500" />{title}
+      </h4>
+      <ul className="space-y-2.5 text-sm">
+        {links.map((l) => (
+          <li key={l.label}>
+            <Link href={l.href} className="group inline-flex items-center gap-1.5 text-slate-400 transition-colors hover:text-white">
+              <ArrowRight className="h-3 w-3 -translate-x-1 text-brand-400 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+              <span className="-ml-4 transition-all group-hover:ml-0">{l.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CallbackForm() {
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneRegex.test(phone.trim())) { setError("Enter a valid Bangladeshi mobile number"); return; }
+    setError("");
+    setSent(true);
+    toast.success("Call-back request recorded (demo)");
   };
+  if (sent) {
+    return (
+      <p className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">
+        <CheckCircle2 className="h-4 w-4 shrink-0" />Thanks! A demo request was recorded for {phone}.
+      </p>
+    );
+  }
+  return (
+    <form onSubmit={submit} noValidate>
+      <div className="flex gap-2">
+        <label className="relative min-w-0 flex-1">
+          <span className="sr-only">Mobile number</span>
+          <Phone aria-hidden className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <input
+            type="tel" inputMode="tel" autoComplete="tel" placeholder="01XXXXXXXXX" value={phone}
+            onChange={(e) => { setPhone(e.target.value); if (error) setError(""); }}
+            aria-invalid={!!error}
+            className="h-10 w-full rounded-md border border-white/15 bg-white/5 pl-9 pr-3 text-sm text-white placeholder:text-slate-500 transition-colors focus:border-brand-500 focus:outline-none aria-[invalid=true]:border-red-500"
+          />
+        </label>
+        <button type="submit" className="gloss-btn inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-sm font-semibold text-white">
+          <PhoneCall className="h-4 w-4" /><span className="hidden sm:inline">Call me</span>
+        </button>
+      </div>
+      {error && <p role="alert" className="mt-1.5 text-xs text-red-400">{error}</p>}
+    </form>
+  );
+}
+
+export default function Footer() {
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="relative border-t border-white/10 bg-navy-950 text-slate-300 antialiased">
-      <Container className="py-12 sm:py-16">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-12">
-          {/* Brand & App Download */}
-          <div className="space-y-4 lg:col-span-4">
-            <Logo light />
+    <footer className="relative overflow-hidden border-t border-white/10 bg-navy-950 text-slate-300 antialiased">
+      <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 opacity-40" />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-brand-600/15 blur-3xl" />
+      <svg aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-10 w-full" viewBox="0 0 1440 40" preserveAspectRatio="none">
+        <path d={ROUTE} fill="none" stroke="#f05a22" strokeOpacity=".25" strokeWidth="6" vectorEffect="non-scaling-stroke" />
+        <path d={ROUTE} fill="none" stroke="#f98a55" strokeWidth="1.5" strokeDasharray="6 10" className="route-flow" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <div aria-hidden className="footer-tracker pointer-events-none absolute top-[14px] h-3 w-3 rounded-full bg-brand-500 shadow-[0_0_0_4px_rgb(240_90_34/0.25),0_0_16px_#f05a22]" />
+
+      <Container className="relative pt-12 sm:pt-14">
+        {/* ---------- contact tiles ---------- */}
+        <ul className="grid gap-3 md:grid-cols-3">
+          {CONTACTS.map((c) => (
+            <li key={c.label}>
+              <a
+                href={c.href}
+                {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="spotlight group flex h-full items-center gap-4 overflow-hidden rounded-md border border-white/10 bg-white/[0.03] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-500/50 hover:bg-white/[0.06]"
+              >
+                <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
+                  <c.icon className="h-5 w-5" />
+                  {c.live && (
+                    <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                      <span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" />
+                      <span className="relative h-3 w-3 rounded-full border-2 border-navy-950 bg-green-400" />
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs text-slate-500">{c.label}</span>
+                  <span className="block truncate text-sm font-semibold text-white">{c.value}</span>
+                </span>
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-500 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-400" />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {/* ---------- main grid ---------- */}
+        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
+          <div className="space-y-4 sm:col-span-2 lg:col-span-4">
+            <Logo />
             <p className="max-w-sm text-sm leading-relaxed text-slate-400">
               Real-time GPS tracking and vehicle security across Bangladesh. Track live location, monitor fuel consumption, and lock engines remotely.
             </p>
-            <div className="pt-2">
-              <p className="mb-2.5 text-xs font-semibold text-slate-400">Download Mobile Apps</p>
-              <AppStoreBadges showQr={false} />
-            </div>
-          </div>
-
-          {/* Product Links */}
-          <div className="lg:col-span-2 lg:col-start-6">
-            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
-              Product
-            </h4>
-            <ul className="space-y-2 text-sm">
-              {PRODUCT_LINKS.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-slate-400 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div className="lg:col-span-2">
-            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
-              Company
-            </h4>
-            <ul className="space-y-2 text-sm">
-              {COMPANY_LINKS.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-slate-400 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Details */}
-          <div className="space-y-3 sm:col-span-2 lg:col-span-3">
-            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">
-              Contact & Support
-            </h4>
-
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-              <Headset className="h-3.5 w-3.5 text-brand-400" />
-              <span>24/7 Customer Helpline</span>
+              <Headset className="h-3.5 w-3.5 text-brand-400" />24/7 Customer Helpline
             </div>
+          </div>
 
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <a
-                  href={`tel:${SITE.phone}`}
-                  className="flex items-center gap-2.5 text-slate-400 transition-colors hover:text-white"
-                >
-                  <Phone className="h-4 w-4 shrink-0 text-brand-400" />
-                  <span>{SITE.phone}</span>
-                </a>
-              </li>
+          <div className="lg:col-span-2">
+            <LinkColumn title="Product" links={PRODUCT_LINKS} />
+          </div>
+          <div className="lg:col-span-2">
+            <LinkColumn title="Company" links={COMPANY_LINKS} />
+          </div>
 
-              <li>
-                <a
-                  href={`mailto:${SITE.email}`}
-                  className="flex items-center gap-2.5 text-slate-400 transition-colors hover:text-white"
-                >
-                  <Mail className="h-4 w-4 shrink-0 text-brand-400" />
-                  <span>{SITE.email}</span>
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href={MAPS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2.5 text-slate-400 transition-colors hover:text-white"
-                >
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
-                  <span className="leading-snug">{SITE.address}</span>
-                </a>
-              </li>
-            </ul>
+          <div className="sm:col-span-2 lg:col-span-4">
+            <div className="rounded-md border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-5">
+              <p className="text-base font-bold text-white">Request a call back</p>
+              <p className="mt-1 text-sm text-slate-400">Leave your number and our team will call you.</p>
+              <div className="mt-3"><CallbackForm /></div>
+              <div className="my-5 h-px bg-white/10" />
+              <p className="text-sm font-semibold text-white">Track from your phone</p>
+              <div className="mt-3"><AppStoreBadges showQr={false} /></div>
+              <Link href="/pricing" className="group mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-300 hover:text-brand-200">
+                View packages <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* ---------- partner strip ---------- */}
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 md:flex-row md:items-center">
+          <p className="shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500">Networks &amp; devices</p>
+          <ul className="flex flex-wrap gap-2 md:ml-auto">
+            {PARTNERS.map((p) => (
+              <li key={p.name} title={p.name} className="grid h-8 w-[72px] place-items-center rounded-md bg-white/90 px-2 opacity-80 transition-all hover:-translate-y-0.5 hover:opacity-100">
+                <Image src={p.logo} alt={p.name} width={64} height={24} className="h-auto max-h-5 w-auto max-w-full object-contain" />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* ---------- watermark ---------- */}
+        <p
+          aria-hidden
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            e.currentTarget.style.setProperty("--wx", `${e.clientX - r.left}px`);
+            e.currentTarget.style.setProperty("--wy", `${e.clientY - r.top}px`);
+          }}
+          className="footer-mark mt-8 select-none bg-clip-text text-center text-[clamp(3rem,13vw,10rem)] font-black leading-none tracking-tighter text-transparent"
+        >
+          SAFETY GPS
+        </p>
       </Container>
 
-      {/* Clean Bottom Copyright Bar */}
-      <div className="border-t border-white/10 bg-black/40 py-4 text-xs text-slate-500">
+      {/* ---------- bottom bar ---------- */}
+      <div className="relative border-t border-white/10 bg-black/40 py-4 text-xs text-slate-500">
         <Container className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Image
-              src="/img/app/icon.png"
-              alt="Safety GPS Tracker"
-              width={20}
-              height={20}
-              className="h-5 w-auto"
-            />
-            <span>
-              © {new Date().getFullYear()} Safety GPS Tracker. All rights reserved.
-            </span>
+            <Image src="/img/app/icon.png" alt="Safety GPS Tracker" width={20} height={20} className="h-5 w-auto" />
+            <span>© {new Date().getFullYear()} Safety GPS Tracker. All rights reserved.</span>
           </div>
-
+          <span className="flex items-center gap-1.5 self-start rounded-full border border-green-500/25 bg-green-500/10 px-2.5 py-1 text-green-400 sm:self-auto">
+            <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-400" /></span>
+            All systems online
+          </span>
           <div className="flex items-center gap-4">
-            <Link href="/privacy" className="transition-colors hover:text-slate-300">
-              Privacy Policy
-            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-slate-300">Privacy Policy</Link>
             <span>·</span>
-            <Link href="/terms" className="transition-colors hover:text-slate-300">
-              Terms of Service
-            </Link>
+            <Link href="/terms" className="transition-colors hover:text-slate-300">Terms of Service</Link>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              aria-label="Scroll to top"
+              className="grid h-7 w-7 place-items-center rounded-full border border-white/15 text-slate-400 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
           </div>
         </Container>
       </div>

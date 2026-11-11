@@ -47,7 +47,7 @@ export default function ContactForm() {
 
   if (sent) {
     return (
-      <div className="grid place-items-center rounded-lg border border-green-200 bg-green-50 p-10 text-center">
+      <div className="grid place-items-center rounded-md border border-green-200 bg-green-50 p-10 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
         <h2 className="mt-3 text-xl font-bold text-ink">Thank you, {sent}</h2>
         <p className="mt-1 max-w-sm text-sm text-body">Your message has been recorded in this demo. No data was sent to a server; a live site would reply by phone or email.</p>
@@ -57,7 +57,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5 rounded-lg glass border border-line p-5 sm:p-7">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5 rounded-md glass border border-line p-5 sm:p-7">
       <div>
         <h2 className="text-lg font-bold text-ink">Send us a message</h2>
         <p className="mt-0.5 text-sm text-body">Pick a team and we&apos;ll route it to the right people.</p>
@@ -71,12 +71,12 @@ export default function ContactForm() {
             return (
               <label
                 key={d.value}
-                className={`relative flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-all duration-200 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-500/20 sm:flex-row sm:items-start sm:text-left ${
+                className={`relative flex cursor-pointer flex-col items-center gap-1.5 rounded-md border p-3 text-center transition-all duration-200 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-500/20 sm:flex-row sm:items-start sm:text-left ${
                   active ? "border-brand-500 bg-brand-50 shadow-[0_0_0_1px_var(--color-brand-500)]" : "border-line-strong bg-surface/80 hover:border-slate-400 dark:hover:border-slate-500"
                 }`}
               >
                 <input type="radio" value={d.value} className="sr-only" {...register("department")} />
-                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors ${active ? "bg-brand-600 text-white" : "bg-softer text-body"}`}>
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors ${active ? "bg-brand-600 text-white" : "bg-softer text-body"}`}>
                   <d.icon className="h-4 w-4" />
                 </span>
                 <span className="min-w-0">

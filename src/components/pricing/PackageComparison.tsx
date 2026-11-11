@@ -71,7 +71,7 @@ export default function PackageComparison() {
             <p className="mt-1 text-sm text-body">Compare up to {MAX} packages side by side. Prices and features follow the published price list.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm font-medium text-body-strong">
+            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-line-strong bg-surface px-3 py-2 text-sm font-medium text-body-strong">
               <input type="checkbox" checked={diffOnly} onChange={(e) => setDiffOnly(e.target.checked)} className="h-4 w-4 accent-brand-600" />Differences only
             </label>
             {compareIds.length > 0 && <Button variant="outline" size="sm" onClick={() => dispatch(clearCompare())}><X className="h-4 w-4" />Reset</Button>}
@@ -90,7 +90,7 @@ export default function PackageComparison() {
             ); })}
           </div>
 
-          <div className="max-h-[80vh] overflow-auto rounded-lg border border-line">
+          <div className="max-h-[80vh] overflow-auto rounded-md border border-line">
             <table className="w-full border-separate border-spacing-0 text-sm" style={{ minWidth: 220 + cols.length * 170 }} onMouseLeave={() => setHoverCol(null)}>
               <thead>
                 <tr>
@@ -99,10 +99,10 @@ export default function PackageComparison() {
                     <th key={p.id} onMouseEnter={() => setHoverCol(p.id)} className={cn("sticky top-0 z-20 border-b border-line px-3 py-3 text-center align-top transition-colors", hoverCol === p.id ? "bg-brand-50" : "bg-soft")}>
                       <div className="relative">
                         {cols.length > 2 && <button onClick={() => toggle(p.id)} aria-label={`Remove ${p.name}`} className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-softer hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
-                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
+                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
                         <span className="mt-1.5 block text-sm font-bold leading-tight text-ink">{p.name}</span>
                         {p.siteTitle && <span className="block text-xs font-normal text-body">{p.siteTitle}</span>}
-                        <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
+                        <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
                       </div>
                     </th>
                   ))}
@@ -140,7 +140,7 @@ export default function PackageComparison() {
             {[[aId, setAId, "Package A"], [bId, setBId, "Package B"]].map(([val, set, label], i) => (
               <label key={String(label)} className={cn("block", i === 1 && "col-start-3 row-start-1")}>
                 <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-body">{String(label)}</span>
-                <select value={val as string} onChange={(e) => (set as (v: string) => void)(e.target.value)} className="w-full rounded-lg border border-line-strong bg-surface px-2.5 py-2.5 text-sm font-medium text-ink">
+                <select value={val as string} onChange={(e) => (set as (v: string) => void)(e.target.value)} className="w-full rounded-md border border-line-strong bg-surface px-2.5 py-2.5 text-sm font-medium text-ink">
                   {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </label>
@@ -152,8 +152,8 @@ export default function PackageComparison() {
             {[a, b].map((p) => {
               const other = p.id === a.id ? b : a;
               return (
-                <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-lg border border-line p-3">
-                  <span className="relative block h-20 overflow-hidden rounded-lg bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
+                <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-md border border-line p-3">
+                  <span className="relative block h-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
                   <p className="mt-2 text-sm font-bold leading-tight text-ink">{p.name}</p>
                   <dl className="mt-2 space-y-1 text-xs">
                     <div className="flex justify-between gap-1"><dt className="text-body">Device</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(p.devicePrice)}{p.devicePrice < other.devicePrice && <Best />}</dd></div>
@@ -172,7 +172,7 @@ export default function PackageComparison() {
               if (!rows.length) return null;
               const open = !closed[`m-${g.title}`];
               return (
-                <section key={g.title} className="overflow-hidden rounded-lg border border-line">
+                <section key={g.title} className="overflow-hidden rounded-md border border-line">
                   <button onClick={() => setClosed((c) => ({ ...c, [`m-${g.title}`]: !c[`m-${g.title}`] }))} aria-expanded={open} className="flex w-full items-center gap-2 bg-soft px-3 py-3 text-left">
                     <g.icon className="h-4 w-4 text-brand-text" /><span className="flex-1 text-sm font-semibold text-ink">{g.title}</span>
                     <span className="text-xs tabular-nums text-body">{rows.filter((r) => r.x).length} · {rows.filter((r) => r.y).length}</span>
@@ -190,7 +190,7 @@ export default function PackageComparison() {
                 </section>
               );
             })}
-            {diffOnly && GROUPS.every((g) => g.items.every((f) => a.features.includes(f) === b.features.includes(f))) && <p className="rounded-lg border border-dashed border-line-strong p-5 text-center text-sm text-body">These two packages list the same features — only the price differs.</p>}
+            {diffOnly && GROUPS.every((g) => g.items.every((f) => a.features.includes(f) === b.features.includes(f))) && <p className="rounded-md border border-dashed border-line-strong p-5 text-center text-sm text-body">These two packages list the same features — only the price differs.</p>}
           </div>
           <button onClick={() => dispatch(openPlanModal(a.id))} className="mt-3 text-sm font-semibold text-brand-text hover:underline">See every feature of {a.name}</button>
         </div>

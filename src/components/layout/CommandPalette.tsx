@@ -82,7 +82,7 @@ export default function CommandPalette() {
       {open && (
         <motion.div className="fixed inset-0 z-[100] flex items-start justify-center bg-navy-950/60 px-4 pt-[12vh] backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close}>
           <motion.div role="dialog" aria-modal="true" aria-label="Search and commands" onClick={(e) => e.stopPropagation()} onKeyDown={onKey}
-            className="w-full max-w-xl overflow-hidden rounded-lg glass border border-line  "
+            className="w-full max-w-xl overflow-hidden rounded-md glass border border-line  "
             initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.98 }} transition={{ duration: 0.18 }}>
             <div className="flex items-center gap-3 border-b border-line px-4">
               <Search className="h-5 w-5 text-slate-400" />
@@ -98,8 +98,8 @@ export default function CommandPalette() {
                   <li key={c.id} role="presentation">
                     {header && <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-slate-500">{header}</p>}
                     <button role="option" aria-selected={i === active} data-i={i} onMouseMove={() => setActive(i)} onClick={() => run(c)}
-                      className={cn("flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm", i === active ? "bg-brand-50 text-ink" : "text-body-strong")}>
-                      <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === active ? "bg-brand-600 text-white" : "bg-softer text-body")}><c.icon className="h-4 w-4" /></span>
+                      className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === active ? "bg-brand-50 text-ink" : "text-body-strong")}>
+                      <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-md", i === active ? "bg-brand-600 text-white" : "bg-softer text-body")}><c.icon className="h-4 w-4" /></span>
                       <span className="min-w-0 flex-1 truncate font-medium">{c.label}</span>
                       {c.hint && <span className="hidden truncate text-xs text-slate-500 sm:block">{c.hint}</span>}
                       {i === active && <CornerDownLeft className="h-3.5 w-3.5 text-slate-400" />}

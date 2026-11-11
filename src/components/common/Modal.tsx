@@ -27,7 +27,7 @@ export default function Modal({
         >
           <motion.div
             role="dialog" aria-modal="true" aria-label={title}
-            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-lg bg-surface pb-[env(safe-area-inset-bottom)]   sm:rounded-lg ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
+            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-md bg-surface pb-[env(safe-area-inset-bottom)]   sm:rounded-md ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
             initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
@@ -35,7 +35,7 @@ export default function Modal({
             <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-line-strong sm:hidden" aria-hidden />
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line-soft bg-surface px-5 py-3.5">
               <h2 className="text-base font-bold text-ink">{title}</h2>
-              <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-softer">
+              <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-md text-slate-500 hover:bg-softer">
                 <X className="h-5 w-5" />
               </button>
             </div>

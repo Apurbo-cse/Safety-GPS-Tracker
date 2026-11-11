@@ -61,7 +61,7 @@ export default function SecurityResponseTimeline() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {TIMELINE_STEPS.map((s, idx) => (
               <Reveal key={s.step} delay={idx * 0.1}>
-                <div className="relative flex h-full flex-col justify-between rounded-lg border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-brand-500/50 hover:bg-white/[0.06]  ">
+                <div className="relative flex h-full flex-col justify-between rounded-md border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-brand-500/50 hover:bg-white/[0.06]  ">
                   {/* Top Header */}
                   <div>
                     <div className="flex items-center justify-between">
@@ -71,7 +71,7 @@ export default function SecurityResponseTimeline() {
                       </span>
                     </div>
 
-                    <div className={`mt-4 grid h-12 w-12 place-items-center rounded-lg border ${s.accent}`}>
+                    <div className={`mt-4 grid h-12 w-12 place-items-center rounded-md border ${s.accent}`}>
                       <s.icon className="h-6 w-6" />
                     </div>
 
@@ -90,9 +90,9 @@ export default function SecurityResponseTimeline() {
 
           {/* Emergency Helpline Banner */}
           <Reveal delay={0.4}>
-            <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-lg border border-white/15 bg-gradient-to-r from-brand-600/20 via-brand-500/10 to-transparent p-6 backdrop-blur sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-md border border-white/15 bg-gradient-to-r from-brand-600/20 via-brand-500/10 to-transparent p-6 backdrop-blur sm:flex-row">
               <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-brand-600 text-white  ">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-brand-600 text-white  ">
                   <PhoneCall className="h-6 w-6" />
                 </div>
                 <div>
@@ -105,7 +105,7 @@ export default function SecurityResponseTimeline() {
 
               <a
                 href="tel:01713546487"
-                className="whitespace-nowrap rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-slate-950   hover:bg-brand-50 hover:text-brand-700 transition-colors"
+                className="whitespace-nowrap rounded-md bg-white px-5 py-2.5 text-xs font-bold text-slate-950   hover:bg-brand-50 hover:text-brand-700 transition-colors"
               >
                 Call Emergency Desk
               </a>

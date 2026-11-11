@@ -27,7 +27,7 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={cn("group relative min-h-[320px] overflow-hidden rounded-lg border border-line bg-white sm:min-h-[420px]", flip && "lg:order-2")}
+          className={cn("group relative min-h-[320px] overflow-hidden rounded-md border border-line bg-white sm:min-h-[420px]", flip && "lg:order-2")}
         >
           <Image
             quality={90}
@@ -56,7 +56,7 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
           {/* bottom overlay */}
           <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
             <div className="flex items-center gap-2.5">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-600 text-white">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-brand-600 text-white">
                 <DynIcon name={s.icon} className="h-5 w-5" />
               </span>
               <p className="text-lg font-bold text-white sm:text-xl">{s.title}</p>
@@ -90,7 +90,7 @@ export default function SolutionSection({ s, index }: { s: Solution; index: numb
           </h3>
           <div className="mt-2.5 grid gap-2.5 sm:grid-cols-3">
             {s.benefits.map((b, i) => (
-              <div key={b} className="glass relative rounded-lg border border-line p-3 transition-colors hover:border-emerald-500/40">
+              <div key={b} className="glass relative rounded-md border border-line p-3 transition-colors hover:border-emerald-500/40">
                 <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{pad(i + 1)}</span>
                 <p className="mt-1 text-sm font-semibold leading-snug text-ink">{b}</p>
               </div>

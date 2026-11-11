@@ -92,7 +92,7 @@ export default function ComparisonMatrix() {
 
         <div className="mx-auto mt-12 max-w-5xl">
           <Reveal>
-            <div className="overflow-x-auto rounded-lg glass border border-line  ">
+            <div className="overflow-x-auto rounded-md glass border border-line  ">
               <table className="w-full min-w-[700px] border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-line bg-softer/60 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -152,7 +152,7 @@ export default function ComparisonMatrix() {
               </table>
             </div>
 
-            <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-lg border border-line bg-gradient-to-r from-soft to-surface p-5 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-md border border-line bg-gradient-to-r from-soft to-surface p-5 sm:flex-row">
               <div>
                 <p className="text-sm font-bold text-ink">Ready to protect your vehicle with Bangladesh&apos;s #1 GPS system?</p>
                 <p className="text-xs text-slate-500">Packages starting from ৳3,000 device price with ৳300/mo service.</p>

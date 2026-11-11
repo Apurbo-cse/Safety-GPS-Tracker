@@ -113,7 +113,7 @@ export default function HardwareEcosystem() {
                   key={s.id}
                   onClick={() => setSelectedId(s.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-all",
+                    "flex flex-col items-center gap-2 rounded-md border p-4 text-center transition-all",
                     isActive
                       ? "border-brand-600 bg-brand-500/10 text-brand-text   ring-2 ring-brand-500/30"
                       : "border-line bg-soft/50 text-slate-600 dark:text-slate-300 hover:border-brand-400 hover:bg-surface"
@@ -121,7 +121,7 @@ export default function HardwareEcosystem() {
                 >
                   <div
                     className={cn(
-                      "grid h-10 w-10 place-items-center rounded-lg",
+                      "grid h-10 w-10 place-items-center rounded-md",
                       isActive ? "bg-brand-600 text-white" : "bg-softer text-slate-500"
                     )}
                   >
@@ -136,7 +136,7 @@ export default function HardwareEcosystem() {
           {/* Selected Sensor Deep-Dive Card */}
           <div className="mt-8">
             <Reveal key={selected.id}>
-              <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/50 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
+              <div className="grid gap-8 rounded-md border border-line bg-gradient-to-br from-soft/50 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
                 <div className="space-y-4 lg:col-span-7">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-text">
@@ -153,7 +153,7 @@ export default function HardwareEcosystem() {
                 </div>
 
                 {/* Specs Box */}
-                <div className="flex flex-col justify-between rounded-lg border border-line bg-softer/60 p-6 lg:col-span-5">
+                <div className="flex flex-col justify-between rounded-md border border-line bg-softer/60 p-6 lg:col-span-5">
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Technical Specifications</h4>
                     <dl className="mt-3 divide-y divide-line-soft text-xs space-y-1">

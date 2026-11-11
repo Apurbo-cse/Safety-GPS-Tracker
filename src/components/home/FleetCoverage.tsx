@@ -123,7 +123,7 @@ export default function FleetCoverage() {
               key={c.id}
               onClick={() => setActiveId(c.id)}
               className={cn(
-                "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-3 text-xs sm:text-sm font-bold transition-all border shrink-0",
+                "flex items-center gap-2 whitespace-nowrap rounded-md px-4 py-3 text-xs sm:text-sm font-bold transition-all border shrink-0",
                 activeId === c.id
                   ? "border-brand-600 bg-brand-600 text-white    "
                   : "border-line bg-soft/50 text-body hover:border-brand-400 hover:text-ink hover:bg-surface"
@@ -138,7 +138,7 @@ export default function FleetCoverage() {
         {/* Selected Category Details Card */}
         <div className="mt-6">
           <Reveal key={active.id}>
-            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/40 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
+            <div className="grid gap-8 rounded-md border border-line bg-gradient-to-br from-soft/40 via-surface to-surface p-6   lg:grid-cols-12 sm:p-8">
               {/* Left Column: Description & Feature Grid */}
               <div className="space-y-6 lg:col-span-7">
                 <div>
@@ -158,7 +158,7 @@ export default function FleetCoverage() {
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Included Security & Telematics Features</h4>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {active.features.map((feat) => (
-                      <div key={feat} className="flex items-center gap-2 rounded-lg bg-soft/60 p-2.5 text-xs font-semibold text-ink border border-line-soft">
+                      <div key={feat} className="flex items-center gap-2 rounded-md bg-soft/60 p-2.5 text-xs font-semibold text-ink border border-line-soft">
                         <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -168,19 +168,19 @@ export default function FleetCoverage() {
               </div>
 
               {/* Right Column: Hardware Kit & Recommended Package */}
-              <div className="flex flex-col justify-between rounded-lg border border-line bg-softer/50 p-6 lg:col-span-5">
+              <div className="flex flex-col justify-between rounded-md border border-line bg-softer/50 p-6 lg:col-span-5">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Recommended Hardware Sensor Kit</h4>
                   <ul className="mt-3 space-y-2">
                     {active.hardware.map((hw) => (
-                      <li key={hw} className="flex items-center gap-2.5 rounded-lg glass border border-line p-3 text-xs font-bold text-ink">
+                      <li key={hw} className="flex items-center gap-2.5 rounded-md glass border border-line p-3 text-xs font-bold text-ink">
                         <Radio className="h-3.5 w-3.5 text-brand-600 shrink-0" />
                         <span>{hw}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <div className="mt-6 rounded-lg border border-brand-500/20 bg-brand-500/5 p-4 text-xs">
+                  <div className="mt-6 rounded-md border border-brand-500/20 bg-brand-500/5 p-4 text-xs">
                     <p className="font-bold text-ink">Pricing Recommendation:</p>
                     <p className="mt-0.5 text-brand-text font-semibold">{active.pricingHint}</p>
                     <p className="mt-1 text-xs text-slate-500">Includes Free Installation + 1 Year Device Replacement Warranty.</p>

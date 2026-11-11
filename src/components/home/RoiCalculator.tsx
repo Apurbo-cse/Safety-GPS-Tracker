@@ -52,7 +52,7 @@ export default function RoiCalculator() {
 
         <div className="mx-auto mt-10 max-w-5xl">
           <Reveal>
-            <div className="grid gap-8 rounded-lg border border-line bg-gradient-to-br from-soft/60 to-surface p-6   lg:grid-cols-12 sm:p-8">
+            <div className="grid gap-8 rounded-md border border-line bg-gradient-to-br from-soft/60 to-surface p-6   lg:grid-cols-12 sm:p-8">
               {/* Left Column: Sliders & Controls */}
               <div className="space-y-6 lg:col-span-7">
                 <div>
@@ -75,7 +75,7 @@ export default function RoiCalculator() {
                         setVehicleCount(p.count);
                         setFuelCostPerVehicle(p.fuel);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg glass border border-line px-3 py-1.5 text-xs font-semibold text-body-strong transition-all hover:border-brand-500 hover:text-brand-text active:scale-95"
+                      className="inline-flex items-center gap-1.5 rounded-md glass border border-line px-3 py-1.5 text-xs font-semibold text-body-strong transition-all hover:border-brand-500 hover:text-brand-text active:scale-95"
                     >
                       <span>{p.icon}</span>
                       <span>{p.label}</span>
@@ -84,7 +84,7 @@ export default function RoiCalculator() {
                 </div>
 
                 {/* Slider 1: Vehicle Count */}
-                <div className="rounded-lg border border-line-soft bg-surface p-4">
+                <div className="rounded-md border border-line-soft bg-surface p-4">
                   <div className="flex items-center justify-between">
                     <label htmlFor="veh-count-slider" className="text-sm font-bold text-ink">
                       Number of Vehicles
@@ -100,7 +100,7 @@ export default function RoiCalculator() {
                     max={100}
                     value={vehicleCount}
                     onChange={(e) => setVehicleCount(Number(e.target.value))}
-                    className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
+                    className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-md bg-softer accent-brand-600"
                   />
                   <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>1 vehicle</span>
@@ -110,7 +110,7 @@ export default function RoiCalculator() {
                 </div>
 
                 {/* Slider 2: Monthly Fuel Cost */}
-                <div className="rounded-lg border border-line-soft bg-surface p-4">
+                <div className="rounded-md border border-line-soft bg-surface p-4">
                   <div className="flex items-center justify-between">
                     <label htmlFor="fuel-cost-slider" className="text-sm font-bold text-ink">
                       Monthly Fuel Expense Per Vehicle
@@ -127,7 +127,7 @@ export default function RoiCalculator() {
                     step={2500}
                     value={fuelCostPerVehicle}
                     onChange={(e) => setFuelCostPerVehicle(Number(e.target.value))}
-                    className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-softer accent-brand-600"
+                    className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-md bg-softer accent-brand-600"
                   />
                   <div className="mt-1 flex justify-between text-xs text-slate-400">
                     <span>{formatBDT(5000)}</span>
@@ -137,7 +137,7 @@ export default function RoiCalculator() {
                 </div>
 
                 {/* Breakdown checklist */}
-                <div className="space-y-2 rounded-lg bg-soft/40 p-4 text-xs text-body">
+                <div className="space-y-2 rounded-md bg-soft/40 p-4 text-xs text-body">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                     <span>~19% fuel waste stopped (eliminates overnight AC idling & fuel tank drainage)</span>
@@ -154,7 +154,7 @@ export default function RoiCalculator() {
               </div>
 
               {/* Right Column: Dynamic Savings Summary Card */}
-              <div className="flex flex-col justify-between rounded-lg border border-brand-500/20 bg-gradient-to-b from-navy-950 to-navy-900 p-6 text-white   lg:col-span-5">
+              <div className="flex flex-col justify-between rounded-md border border-brand-500/20 bg-gradient-to-b from-navy-950 to-navy-900 p-6 text-white   lg:col-span-5">
                 <div>
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/20 px-3 py-1 text-xs font-bold text-brand-300 ring-1 ring-brand-500/40">
                     <Sparkles className="h-3.5 w-3.5" />
@@ -171,7 +171,7 @@ export default function RoiCalculator() {
                     </p>
                   </div>
 
-                  <div className="mt-6 space-y-3 rounded-lg bg-white/5 p-4 text-xs backdrop-blur border border-white/10">
+                  <div className="mt-6 space-y-3 rounded-md bg-white/5 p-4 text-xs backdrop-blur border border-white/10">
                     <div className="flex items-center justify-between text-slate-300">
                       <span>Annual Fuel & Waste Saved:</span>
                       <b className="font-mono text-white text-sm">{formatBDT(annualSavings)}</b>

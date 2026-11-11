@@ -17,7 +17,7 @@ const sections: LegalSection[] = [
     </ul>
   </>) },
   { id: "use", title: "How we use your information", body: (<ul>
-    <li>Show your vehicles' live location, history and reports in the app and on the web platform.</li>
+    <li>Show your vehicles&apos; live location, history and reports in the app and on the web platform.</li>
     <li>Send alerts you have turned on (ignition, geo-fence, speed, panic button, device removal and others).</li>
     <li>Run commands you request, such as remote engine lock and unlock.</li>
     <li>Send reminders for servicing, papers and insurance.</li>

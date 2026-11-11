@@ -14,7 +14,7 @@ const lineup: { k: VehicleKind; c?: string }[] = [
 export default function FleetStrip({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-lg bg-gradient-to-r from-navy-950 via-navy-800 to-[#4a2312] px-4 pb-6 pt-8 ${className}`}
+      className={`relative overflow-hidden rounded-md bg-gradient-to-r from-navy-950 via-navy-800 to-[#4a2312] px-4 pb-6 pt-8 ${className}`}
       aria-hidden
     >
       <div className="grid-bg absolute inset-0 opacity-60" />

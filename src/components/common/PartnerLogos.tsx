@@ -4,7 +4,7 @@ type Item = { name: string; logo: string };
 
 const Logo = ({ p, small }: { p: Item; small?: boolean }) => (
   <li className={small ? "grid h-12 w-[6.5rem] shrink-0 place-items-center" : "grid h-16 w-32 shrink-0 place-items-center"}>
-    <Image src={p.logo} alt={p.name} width={140} height={60} className={small ? "h-auto max-h-11 w-auto rounded-lg object-contain" : "h-auto max-h-14 w-auto rounded-lg object-contain"} />
+    <Image src={p.logo} alt={p.name} width={140} height={60} className={small ? "h-auto max-h-11 w-auto rounded-md object-contain" : "h-auto max-h-14 w-auto rounded-md object-contain"} />
   </li>
 );
 

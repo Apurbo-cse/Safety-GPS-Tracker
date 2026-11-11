@@ -24,14 +24,14 @@ export default function ContactPage() {
           <ul className="space-y-3">
             {rows.map((r) => (
               <li key={r.label}>
-                <a href={r.href} className="flex items-center gap-4 rounded-lg glass border border-line p-4 transition-colors hover:border-brand-300">
-                  <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-50 text-brand-text"><r.icon className="h-5 w-5" /></span>
+                <a href={r.href} className="flex items-center gap-4 rounded-md glass border border-line p-4 transition-colors hover:border-brand-300">
+                  <span className="grid h-11 w-11 place-items-center rounded-md bg-brand-50 text-brand-text"><r.icon className="h-5 w-5" /></span>
                   <span><span className="block text-xs text-slate-500">{r.label}</span><span className="text-sm font-bold text-ink">{r.value}</span></span>
                 </a>
               </li>
             ))}
-            <li className="flex items-start gap-4 rounded-lg glass border border-line p-4">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-text"><MapPin className="h-5 w-5" /></span>
+            <li className="flex items-start gap-4 rounded-md glass border border-line p-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-brand-50 text-brand-text"><MapPin className="h-5 w-5" /></span>
               <span><span className="block text-xs text-slate-500">Office</span><span className="text-sm font-bold text-ink">{SITE.address}</span></span>
             </li>
           </ul>
@@ -39,7 +39,7 @@ export default function ContactPage() {
         <div className="lg:col-span-3"><ContactForm /></div>
       </Container>
       <Container className="pb-16">
-        <div className="overflow-hidden rounded-lg border border-line" style={{ height: 380 }}>
+        <div className="overflow-hidden rounded-md border border-line" style={{ height: 380 }}>
           <LocationMap lat={23.7513} lng={90.3727} label="Meem Tower, Shukrabad, Dhaka (approximate location)" />
         </div>
         <p className="mt-2 text-xs text-slate-500">Map pin is an approximate location for the Shukrabad area.</p>
