@@ -285,21 +285,7 @@ export default function Navbar() {
                 </LinkButton>
               </>
             )}
-          </div>
-
-          {/* Mobile Hamburger Toggle Button */}
-          <button
-            type="button"
-            onClick={() => dispatch(setMobileNav(!mobileNavOpen))}
-            aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="grid h-9 w-9 place-items-center rounded-md text-body-strong transition-colors hover:bg-softer lg:hidden"
-          >
-            {mobileNavOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
+          </div> 
         </div>
       </Container>
 

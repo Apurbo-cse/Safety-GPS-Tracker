@@ -241,7 +241,14 @@ textarea:focus-visible {
 
 /* ---- Mobile app feel ---- */
 html { -webkit-text-size-adjust: 100%; }
-body { min-height: 100dvh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+/* Grid children may shrink below their content width, so horizontal scroll rows
+   (tabs, card carousels) inside a grid can't push the page wider than the screen.
+   :where() keeps specificity at 0, so any min-w-* utility class still wins. */
+:where(.grid) > * { min-width: 0; }
+
+/* `clip` (not `hidden`) stops sideways scroll without breaking position: sticky headers on mobile */
+html, body { overflow-x: clip; }
+body { min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
 a, button, [role="button"], label, select, summary { touch-action: manipulation; }
 button { -webkit-user-select: none; user-select: none; }
 @media (max-width: 767px) {

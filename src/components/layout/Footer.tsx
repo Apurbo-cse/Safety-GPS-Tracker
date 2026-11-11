@@ -113,7 +113,7 @@ export default function Footer() {
 
       <Container className="relative pb-8 pt-8 sm:pt-10">
         {/* ---------- contact tiles ---------- */}
-        <ul className="grid gap-2 md:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-2 md:grid-cols-3">
           {CONTACTS.map((c) => (
             <li key={c.label}>
               <a

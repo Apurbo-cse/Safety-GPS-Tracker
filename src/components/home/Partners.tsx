@@ -204,6 +204,50 @@ function NetworkDiagram() {
 }
 
 /* ------------------------------------------------- phone / tablet */
+function PathNode({ p, label }: { p: Item; label: string }) {
+  return (
+    <div className="flex w-[72px] shrink-0 flex-col items-center gap-1">
+      <span className="grid h-10 w-full place-items-center rounded-md border border-line bg-white px-1.5 shadow-sm">
+        <Image src={p.logo} alt={p.name} width={64} height={28} className="h-auto max-h-6 w-auto max-w-full object-contain" />
+      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</span>
+    </div>
+  );
+}
+
+function PathLink({ color }: { color: string }) {
+  return (
+    <svg aria-hidden className="mb-4 h-3 min-w-0 flex-1" viewBox="0 0 100 12" preserveAspectRatio="none">
+      <line x1="0" y1="6" x2="100" y2="6" stroke="#94a3b8" strokeOpacity=".35" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+      <line x1="0" y1="6" x2="100" y2="6" stroke={color} strokeWidth="2" strokeDasharray="4 6" className="route-flow" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+/** Animated device → network → cloud strip */
+function DataPath({ device, network }: { device: Item; network: Item }) {
+  return (
+    <div className="relative overflow-hidden border-b border-line bg-soft px-3 py-3">
+      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+        <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-500" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-500" /></span>
+        Live data path
+      </p>
+      <div className="flex items-center gap-1.5">
+        <PathNode p={device} label="Device" />
+        <PathLink color="#f98a55" />
+        <PathNode p={network} label="Network" />
+        <PathLink color="#38bdf8" />
+        <div className="flex w-[72px] shrink-0 flex-col items-center gap-1">
+          <span className="grid h-10 w-full place-items-center rounded-md border border-line bg-white shadow-[0_0_18px_-6px_rgb(240_90_34/0.6)]">
+            <Image src="/img/app/icon.png" alt="" width={22} height={24} className="h-6 w-auto" />
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Cloud</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PartnerPicker() {
   const [sel, setSel] = useState(DEVICES[0].name);
   const [touched, setTouched] = useState(false);
@@ -212,12 +256,20 @@ function PartnerPicker() {
     const t = setInterval(() => setSel((cur) => ALL[(ALL.findIndex((x) => x.name === cur) + 1) % ALL.length].name), 2600);
     return () => clearInterval(t);
   }, [touched]);
+  const selItem = ALL.find((x) => x.name === sel)!;
+  const isDevice = DEVICES.some((d) => d.name === sel);
+  const [lastDevice, setLastDevice] = useState(DEVICES[0]);
+  const [lastNetwork, setLastNetwork] = useState(NETWORKS[0]);
+  // keep the other half of the path on the most recently selected partner of that type
+  if (isDevice && lastDevice.name !== sel) setLastDevice(selItem);
+  if (!isDevice && lastNetwork.name !== sel) setLastNetwork(selItem);
   const groups = [
     { icon: Cpu, label: "Device partners", items: DEVICES },
     { icon: Signal, label: "Telecom partners", items: NETWORKS },
   ];
   return (
-    <div className="rounded-md border border-line bg-surface">
+    <div className="overflow-hidden rounded-md border border-line bg-surface">
+      <DataPath device={lastDevice} network={lastNetwork} />
       {groups.map((g) => (
         <div key={g.label} className="border-b border-line p-4">
           <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">

@@ -343,7 +343,7 @@ export default function SoftwarePreview() {
       <Container>
         <SectionHeading eyebrow="Tracking software preview" title="Try the fleet console" description="An interactive demo with simulated data — pick a tool on the left and try it in the console." />
 
-        <div className="grid gap-4 lg:grid-cols-[280px_1fr] lg:gap-6">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr] lg:gap-6">
           {/* ---------- tool picker ---------- */}
           <div>
             <div role="tablist" aria-label="Console tools" className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:flex-col [&::-webkit-scrollbar]:hidden">

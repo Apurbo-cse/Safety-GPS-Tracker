@@ -74,7 +74,7 @@ export default function UseCases() {
 
         <Reveal>
           <div
-            className="grid gap-4 lg:grid-cols-12 lg:gap-6"
+            className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >

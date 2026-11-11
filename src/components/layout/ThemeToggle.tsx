@@ -40,8 +40,8 @@ export default function ThemeToggle({ className, showLabels = false }: { classNa
       aria-label={`${theme === "dark" ? "Dark" : "Light"} theme active. Switch to ${next} theme`}
       title={`Switch to ${next} theme`}
       className={cn(
-        "glass relative flex h-10 items-center justify-center gap-2 overflow-hidden rounded-full border border-line-strong text-ink transition-transform hover:border-brand-400 active:scale-90 sm:h-9",
-        showLabels ? "px-4" : "w-10 sm:w-9",
+        "glass relative flex h-8 w-8 md:h-10 md:w-10 items-center justify-center gap-2 overflow-hidden rounded-full border border-line-strong text-ink transition-transform hover:border-brand-400 active:scale-90",
+        showLabels ? "px-4" : "",
         className,
       )}
     >
@@ -55,7 +55,7 @@ export default function ThemeToggle({ className, showLabels = false }: { classNa
             transition={{ duration: 0.2 }}
             className="absolute"
           >
-            {theme === "dark" ? <Moon className="h-[18px] w-[18px] text-brand-400" /> : <Sun className="h-[18px] w-[18px] text-brand-600" />}
+            {theme === "dark" ? <Moon className=" md:h-[18px] md:w-[18px] text-brand-400" /> : <Sun className="h-[18px] w-[18px] text-brand-600" />}
           </motion.span>
         </AnimatePresence>
       </span>
