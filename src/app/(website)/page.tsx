@@ -27,7 +27,6 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Partners />
       <Overview />
       <FeaturesGrid />
       <HowItWorks />
@@ -40,9 +39,8 @@ export default function HomePage() {
       <AppPlatform />
       <WhyUs />
       <Stats />
-      <Testimonials />
-      <HomeFaq />
-      <ContactCta />
+      <Testimonials /> 
+      <Partners />
     </>
   );
 }
