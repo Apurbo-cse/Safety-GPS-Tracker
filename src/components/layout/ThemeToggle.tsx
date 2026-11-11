@@ -40,7 +40,7 @@ export default function ThemeToggle({ className, showLabels = false }: { classNa
       aria-label={`${theme === "dark" ? "Dark" : "Light"} theme active. Switch to ${next} theme`}
       title={`Switch to ${next} theme`}
       className={cn(
-        "glass relative flex h-8 w-8 md:h-10 md:w-10 items-center justify-center gap-2 overflow-hidden rounded-full border border-line-strong text-ink transition-transform hover:border-brand-400 active:scale-90",
+        "glass relative flex h-8 w-8 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full border border-line-strong text-ink transition-transform hover:border-brand-400 active:scale-90",
         showLabels ? "px-4" : "",
         className,
       )}
