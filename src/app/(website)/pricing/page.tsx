@@ -10,48 +10,92 @@ import CostTimeline from "@/components/pricing/CostTimeline";
 import PackageComparison from "@/components/pricing/PackageComparison";
 import { LinkButton } from "@/components/common/Button";
 import CorporateCta from "@/components/pricing/CorporateCta";
-import { pricingFaqs } from "@/data/pricing";
+import { plans, pricingFaqs } from "@/data/pricing";
+import { formatBDT } from "@/utils/format";
 import { pageMeta } from "@/lib/metadata";
 
 export const metadata = pageMeta("GPS Tracking Pricing & Packages", "Compare Safety GPS Tracker packages: device price from ৳4,000 and monthly charges from ৳300.", "/pricing");
 
 const how = [
-  { icon: Wallet, t: "Pay for the device once", d: "The device price covers the tracking hardware." },
-  { icon: CalendarClock, t: "Pay monthly for service", d: "The monthly charge keeps tracking, apps and alerts active." },
-  { icon: Receipt, t: "Pay bills online", d: "Use the Pay Bill page to settle invoices (demo interface)." },
+  { icon: Wallet, t: "Pay for the device once", d: "The device price covers the tracking hardware and installation-ready setup." },
+  { icon: CalendarClock, t: "Pay monthly for service", d: "The monthly charge keeps live tracking, apps, alerts and support active." },
+  { icon: Receipt, t: "Pay bills online", d: "Settle invoices any time from the Pay Bill page with bKash, Nagad or Rocket." },
+];
+
+const minDevice = Math.min(...plans.map((p) => p.devicePrice));
+const minMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
+const stats: [string, string, string][] = [
+  [String(plans.length), "", "Tracking packages"],
+  [formatBDT(minDevice), "+", "One-time device price"],
+  [formatBDT(minMonthly), "/mo", "Monthly service from"],
+  ["0", "৳", "Hidden charges"],
 ];
 
 export default function PricingPage() {
   return (
     <>
-      <PageHero art="van" eyebrow="Pricing" title="Clear device prices and Monthlys" description="Eight packages from the published price list. Device prices range from ৳4,000 to ৳16,000 and monthly charges from ৳300 to ৳500.">
-        <LinkButton href="#finder" variant="light">Find my plan</LinkButton>
-        <LinkButton href="#compare" variant="outline" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">Compare packages</LinkButton>
+      <PageHero
+        art="van"
+        eyebrow="Pricing Plans"
+        badgeText="Transparent BDT Pricing"
+        title="Certified GPS Tracking Packages"
+        titleHighlight="With Zero Hidden Charges"
+        description={`Choose from ${plans.length} tracking packages. Pay once for the device, then a simple monthly charge for live tracking, apps and 24×7 support.`}
+      >
+        <LinkButton href="#plans" variant="light">Explore Packages</LinkButton>
+        <LinkButton href="#compare" variant="outline" className="!bg-white/10 !text-white hover:!bg-white/20">Compare Packages</LinkButton>
       </PageHero>
-      <PricingSubNav />
-      <PricingExplorer />
-      <PlanFinder />
-      <CostTimeline />
-      <PackageComparison />
-      <section className="py-14">
+
+      {/* stats (About style) */}
+      <section className="bg-surface py-10 sm:py-12">
         <Container>
-          <SectionHeading eyebrow="Monthly pricing" title="How pricing works" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {how.map((h) => (
-              <div key={h.t} className="rounded-md glass border border-line p-5">
-                <span className="grid h-10 w-10 place-items-center rounded-md bg-brand-50 text-brand-text"><h.icon className="h-5 w-5" /></span>
-                <h3 className="mt-3 text-base font-bold text-ink">{h.t}</h3><p className="mt-1 text-sm text-body">{h.d}</p>
+          <dl className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
+            {stats.map(([n, suffix, l]) => (
+              <div key={l} className="rounded-lg bg-softer/80 p-5 dark:bg-navy-900/90 sm:p-6">
+                <dd className="text-2xl font-black tracking-tight text-ink sm:text-4xl">{n}<span className="text-brand-500">{suffix}</span></dd>
+                <dt className="mt-1.5 text-xs font-medium uppercase tracking-wider text-body">{l}</dt>
+              </div>
+            ))}
+          </dl>
+        </Container>
+      </section>
+
+      <PricingSubNav />
+
+      <section className="bg-soft py-12 sm:py-16">
+        <Container>
+          <SectionHeading eyebrow="Packages" title="Choose Your Tracking Package" description="Every package includes live tracking, the Android, iOS and web apps, and our 24×7 helpline. Tick “Compare” on any two to see them side by side." />
+        </Container>
+        <PricingExplorer />
+      </section>
+
+      <section className="bg-surface py-12 sm:py-16">
+        <Container>
+          <SectionHeading eyebrow="How it works" title="Simple, Two-Part Pricing" description="No contracts to decode — just a device price and a monthly service charge." />
+          <div className="grid gap-5 md:grid-cols-3">
+            {how.map((h, i) => (
+              <div key={h.t} className="relative rounded-lg bg-softer/80 p-6 text-center transition-all hover:-translate-y-1 dark:bg-navy-900/90">
+                <span className="absolute right-4 top-3 text-3xl font-black text-ink/5 dark:text-white/5">0{i + 1}</span>
+                <h.icon className="mx-auto h-12 w-12 text-brand-500" strokeWidth={1.5} />
+                <h3 className="mt-3 text-lg font-bold text-ink">{h.t}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-body">{h.d}</p>
               </div>
             ))}
           </div>
         </Container>
       </section>
-      <section id="faq" className="scroll-mt-32 pb-14">
+
+      <PlanFinder />
+      <CostTimeline />
+      <PackageComparison />
+
+      <section id="faq" className="scroll-mt-32 bg-surface py-12 sm:py-16">
         <Container className="max-w-3xl">
-          <SectionHeading eyebrow="Pricing FAQ" title="Questions about pricing" />
+          <SectionHeading eyebrow="Pricing FAQ" title="Questions About Pricing" />
           <Accordion items={pricingFaqs} />
         </Container>
       </section>
+
       <CorporateCta />
     </>
   );

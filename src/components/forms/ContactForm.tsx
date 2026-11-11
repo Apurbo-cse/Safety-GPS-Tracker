@@ -29,7 +29,7 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-export default function ContactForm() {
+export default function ContactForm({ showHeader = true }: { showHeader?: boolean } = {}) {
   const [sent, setSent] = useState<string | null>(null);
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -57,11 +57,13 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5 rounded-md glass border border-line p-5 sm:p-7">
-      <div>
-        <h2 className="text-lg font-bold text-ink">Send us a message</h2>
-        <p className="mt-0.5 text-sm text-body">Pick a team and we&apos;ll route it to the right people.</p>
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5 rounded-lg bg-softer/80 dark:bg-navy-900/90 p-5 sm:p-7">
+      {showHeader && (
+        <div>
+          <h2 className="text-lg font-bold text-ink">Send us a message</h2>
+          <p className="mt-0.5 text-sm text-body">Pick a team and we&apos;ll route it to the right people.</p>
+        </div>
+      )}
 
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-body-strong">Department<span className="ml-0.5 text-brand-600" aria-hidden>*</span></legend>

@@ -28,22 +28,22 @@ const common = (id: string) => [
 ];
 
 export const devices: Device[] = [
-  { id: "premium-pro-voice", name: "Premium Pro With Voice", category: "Voice Monitoring Devices", visual: "voice", summary: "Voice monitoring tracker with AC On and Door Open notifications.", specs: common("premium-voice"), features: pick("premium-voice", KEY), ...base("premium-voice") },
-  { id: "premium-with-voice", name: "Premium Device With Voice", category: "Voice Monitoring Devices", visual: "voice", summary: "Tracker with in-car voice monitoring and full security alerts.", specs: common("standard-gps"), features: pick("standard-gps", KEY), ...base("standard-gps") },
-  { id: "premium-without-voice", name: "Premium Without Voice", category: "GPS Tracking Devices", visual: "tracker", summary: "Everyday GPS tracker for cars with live tracking, history and alerts.", specs: common("gps-1"), features: pick("gps-1", KEY), ...base("gps-1") },
-  { id: "bike-premium", name: "Bike Premium Device", category: "GPS Tracking Devices", visual: "tracker", summary: "Tracker for motorcycles with live location, engine lock and alerts.", specs: common("gps-2"), features: pick("gps-2", KEY), ...base("gps-2") },
-  { id: "excavator-device", name: "Excavator Device", category: "GPS Tracking Devices", visual: "tracker", summary: "Tracking for construction equipment with working hours and engine alerts.", specs: common("gps-3"), features: pick("gps-3", KEY), ...base("gps-3") },
-  { id: "truck-tracking", name: "Truck Tracking Device", category: "GPS Tracking Devices", visual: "voice", summary: "Tracking for trucks and commercial vehicles with voice monitoring.", specs: common("voice-gps"), features: pick("voice-gps", KEY), ...base("voice-gps") },
-  { id: "live-video-tracking", name: "Live Video & Tracking", category: "Video & Voice Monitoring Devices", visual: "video", summary: "Live video and voice monitoring terminal for high-assurance fleets.", specs: common("video-voice"), features: pick("video-voice", KEY), ...base("video-voice") },
-  { id: "easy-obd", name: "Easy OBD Device", category: "Vehicle GPS Hardware", visual: "tracker", summary: "Plug-in style tracker for passenger vehicles.", specs: common("voice-gps-2"), features: pick("voice-gps-2", KEY), ...base("voice-gps-2") },
+  { id: "premium-pro-voice", name: "Premium Pro With Voice", category: "Voice Monitoring Devices", subcategory: "Car Voice Trackers", visual: "voice", summary: "Voice monitoring tracker with AC On and Door Open notifications.", specs: common("premium-voice"), features: pick("premium-voice", KEY), ...base("premium-voice") },
+  { id: "premium-with-voice", name: "Premium Device With Voice", category: "Voice Monitoring Devices", subcategory: "Car Voice Trackers", visual: "voice", summary: "Tracker with in-car voice monitoring and full security alerts.", specs: common("standard-gps"), features: pick("standard-gps", KEY), ...base("standard-gps") },
+  { id: "premium-without-voice", name: "Premium Without Voice", category: "GPS Tracking Devices", subcategory: "Car Trackers", visual: "tracker", summary: "Everyday GPS tracker for cars with live tracking, history and alerts.", specs: common("gps-1"), features: pick("gps-1", KEY), ...base("gps-1") },
+  { id: "bike-premium", name: "Bike Premium Device", category: "GPS Tracking Devices", subcategory: "Bike Trackers", visual: "tracker", summary: "Tracker for motorcycles with live location, engine lock and alerts.", specs: common("gps-2"), features: pick("gps-2", KEY), ...base("gps-2") },
+  { id: "excavator-device", name: "Excavator Device", category: "GPS Tracking Devices", subcategory: "Heavy Vehicle Trackers", visual: "tracker", summary: "Tracking for construction equipment with working hours and engine alerts.", specs: common("gps-3"), features: pick("gps-3", KEY), ...base("gps-3") },
+  { id: "truck-tracking", name: "Truck Tracking Device", category: "GPS Tracking Devices", subcategory: "Heavy Vehicle Trackers", visual: "voice", summary: "Tracking for trucks and commercial vehicles with voice monitoring.", specs: common("voice-gps"), features: pick("voice-gps", KEY), ...base("voice-gps") },
+  { id: "live-video-tracking", name: "Live Video & Tracking", category: "Video & Voice Monitoring Devices", subcategory: "Video Telematics", visual: "video", summary: "Live video and voice monitoring terminal for high-assurance fleets.", specs: common("video-voice"), features: pick("video-voice", KEY), ...base("video-voice") },
+  { id: "easy-obd", name: "Easy OBD Device", category: "Vehicle GPS Hardware", subcategory: "OBD Devices", visual: "tracker", summary: "Plug-in style tracker for passenger vehicles.", specs: common("voice-gps-2"), features: pick("voice-gps-2", KEY), ...base("voice-gps-2") },
   {
-    id: "engine-lock-relay", name: "Engine Lock Relay Kit", category: "Vehicle GPS Hardware", visual: "relay",
+    id: "engine-lock-relay", name: "Engine Lock Relay Kit", category: "Vehicle GPS Hardware", subcategory: "Accessories", visual: "relay",
     summary: "Wiring accessory that lets the tracker cut and restore engine power remotely.",
     specs: [{ label: "Price", value: "Request quote" }, { label: "Function", value: "Remote engine lock & unlock" }, { label: "Technical specs", value: "On request" }],
     features: ["Engine Lock & Unlock", "Engine On & Off Alert"], priceNote: "Price not published — request a quote",
   },
   {
-    id: "panic-sos-button", name: "Panic / SOS Button", category: "Vehicle GPS Hardware", visual: "sos",
+    id: "panic-sos-button", name: "Panic / SOS Button", category: "Vehicle GPS Hardware", subcategory: "Accessories", visual: "sos",
     summary: "Driver-operated emergency button that raises an alert to the account owner.",
     specs: [{ label: "Price", value: "Request quote" }, { label: "Function", value: "Emergency alert" }, { label: "Technical specs", value: "On request" }],
     features: ["Panic Button", "Car Accident Alert"], priceNote: "Price not published — request a quote",

@@ -167,7 +167,7 @@ export default function HardwareEcosystem() {
                   </div>
 
                   <div className="mt-6 flex gap-2">
-                    <LinkButton href="/devices" size="sm" variant="outline" className="w-full text-center justify-center font-bold">
+                    <LinkButton href="/products" size="sm" variant="outline" className="w-full text-center justify-center font-bold">
                       View Hardware Specs
                     </LinkButton>
                     <LinkButton href="/contact" size="sm" className="w-full text-center justify-center font-bold">

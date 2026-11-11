@@ -380,3 +380,32 @@ html[data-nav-hidden] .fab-stack { transform: translateY(calc(3.6rem + env(safe-
 .bg-sec-white { background-color: var(--sec-white); }
 .bg-sec-warm { background-color: var(--sec-warm); }
 .bg-sec-gray { background-color: var(--sec-gray); }
+
+/* ---- Borderless theme (border-0 everywhere) ----
+   Unlayered, so it wins over Tailwind utilities. Strips every neutral / decorative
+   border, divider and ring across the site. Kept on purpose:
+   - form controls (input/select/textarea) so fields stay visible and show focus/error colour
+   - brand/state borders (active tab underline, selected options: border-brand-*, border-red-* …) */
+[class*="border-line"]:not(input):not(select):not(textarea),
+[class*="border-white/"]:not(input):not(select):not(textarea),
+[class*="border-slate-"]:not(input):not(select):not(textarea),
+[class*="border-gray-"]:not(input):not(select):not(textarea),
+[class*="border-black/"]:not(input):not(select):not(textarea) {
+  border-width: 0;
+}
+[class*="divide-line"] > * + *,
+[class*="divide-white/"] > * + * {
+  border-width: 0;
+}
+[class*="ring-line"]:not(input):not(select):not(textarea),
+[class*="ring-white/"]:not(input):not(select):not(textarea) {
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Orbit wheel (home "keep your vehicles safe"): ring turns, icons stay upright */
+@keyframes orbit { to { transform: rotate(360deg); } }
+.orbit { animation: orbit 60s linear infinite; }
+.orbit-rev { animation: orbit 60s linear infinite reverse; }
+.orbit-wrap:hover .orbit,
+.orbit-wrap:hover .orbit-rev { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .orbit, .orbit-rev { animation: none; } }

@@ -7,8 +7,9 @@ import { announceNavigation } from "@/lib/navigate";
 
 const TITLES: Record<string, string> = {
   "/features": "Features",
+  "/mobile-app": "Mobile App",
   "/pricing": "Pricing",
-  "/devices": "Tracking Devices",
+  "/products": "Products",
   "/solutions": "Solutions",
   "/about": "About Us",
   "/contact": "Contact",

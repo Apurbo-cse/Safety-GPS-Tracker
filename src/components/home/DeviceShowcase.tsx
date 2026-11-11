@@ -11,8 +11,8 @@ export default function DeviceShowcase() {
     <section className="bg-sec-warm py-16 sm:py-20">
       <Container>
         <SectionHeading eyebrow="Tracking devices" title="Hardware for every kind of vehicle" description="GPS, voice monitoring and video & voice monitoring devices." />
-        <div className="swipe-row grid gap-5 md:grid-cols-3">{show.map((d) => <DeviceCard key={d.id} device={d} />)}</div>
-        <div className="mt-8 text-center"><Link href="/devices" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-text hover:underline">Browse all devices <ArrowRight className="h-4 w-4" /></Link></div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3">{show.map((d) => <DeviceCard key={d.id} device={d} />)}</div>
+        <div className="mt-8 text-center"><Link href="/products" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-text hover:underline">Browse all products <ArrowRight className="h-4 w-4" /></Link></div>
       </Container>
     </section>
   );

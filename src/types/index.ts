@@ -42,6 +42,8 @@ export interface Device {
   id: string;
   name: string;
   category: DeviceCategory;
+  /** Second level of the catalogue (e.g. "Bike Trackers") */
+  subcategory: string;
   visual: "tracker" | "voice" | "video" | "relay" | "sos";
   /** Product image from the company price list */
   image?: string;

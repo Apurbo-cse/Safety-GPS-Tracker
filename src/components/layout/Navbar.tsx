@@ -1,54 +1,91 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
+import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import { usePathname } from "next/navigation";
 import {
-  ArrowRight,
-  Bike,
-  Bus,
-  Car,
-  ChevronDown,
-  Cpu,
-  CreditCard,
-  Fuel,
-  HardHat,
-  Info,
-  LogOut,
-  Menu,
-  Mic,
-  Navigation,
-  Phone,
-  Shield,
-  ShoppingCart,
-  Truck,
-  User,
-  Video,
-  X,
-  Zap,
+  ArrowRight, BarChart3, Bell, ChevronDown, CreditCard, HelpCircle, Info, LayoutGrid, Mail, Phone,
+  Search, Shield, ShieldCheck, ShoppingCart, Smartphone, Sparkles, Heart, UserRound, Wrench, Navigation,
+  type LucideIcon,
 } from "lucide-react";
-import { toast } from "sonner";
-import { announceNavigation } from "@/lib/navigate";
 import Logo from "@/components/common/Logo";
 import ThemeToggle from "./ThemeToggle";
 import Container from "@/components/common/Container";
-import { LinkButton, Button } from "@/components/common/Button";
+import { DynIcon } from "@/lib/icons";
 import { SITE } from "@/lib/site";
+import { features, featureCategories } from "@/data/features";
+import { catalogue, categoryUrl, deviceUrl } from "@/data/catalogue";
+import { devices } from "@/data/devices";
+import { solutions } from "@/data/solutions";
+import { plans } from "@/data/pricing";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setCartOpen, setMobileNav } from "@/store/slices/uiSlice";
-import { logout } from "@/store/slices/authSlice";
-import { cn } from "@/utils/format";
+import { openDemoModal, setCartOpen, setPalette } from "@/store/slices/uiSlice";
+import { cn, formatBDT } from "@/utils/format";
 
+/* ------------------------------------------------------------------ data */
+type MenuKey = "Features" | "Products" | "Solutions" | "Company";
+
+const NAV: { label: string; menu?: MenuKey; href?: string; match: string[] }[] = [
+  { label: "Features", menu: "Features", match: ["/features"] },
+  { label: "Products", menu: "Products", match: ["/products"] },
+  { label: "Solutions", menu: "Solutions", match: ["/solutions"] },
+  { label: "Pricing", href: "/pricing", match: ["/pricing"] },
+  { label: "Company", menu: "Company", match: ["/about", "/contact", "/pay-bill", "/faq"] },
+];
+
+const FEATURE_ICONS: Record<string, LucideIcon> = {
+  "Vehicle Tracking": Navigation,
+  "Vehicle Security": Shield,
+  "Reports & Analytics": BarChart3,
+  "Driver Monitoring": UserRound,
+  "Maintenance & Reminders": Wrench,
+  Platform: LayoutGrid,
+};
+
+const COMPANY: { href: string; icon: LucideIcon; t: string; d: string }[] = [
+  { href: "/about", icon: Info, t: "About us", d: "Who we are and why customers choose us." },
+  { href: "/contact", icon: Phone, t: "Contact & support", d: "Sales, support and billing — 24×7." },
+  { href: "/pay-bill", icon: CreditCard, t: "Pay bill online", d: "bKash, Nagad, Rocket or bank transfer." },
+  { href: "/faq", icon: HelpCircle, t: "Help centre", d: "Answers about tracking, devices and billing." },
+];
+
+const featuredDevice = devices.find((d) => d.price && d.image) ?? devices[0];
+const minMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
+
+/* ------------------------------------------------------------------ bits */
+const Eyebrow = ({ children }: { children: React.ReactNode }) => (
+  <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{children}</p>
+);
+
+function Promo({ image, tag, title, text, children }: { image: string; tag: string; title: string; text: string; children: React.ReactNode }) {
+  return (
+    <div className="relative isolate flex h-full flex-col overflow-hidden rounded-lg bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] p-5 text-white">
+      <Image src={image} alt="" fill sizes="320px" className="-z-20 object-cover opacity-35" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0c1e31] via-[#0c1e31]/70 to-transparent" />
+      <span className="self-start rounded-full bg-brand-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-brand-300">{tag}</span>
+      <p className="mt-auto pt-16 text-lg font-black leading-tight tracking-tight">{title}</p>
+      <p className="mt-1 text-xs text-slate-300">{text}</p>
+      <div className="mt-4 flex flex-wrap gap-2">{children}</div>
+    </div>
+  );
+}
+
+const promoBtn = "inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-500 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-brand-600";
+const promoGhost = "inline-flex h-9 items-center gap-1.5 rounded-lg bg-white/10 px-3.5 text-xs font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20";
+const tile = "group flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-softer/80 dark:hover:bg-navy-900/90";
+const tileIcon = "grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400";
+
+/* ------------------------------------------------------------------ navbar */
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const user = useAppSelector((s) => s.auth.user);
   const cartCount = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
-  const mobileNavOpen = useAppSelector((s) => s.ui.mobileNavOpen);
+  const wishCount = useAppSelector((s) => s.wishlist.ids.length);
 
   const [scrolled, setScrolled] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [prevPath, setPrevPath] = useState(pathname);
   if (prevPath !== pathname) {
     setPrevPath(pathname);
@@ -58,6 +95,10 @@ export default function Navbar() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const headerRef = useRef<HTMLElement>(null);
 
+  // reading-progress bar along the bottom edge
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 30, mass: 0.3 });
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
@@ -65,663 +106,236 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close dropdown when clicking outside or pressing Escape
+  // close on outside click / Escape
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
-        setActiveMenu(null);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActiveMenu(null);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    const onClick = (e: MouseEvent) => { if (headerRef.current && !headerRef.current.contains(e.target as Node)) setActiveMenu(null); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActiveMenu(null); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
   }, []);
 
-  const handleMouseEnter = (label: string) => {
+  const open = (m: MenuKey | null) => { if (timeoutRef.current) clearTimeout(timeoutRef.current); setActiveMenu(m); };
+  const leave = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setActiveMenu(label);
+    timeoutRef.current = setTimeout(() => { setActiveMenu(null); setHovered(null); }, 150);
   };
-
-  const handleMouseLeave = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setActiveMenu(null);
-    }, 150);
-  };
-
-  const closeMenu = () => setActiveMenu(null);
-
-  const signOut = () => {
-    dispatch(logout());
-    dispatch(setMobileNav(false));
-    toast.success("Signed out (demo)");
-    announceNavigation();
-    router.push("/");
-  };
+  const close = () => setActiveMenu(null);
+  const isActive = (match: string[]) => match.some((p) => pathname.startsWith(p));
 
   return (
     <header
       ref={headerRef}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={leave}
       className={cn(
-        "sticky top-0 z-50 border-b border-line/80 bg-surface/95 backdrop-blur-xl transition-all duration-300",
-        scrolled ? "shadow-md shadow-black/5 dark:shadow-black/25" : "",
+        "sticky top-0 z-50 bg-surface/90 backdrop-blur-xl transition-shadow duration-300 dark:bg-navy-950/85",
+        scrolled && "shadow-lg shadow-black/5 dark:shadow-black/30",
         // phones/tablets: full navbar only on the home page; inner pages use MobilePageBar
-        pathname !== "/" && "max-lg:hidden"
+        pathname !== "/" && "max-lg:hidden",
       )}
     >
-      <Container
-        className={cn(
-          "flex items-center justify-between transition-[height] duration-300",
-          scrolled ? "h-14" : "h-14 lg:h-16"
-        )}
-      >
-        {/* Left: Brand Logo (Proportionate size) */}
-        <div className="flex items-center gap-6">
-          <Logo className="h-6 sm:h-7 md:h-7.5" />
-        </div>
+      {/* ---------- utility strip (desktop, hides on scroll) ---------- */}
+      <div className={cn("hidden overflow-hidden bg-navy-950 text-slate-300 transition-[height] duration-300 lg:block", scrolled ? "h-0" : "h-8")}>
+        <Container className="flex h-8 items-center justify-between text-[11px]">
+          <div className="flex items-center gap-5">
+            <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-1.5 hover:text-white">
+              <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-400" /></span>
+              24/7 Helpline <b className="font-semibold text-white">{SITE.phone}</b>
+            </a>
+            <a href={`mailto:${SITE.email}`} className="inline-flex items-center gap-1.5 hover:text-white"><Mail className="h-3 w-3" />{SITE.email}</a>
+          </div>
+          <div className="flex items-center gap-5">
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-brand-400" />BTRC approved</span>
+            <Link href="/pay-bill" className="hover:text-white">Pay bill</Link>
+            <Link href="/faq" className="hover:text-white">Help centre</Link>
+            <Link href="/login" className="inline-flex items-center gap-1 font-semibold text-white hover:text-brand-300"><UserRound className="h-3 w-3" />Log in</Link>
+          </div>
+        </Container>
+      </div>
 
-        {/* Center: Desktop Navigation */}
-        <nav
-          className="hidden items-center gap-1 lg:flex"
-          aria-label="Main Navigation"
-        >
-          {/* 1. Features */}
-          <button
-            type="button"
-            onMouseEnter={() => handleMouseEnter("Features")}
-            onClick={() => setActiveMenu(activeMenu === "Features" ? null : "Features")}
-            aria-expanded={activeMenu === "Features"}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-all xl:text-sm",
-              activeMenu === "Features" || pathname.startsWith("/features")
-                ? "bg-soft text-brand-text font-bold"
-                : "text-body-strong hover:bg-soft/70 hover:text-brand-text"
-            )}
-          >
-            <span>Features</span>
-            <ChevronDown
-              className={cn(
-                "h-3.5 w-3.5 text-slate-400 transition-transform duration-200",
-                activeMenu === "Features" && "rotate-180 text-brand-text"
-              )}
-            />
-          </button>
+      {/* ---------- main bar ---------- */}
+      <Container className={cn("flex items-center justify-between gap-4 transition-[height] duration-300", scrolled ? "h-14" : "h-14 lg:h-16")}>
+        <div className="shrink-0"><Logo className="h-6 sm:h-7 md:h-7.5" /></div>
 
-          {/* 2. Devices */}
-          <button
-            type="button"
-            onMouseEnter={() => handleMouseEnter("Devices")}
-            onClick={() => setActiveMenu(activeMenu === "Devices" ? null : "Devices")}
-            aria-expanded={activeMenu === "Devices"}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-all xl:text-sm",
-              activeMenu === "Devices" || pathname.startsWith("/devices")
-                ? "bg-soft text-brand-text font-bold"
-                : "text-body-strong hover:bg-soft/70 hover:text-brand-text"
-            )}
-          >
-            <span>Devices</span>
-            <ChevronDown
-              className={cn(
-                "h-3.5 w-3.5 text-slate-400 transition-transform duration-200",
-                activeMenu === "Devices" && "rotate-180 text-brand-text"
-              )}
-            />
-          </button>
-
-          {/* 3. Solutions */}
-          <button
-            type="button"
-            onMouseEnter={() => handleMouseEnter("Solutions")}
-            onClick={() => setActiveMenu(activeMenu === "Solutions" ? null : "Solutions")}
-            aria-expanded={activeMenu === "Solutions"}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-all xl:text-sm",
-              activeMenu === "Solutions" || pathname.startsWith("/solutions")
-                ? "bg-soft text-brand-text font-bold"
-                : "text-body-strong hover:bg-soft/70 hover:text-brand-text"
-            )}
-          >
-            <span>Solutions</span>
-            <ChevronDown
-              className={cn(
-                "h-3.5 w-3.5 text-slate-400 transition-transform duration-200",
-                activeMenu === "Solutions" && "rotate-180 text-brand-text"
-              )}
-            />
-          </button>
-
-          {/* 4. Pricing (Direct Link) */}
-          <Link
-            href="/pricing"
-            onMouseEnter={() => handleMouseEnter("Pricing")}
-            className={cn(
-              "relative whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold transition-colors xl:text-sm",
-              pathname === "/pricing"
-                ? "text-brand-text font-bold"
-                : "text-body-strong hover:bg-soft/70 hover:text-brand-text"
-            )}
-          >
-            <span>Pricing</span>
-            {pathname === "/pricing" && (
-              <motion.span
-                layoutId="nav-underline"
-                className="absolute inset-x-3 -bottom-1 h-0.5 rounded-full bg-brand-600"
-                transition={{ type: "spring", stiffness: 400, damping: 32 }}
-              />
-            )}
-          </Link>
-
-          {/* 5. Company */}
-          <button
-            type="button"
-            onMouseEnter={() => handleMouseEnter("Company")}
-            onClick={() => setActiveMenu(activeMenu === "Company" ? null : "Company")}
-            aria-expanded={activeMenu === "Company"}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-all xl:text-sm",
-              activeMenu === "Company" || ["/about", "/contact", "/pay-bill"].some((p) => pathname.startsWith(p))
-                ? "bg-soft text-brand-text font-bold"
-                : "text-body-strong hover:bg-soft/70 hover:text-brand-text"
-            )}
-          >
-            <span>Company</span>
-            <ChevronDown
-              className={cn(
-                "h-3.5 w-3.5 text-slate-400 transition-transform duration-200",
-                activeMenu === "Company" && "rotate-180 text-brand-text"
-              )}
-            />
-          </button>
+        <nav aria-label="Main navigation" className="hidden items-center lg:flex" onMouseLeave={() => setHovered(null)}>
+          {NAV.map((n) => {
+            const active = isActive(n.match) || activeMenu === n.menu;
+            const cls = cn("relative inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors", active ? "text-brand-600 dark:text-brand-400" : "text-ink hover:text-brand-600 dark:hover:text-brand-400");
+            const inner = (
+              <>
+                {hovered === n.label && (
+                  <motion.span layoutId="nav-hover" className="absolute inset-0 -z-10 rounded-full bg-softer/90 dark:bg-navy-900/90" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+                )}
+                {n.label}
+                {n.menu && <ChevronDown className={cn("h-3.5 w-3.5 opacity-60 transition-transform duration-200", activeMenu === n.menu && "rotate-180 opacity-100")} />}
+                {isActive(n.match) && <span className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand-500" />}
+              </>
+            );
+            return n.href ? (
+              <Link key={n.label} href={n.href} onMouseEnter={() => { setHovered(n.label); open(null); }} className={cls} aria-current={pathname === n.href ? "page" : undefined}>{inner}</Link>
+            ) : (
+              <button key={n.label} type="button" onMouseEnter={() => { setHovered(n.label); open(n.menu!); }} onClick={() => setActiveMenu(activeMenu === n.menu ? null : n.menu!)} aria-expanded={activeMenu === n.menu} aria-haspopup="true" className={cls}>{inner}</button>
+            );
+          })}
         </nav>
 
-        {/* Right: Actions, Theme, Cart & Auth */}
-        <div className="flex items-center gap-2">
-        
-          <ThemeToggle />
-
-          {/* Cart Icon */}
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={() => dispatch(setCartOpen(true))}
-            aria-label={`Cart, ${cartCount} items`}
-            className="relative grid h-9 w-9 place-items-center rounded-md text-body-strong transition-colors hover:bg-softer"
+            type="button"
+            onClick={() => dispatch(setPalette(true))}
+            aria-label="Search (Ctrl K)"
+            className="hidden h-9 items-center gap-2 rounded-full bg-softer/80 pl-3 pr-1.5 text-xs text-slate-500 transition-colors hover:text-ink dark:bg-navy-900/90 xl:inline-flex"
           >
-            <ShoppingCart className="h-4.5 w-4.5" />
-            {cartCount > 0 && (
-              <span className="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
-                {cartCount}
-              </span>
-            )}
+            <Search className="h-3.5 w-3.5" />Search
+            <kbd className="rounded-full bg-surface px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 dark:bg-navy-950">⌘K</kbd>
           </button>
-
-          {/* Auth State (Desktop) */}
-          <div className="hidden items-center gap-2 lg:flex">
-            {user ? (
-              <>
-                <span className="flex items-center gap-1.5 text-xs font-medium text-body-strong">
-                  <User className="h-4 w-4" />
-                  <span>{user.name}</span>
-                </span>
-                <Button variant="ghost" size="sm" onClick={signOut}>
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Logout</span>
-                </Button>
-              </>
-            ) : (
-              <>
-                <LinkButton href="/login" variant="ghost" size="sm">
-                  Login
-                </LinkButton>
-                <LinkButton href="/register" size="sm">
-                  Get Started
-                </LinkButton>
-              </>
-            )}
-          </div> 
+          <button type="button" onClick={() => dispatch(setPalette(true))} aria-label="Search" className="grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer xl:hidden dark:hover:bg-navy-900">
+            <Search className="h-4.5 w-4.5" />
+          </button>
+          <ThemeToggle />
+          <Link href="/products#wishlist" aria-label={`Wishlist, ${wishCount} items`} className="relative grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer dark:hover:bg-navy-900">
+            <Heart className="h-4.5 w-4.5" />
+            {wishCount > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{wishCount}</span>}
+          </Link>
+          <button type="button" onClick={() => dispatch(setCartOpen(true))} aria-label={`Cart, ${cartCount} items`} className="relative grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer dark:hover:bg-navy-900">
+            <ShoppingCart className="h-4.5 w-4.5" />
+            {cartCount > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{cartCount}</span>}
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch(openDemoModal("Demo request (navbar)"))}
+            className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-brand-500 px-4 text-xs font-semibold text-white transition-all hover:bg-brand-600 active:scale-95 lg:inline-flex"
+          >
+            <Sparkles className="h-3.5 w-3.5" />Book a demo
+          </button>
         </div>
       </Container>
 
-      {/* ===================================================================
-          SIMPLE SUBMENU DROPDOWN (Strictly inside Navbar Container Width)
-         =================================================================== */}
+      {/* scroll progress */}
+      <motion.div aria-hidden style={{ scaleX: progress }} className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-gradient-to-r from-brand-600 to-brand-400" />
+
+      {/* ---------- mega menu ---------- */}
       <AnimatePresence>
-        {activeMenu && activeMenu !== "Pricing" && (
+        {activeMenu && (
           <motion.div
-            initial={{ opacity: 0, y: -4 }}
+            key="mega"
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.16, ease: "easeOut" }}
-            onMouseEnter={() => {
-              if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            }}
-            onMouseLeave={handleMouseLeave}
-            className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/98 shadow-xl backdrop-blur-2xl"
+            onMouseEnter={() => timeoutRef.current && clearTimeout(timeoutRef.current)}
+            onMouseLeave={leave}
+            className="absolute inset-x-0 top-full z-40 hidden bg-surface shadow-2xl shadow-black/10 dark:bg-navy-950 lg:block"
           >
             <Container className="py-6">
-              {/* 1. Features Panel */}
-              {activeMenu === "Features" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between border-b border-line/60 pb-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-brand-text">
-                        Telematics Features
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        10-second updates, live traffic, and BTRC-approved telematics.
-                      </p>
-                    </div>
-                    <Link
-                      href="/features"
-                      onClick={closeMenu}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-text hover:underline"
-                    >
-                      <span>View all 40+ features</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <Link
-                      href="/features#all-features"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-500/10 text-brand-text group-hover:bg-brand-600 group-hover:text-white transition-colors">
-                        <Navigation className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Live GNSS Tracking
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Real-time location, 10s intervals, Google Street View.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/features#all-features"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        <Shield className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Remote Engine Lock
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Solid-state immobilizer relay, tamper and SOS alerts.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/features#all-features"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-cyan-500/10 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <Fuel className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Fuel Ultrasonic Rods
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          99.5% accuracy fuel monitoring & theft prevention.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/features#all-features"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-amber-500/10 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                        <Zap className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Geofence & Curfew
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Boundary perimeter alerts and over-speed detection.
-                        </p>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* 2. Devices Panel */}
-              {activeMenu === "Devices" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between border-b border-line/60 pb-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-brand-text">
-                        Tracking Hardware & Sensors
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        BTRC approved genuine Concox, Teltonika and SinoTrack GPS terminals.
-                      </p>
-                    </div>
-                    <Link
-                      href="/devices"
-                      onClick={closeMenu}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-text hover:underline"
-                    >
-                      <span>Explore all devices</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <Link
-                      href="/devices"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-500/10 text-brand-text group-hover:bg-brand-600 group-hover:text-white transition-colors">
-                        <Cpu className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                            4G GPS Trackers
-                          </p>
-                          <span className="rounded bg-brand-500/10 px-1 py-0.2 font-mono text-[9px] font-bold text-brand-text">
-                            Concox
-                          </span>
+              <AnimatePresence mode="wait">
+                <motion.div key={activeMenu} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.14 }} className="grid grid-cols-[1fr_300px] gap-6">
+                  {activeMenu === "Features" && (
+                    <>
+                      <div>
+                        <Eyebrow>{features.length} platform features</Eyebrow>
+                        <div className="grid grid-cols-3 gap-1">
+                          {featureCategories.map((c) => {
+                            const Icon = FEATURE_ICONS[c] ?? Bell;
+                            const items = features.filter((f) => f.category === c);
+                            return (
+                              <Link key={c} href="/features#all-features" onClick={close} className={tile}>
+                                <span className={tileIcon}><Icon className="h-4 w-4" /></span>
+                                <span className="min-w-0">
+                                  <span className="block text-sm font-semibold text-ink">{c} <span className="text-xs font-normal text-slate-400">· {items.length}</span></span>
+                                  <span className="mt-0.5 block truncate text-xs text-slate-500">{items.slice(0, 2).map((f) => f.title).join(", ")}</span>
+                                </span>
+                              </Link>
+                            );
+                          })}
                         </div>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Heavy duty 4G telemetry with solid-state relay kit.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/devices"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-cyan-500/10 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <Zap className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                            OBD-II Plug & Play
-                          </p>
-                          <span className="rounded bg-cyan-500/10 px-1 py-0.2 font-mono text-[9px] font-bold text-cyan-600">
-                            10s
-                          </span>
+                        <div className="mt-4 flex items-center gap-5">
+                          <Link href="/features" onClick={close} className="inline-flex items-center gap-1.5 px-3 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400">View all features <ArrowRight className="h-3.5 w-3.5" /></Link>
+                          <Link href="/mobile-app" onClick={close} className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400"><Smartphone className="h-3.5 w-3.5" />Mobile app</Link>
                         </div>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          No wire cutting. Plugs directly into vehicle OBD port.
-                        </p>
                       </div>
-                    </Link>
+                      <Promo image="/img/hero-truck.jpg" tag="Live demo" title="See your fleet on one map" text="10-second updates, engine lock and smart alerts — on web, Android and iOS.">
+                        <button type="button" onClick={() => { close(); dispatch(openDemoModal("Demo request (features menu)")); }} className={promoBtn}><Sparkles className="h-3.5 w-3.5" />Book a demo</button>
+                      </Promo>
+                    </>
+                  )}
 
-                    <Link
-                      href="/devices"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-amber-500/10 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                        <Video className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                            AI Dual Dashcam
-                          </p>
-                          <span className="rounded bg-amber-500/10 px-1 py-0.2 font-mono text-[9px] font-bold text-amber-600">
-                            ADAS
-                          </span>
+                  {activeMenu === "Products" && (
+                    <>
+                      <div>
+                        <Eyebrow>Shop by category</Eyebrow>
+                        <div className="grid grid-cols-3 gap-x-6 gap-y-5 px-3">
+                          {catalogue.map((c) => (
+                            <div key={c.slug}>
+                              <Link href={categoryUrl(c.name)} onClick={close} className="text-sm font-semibold text-ink hover:text-brand-600 dark:hover:text-brand-400">{c.name} <span className="text-xs font-normal text-slate-400">· {c.count}</span></Link>
+                              <ul className="mt-1.5 space-y-1">
+                                {c.subs.map((s) => (
+                                  <li key={s.slug}><Link href={categoryUrl(c.name, s.name)} onClick={close} className="text-xs text-body transition-colors hover:text-brand-600 dark:hover:text-brand-400">{s.name}</Link></li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
                         </div>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Live road video streaming and in-cabin IR camera.
-                        </p>
+                        <Link href="/products" onClick={close} className="mt-5 inline-flex items-center gap-1.5 px-3 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400">All {devices.length} products <ArrowRight className="h-3.5 w-3.5" /></Link>
                       </div>
-                    </Link>
+                      <div className="flex flex-col rounded-lg bg-softer/80 p-4 dark:bg-navy-900/90">
+                        <span className="self-start rounded-full bg-brand-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400">Featured</span>
+                        {featuredDevice.image && (
+                          <div className="relative mt-2 aspect-[858/600] w-full"><Image src={featuredDevice.image} alt={featuredDevice.name} fill sizes="280px" className="object-contain" /></div>
+                        )}
+                        <p className="mt-2 truncate text-sm font-semibold text-ink">{featuredDevice.name}</p>
+                        <p className="text-xs text-body">{featuredDevice.price ? formatBDT(featuredDevice.price) : "Price on request"}{featuredDevice.monthly ? ` + ${formatBDT(featuredDevice.monthly)}/mo` : ""}</p>
+                        <Link href={deviceUrl(featuredDevice)} onClick={close} className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand-500 text-xs font-semibold text-white transition-colors hover:bg-brand-600">View product <ArrowRight className="h-3.5 w-3.5" /></Link>
+                      </div>
+                    </>
+                  )}
 
-                    <Link
-                      href="/devices"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        <Mic className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                            Voice Monitoring
-                          </p>
-                          <span className="rounded bg-emerald-500/10 px-1 py-0.2 font-mono text-[9px] font-bold text-emerald-600">
-                            Audio
-                          </span>
+                  {activeMenu === "Solutions" && (
+                    <>
+                      <div>
+                        <Eyebrow>{solutions.length} industries</Eyebrow>
+                        <div className="grid grid-cols-4 gap-2">
+                          {solutions.map((s) => (
+                            <Link key={s.id} href={`/solutions#${s.id}`} onClick={close} className="group overflow-hidden rounded-lg bg-softer/80 transition-all hover:-translate-y-0.5 dark:bg-navy-900/90">
+                              <span className="relative block h-16 overflow-hidden">
+                                <Image src={s.image} alt="" fill sizes="200px" className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                                <span className="absolute bottom-1.5 left-1.5 grid h-6 w-6 place-items-center rounded-md bg-surface/90 text-brand-600 dark:bg-navy-950/90 dark:text-brand-400"><DynIcon name={s.icon} className="h-3.5 w-3.5" /></span>
+                              </span>
+                              <span className="block truncate px-2.5 py-2 text-xs font-semibold text-ink group-hover:text-brand-600 dark:group-hover:text-brand-400">{s.title}</span>
+                            </Link>
+                          ))}
                         </div>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Live acoustic surveillance for passenger vehicles.
-                        </p>
                       </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
+                      <Promo image="/img/industries/business-fleet-v3.jpg" tag="For business" title="Running a fleet?" text={`Packages from ${formatBDT(minMonthly)}/month per vehicle, with volume pricing for fleets.`}>
+                        <Link href="/pricing" onClick={close} className={promoBtn}>See pricing</Link>
+                        <Link href="/solutions" onClick={close} className={promoGhost}>All solutions</Link>
+                      </Promo>
+                    </>
+                  )}
 
-              {/* 3. Solutions Panel */}
-              {activeMenu === "Solutions" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between border-b border-line/60 pb-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-brand-text">
-                        Industry Solutions
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Tailored GPS tracking for private cars, logistics fleets, and motorcycles.
-                      </p>
-                    </div>
-                    <Link
-                      href="/solutions"
-                      onClick={closeMenu}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-text hover:underline"
-                    >
-                      <span>Browse all solutions</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                    <Link
-                      href="/solutions#private-cars"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-brand-500/10 text-brand-text group-hover:bg-brand-600 group-hover:text-white transition-colors">
-                        <Car className="h-4 w-4" />
+                  {activeMenu === "Company" && (
+                    <>
+                      <div>
+                        <Eyebrow>Company & support</Eyebrow>
+                        <div className="grid grid-cols-2 gap-1">
+                          {COMPANY.map((c) => (
+                            <Link key={c.href} href={c.href} onClick={close} className={tile}>
+                              <span className={tileIcon}><c.icon className="h-4 w-4" /></span>
+                              <span className="min-w-0">
+                                <span className="block text-sm font-semibold text-ink">{c.t}</span>
+                                <span className="mt-0.5 block text-xs text-slate-500">{c.d}</span>
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        Private Cars
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Theft recovery
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/solutions#logistics"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        <Truck className="h-4 w-4" />
-                      </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        Logistics
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Cargo & dispatch
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/solutions#motorcycles"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-cyan-500/10 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <Bike className="h-4 w-4" />
-                      </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        Motorcycles
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Bikes & couriers
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/solutions#construction"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-amber-500/10 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                        <HardHat className="h-4 w-4" />
-                      </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        Construction
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Heavy machinery
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/solutions#public-transport"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-indigo-500/10 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                        <Bus className="h-4 w-4" />
-                      </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        Public Buses
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Route compliance
-                      </p>
-                    </Link>
-
-                    <Link
-                      href="/solutions#cng"
-                      onClick={closeMenu}
-                      className="group flex flex-col items-center rounded-md border border-line/60 bg-soft/40 p-3 text-center transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-9 w-9 place-items-center rounded-md bg-rose-500/10 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors">
-                        <Fuel className="h-4 w-4" />
-                      </div>
-                      <p className="mt-2 text-xs font-bold text-ink group-hover:text-brand-text">
-                        CNG Autos
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">
-                        Rental drivers
-                      </p>
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. Company Panel */}
-              {activeMenu === "Company" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between border-b border-line/60 pb-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-brand-text">
-                        Company & Customer Support
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Founded in Dhaka. 24/7 dedicated helpline and police dispatch assistance.
-                      </p>
-                    </div>
-                    <a
-                      href={`tel:${SITE.phone}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-text hover:underline"
-                    >
-                      <Phone className="h-3 w-3" />
-                      <span>Direct Helpline: {SITE.phone}</span>
-                    </a>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <Link
-                      href="/about"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-500/10 text-brand-text group-hover:bg-brand-600 group-hover:text-white transition-colors">
-                        <Info className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          About Safety GPS
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Our Dhaka engineering lab, BTRC compliance and nationwide fleet.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/contact"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        <Phone className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Contact & Dispatch Desk
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          24/7 control room at Shukrabad, Dhanmondi, Dhaka.
-                        </p>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href="/pay-bill"
-                      onClick={closeMenu}
-                      className="group flex items-start gap-3 rounded-md border border-line/60 bg-soft/40 p-3.5 transition-colors hover:border-brand-500/50 hover:bg-soft"
-                    >
-                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-cyan-500/10 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <CreditCard className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-ink group-hover:text-brand-text">
-                          Pay Subscription Bill
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500 leading-snug">
-                          Instant online monthly recharge via bKash and Nagad.
-                        </p>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
+                      <Promo image="/img/hero-car.jpg" tag="24/7 helpline" title="Need help right now?" text="Our team answers day and night — emergencies, engine lock and support.">
+                        <a href={`tel:${SITE.phone}`} className={promoBtn}><Phone className="h-3.5 w-3.5" />{SITE.phone}</a>
+                      </Promo>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </Container>
           </motion.div>
         )}

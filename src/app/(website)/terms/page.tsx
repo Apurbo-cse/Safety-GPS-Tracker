@@ -40,7 +40,14 @@ const sections: LegalSection[] = [
 export default function TermsPage() {
   return (
     <>
-      <PageHero eyebrow="Legal" title="Terms of Service" description="The terms that apply when you use our tracking devices, apps and services." />
+      <PageHero
+        art="van"
+        eyebrow="Legal & Compliance"
+        badgeText="Terms & Conditions"
+        title="Terms of Service & Usage"
+        titleHighlight="Agreement"
+        description="Clear terms governing your subscription, tracking hardware ownership, service renewals, and lawful usage of the Safety GPS Tracker telematics platform."
+      />
       <LegalPage
         updated="10 November 2026"
         intro={<p>Please read these terms carefully. They explain your rights and responsibilities when you use {SITE.name} devices, apps and services.</p>}

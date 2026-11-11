@@ -207,7 +207,7 @@ export default function HomeFaq() {
                       className={cn(
                         "overflow-hidden rounded-md border bg-surface transition-all duration-200",
                         isOpen
-                          ? "border-brand-500/60 shadow-sm ring-1 ring-brand-500/20"
+                          ? "border-brand-500/60 ring-1 ring-brand-500/20"
                           : "border-line hover:border-brand-400/50"
                       )}
                     >

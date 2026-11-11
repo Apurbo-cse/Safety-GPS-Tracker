@@ -1,60 +1,113 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
-import Container from "@/components/common/Container";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { solutionDetails } from "@/data/solutionDetails";
 import { plans } from "@/data/pricing";
 import { formatBDT } from "@/utils/format";
 
-/** Challenges, suits, setup steps and recommended package for one industry. */
+/** Clean, uncluttered recommended package & key solution Q&A. */
 export default function SolutionExtras({ id }: { id: string }) {
   const d = solutionDetails[id];
   const plan = d && plans.find((p) => p.id === d.planId);
   if (!d) return null;
-  return (
-    <Container className="mt-8">
-      <div className="grid gap-4 lg:grid-cols-12">
-        <div className="glass rounded-md border border-line p-4 lg:col-span-7">
-          <h3 className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-text"><AlertTriangle className="h-3.5 w-3.5" />Common problems &amp; how tracking helps</h3>
-          <ul className="divide-y divide-line">
-            {d.problems.map((p) => (
-              <li key={p.problem} className="grid gap-1 py-2.5 first:pt-0 last:pb-0 sm:grid-cols-2 sm:gap-4">
-                <p className="text-sm font-semibold text-ink">{p.problem}</p>
-                <p className="flex gap-2 text-sm text-body"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{p.answer}</p>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-line pt-3">
-            <span className="text-xs font-semibold text-body">Suits:</span>
-            {d.suits.map((s) => <span key={s} className="rounded-full bg-softer px-2.5 py-1 text-xs font-medium text-body-strong">{s}</span>)}
-          </div>
-        </div>
 
-        <div className="grid gap-4 lg:col-span-5">
-          {plan?.image && (
-            <Link href="/pricing" className="group glass flex items-center gap-3 rounded-md border border-line p-3 transition-colors hover:border-brand-400">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-white"><Image src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="80px" className="object-contain p-1.5" /></div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand-text">Recommended package</p>
-                <p className="truncate text-sm font-bold text-ink">{plan.siteTitle ?? plan.name}</p>
-                <p className="text-xs text-body">{d.planWhy}</p>
-                <p className="mt-1 text-sm font-bold text-ink">{formatBDT(plan.devicePrice)} <span className="text-xs font-medium text-body">+ {formatBDT(plan.monthlyCharge)}/mo</span></p>
+  return (
+    <div className="mt-6 pt-6 sm:mt-8 sm:pt-8 border-t border-line/30">
+      <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
+        {/* Card 1: Recommended Hardware & Package */}
+        {plan && (
+          <div className="-mx-3 sm:mx-0 rounded-none sm:rounded-md flex flex-col justify-between bg-softer/80 dark:bg-navy-900/90 p-4 sm:p-6">
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                  Recommended Package
+                </span>
+                <span className="text-xs font-semibold text-slate-400">
+                  Hardware &amp; Service
+                </span>
               </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-brand-text transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          )}
-          <div className="glass rounded-md border border-line p-4">
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-brand-text">Typical setup</h3>
-            <ol className="space-y-2">
-              {d.setup.map((s, i) => (
-                <li key={s} className="flex items-center gap-2.5 text-sm text-body-strong">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">{i + 1}</span>{s}
-                </li>
+
+              <div className="mt-4 flex items-center gap-4">
+                <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-surface/90 dark:bg-navy-950/70 p-1">
+                  {plan.image ? (
+                    <Image
+                      src={plan.image}
+                      alt={plan.siteTitle ?? plan.name}
+                      fill
+                      sizes="96px"
+                      className="object-contain p-1"
+                    />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-black text-ink">{plan.siteTitle ?? plan.name}</h3>
+                  <p className="mt-0.5 text-xs text-body leading-relaxed">{d.planWhy}</p>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-xl font-black text-ink">{formatBDT(plan.devicePrice)}</span>
+                    <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
+                      +{formatBDT(plan.monthlyCharge)}/month
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-line/30 flex items-center justify-between">
+              <span className="text-xs text-body">Doorstep installation included</span>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline"
+              >
+                View Plan Details <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Card 2: Key Questions & Telematics Answers */}
+        <div className="-mx-3 sm:mx-0 rounded-none sm:rounded-md flex flex-col justify-between bg-softer/80 dark:bg-navy-900/90 p-4 sm:p-6">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Safety &amp; Telematics
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                24/7 Monitoring
+              </span>
+            </div>
+
+            <h3 className="mt-2 text-base font-black text-ink">
+              Common Questions &amp; How It Works
+            </h3>
+
+            <div className="mt-4 space-y-3.5">
+              {d.problems.slice(0, 2).map((p) => (
+                <div key={p.problem} className="text-xs sm:text-sm">
+                  <p className="font-bold text-ink">{p.problem}</p>
+                  <p className="mt-1 flex items-start gap-1.5 text-body leading-relaxed">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
+                    <span>{p.answer}</span>
+                  </p>
+                </div>
               ))}
-            </ol>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-line/30 flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400">Suits:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {d.suits.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full bg-surface/90 dark:bg-navy-950/70 px-2.5 py-0.5 text-[11px] font-semibold text-ink"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </Container>
+    </div>
   );
 }

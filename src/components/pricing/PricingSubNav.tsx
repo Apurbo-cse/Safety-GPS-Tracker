@@ -24,11 +24,11 @@ export default function PricingSubNav() {
   const go = (id: string) => (e: React.MouseEvent) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
 
   return (
-    <nav aria-label="Pricing sections" className="glass sticky top-14 z-30 border-y border-line lg:top-16">
+    <nav aria-label="Pricing sections" className="sticky top-14 z-30 bg-surface/90 backdrop-blur-md dark:bg-navy-950/90 lg:top-16">
       <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] sm:px-6 lg:px-8">
         {ITEMS.map(([id, label]) => (
           <a key={id} href={`#${id}`} onClick={go(id)} aria-current={active === id ? "true" : undefined}
-            className={cn("shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors", active === id ? "bg-brand-600 text-white" : "text-body hover:bg-softer hover:text-ink")}>{label}</a>
+            className={cn("shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors", active === id ? "bg-brand-500/10 text-brand-600 dark:text-brand-400" : "text-body hover:text-ink")}>{label}</a>
         ))}
       </div>
     </nav>

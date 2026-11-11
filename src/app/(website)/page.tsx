@@ -1,20 +1,6 @@
-import Hero from "@/components/home/Hero";
-import Partners from "@/components/home/Partners";
-import Overview from "@/components/home/Overview";
-import Stats from "@/components/home/Stats";
-import SoftwarePreview from "@/components/home/SoftwarePreview";
-import FeaturesGrid from "@/components/home/FeaturesGrid";
-import HowItWorks from "@/components/home/HowItWorks";
-import DeviceShowcase from "@/components/home/DeviceShowcase";
-import PricingPreview from "@/components/home/PricingPreview";
-import Industries from "@/components/home/Industries";
-import AppPlatform from "@/components/home/AppPlatform";
-import WhyUs from "@/components/home/WhyUs";
-import Testimonials from "@/components/home/Testimonials";
-import UseCases from "@/components/home/UseCases";
-import PackageGallery from "@/components/home/PackageGallery";
-import HomeFaq from "@/components/home/HomeFaq";
-import ContactCta from "@/components/home/ContactCta";
+import {
+  AppBlock, CategoryGrid, DeviceCatalogue, EnquiryBlock, OtherProducts, FaqGrid, HeroDark, PartnerBorderGrid, ProductWheel, SoftwareBlock, WhyChecklist,
+} from "@/components/home/style3/Sections";
 import { pageMeta } from "@/lib/metadata";
 
 export const metadata = pageMeta(
@@ -23,26 +9,20 @@ export const metadata = pageMeta(
   "/",
 );
 
+// Other layouts: src/components/home/HomeClassic.tsx and src/components/home/style2/Sections.tsx
 export default function HomePage() {
   return (
     <>
-      <Hero />
-      <Overview />
-      <FeaturesGrid />
-      <HowItWorks />
-      <UseCases />
-      <SoftwarePreview />
-      <DeviceShowcase />
-      <PackageGallery />
-      <PricingPreview />
-      <Industries />
-      <AppPlatform />
-      <WhyUs />
-      <Stats />
-      <Testimonials /> 
-      <HomeFaq />
-      <ContactCta className="bg-sec-white pt-16 sm:pt-20" />
-      <Partners />
+      <HeroDark />
+      <ProductWheel />
+      <SoftwareBlock />
+      <AppBlock />
+      <CategoryGrid />
+      <DeviceCatalogue />
+      <OtherProducts />
+      <WhyChecklist />
+      <PartnerBorderGrid />
+      <FaqGrid /> 
     </>
   );
 }

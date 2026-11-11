@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeftRight, BadgeDollarSign, Check, ChevronDown, Layers, Minus, Pin, Search, ShoppingCart, Trophy, Wallet, X } from "lucide-react";
+import { ArrowLeftRight, BadgeDollarSign, Check, ChevronDown, Layers, Minus, Pin, ShoppingCart, Trophy, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import { Button } from "@/components/common/Button";
@@ -33,7 +33,7 @@ export default function PackageComparison() {
   const [hoverCol, setHoverCol] = useState<string | null>(null);
   const [pinned, setPinned] = useState<string | null>(null);
   const [months, setMonths] = useState<(typeof PERIODS)[number]>(12);
-  const [query, setQuery] = useState("");
+  const [query] = useState("");
   const q = query.trim().toLowerCase();
   const total = (p: PricingPlan) => p.devicePrice + p.monthlyCharge * months;
   const hl = hoverCol ?? pinned;
@@ -79,23 +79,19 @@ export default function PackageComparison() {
   ];
 
   return (
-    <section className="scroll-mt-32 bg-surface py-12" id="compare">
+    <section className="scroll-mt-32 bg-soft py-12 sm:py-16" id="compare">
       <Container>
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-ink">Package comparison</h2>
+            <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Compare</span>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Package Comparison</h2>
             <p className="mt-1 text-sm text-body">Compare up to {MAX} packages side by side. Prices and features follow the published price list.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="relative">
-              <span className="sr-only">Find a feature</span>
-              <Search aria-hidden className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find a feature…" className="h-9 w-44 rounded-md border border-line-strong bg-surface pl-8 pr-2 text-sm text-ink placeholder:text-slate-400 focus:border-brand-500 focus:outline-none" />
-            </label>
-            <div className="flex rounded-md border border-line-strong bg-surface p-0.5 text-xs font-semibold" role="group" aria-label="Cost period">
+            <div className="flex rounded-md bg-softer/80 dark:bg-navy-900/90 p-0.5 text-xs font-semibold" role="group" aria-label="Cost period">
               {PERIODS.map((m) => <button key={m} onClick={() => setMonths(m)} aria-pressed={months === m} className={cn("rounded px-2.5 py-1.5", months === m ? "bg-brand-600 text-white" : "text-body hover:bg-softer")}>{m} mo</button>)}
             </div>
-            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-line-strong bg-surface px-3 py-2 text-sm font-medium text-body-strong">
+            <label className="flex cursor-pointer items-center gap-2 rounded-md bg-softer/80 dark:bg-navy-900/90 px-3 py-2 text-sm font-medium text-body-strong">
               <input type="checkbox" checked={diffOnly} onChange={(e) => setDiffOnly(e.target.checked)} className="h-4 w-4 accent-brand-600" />Differences only
             </label>
             {compareIds.length > 0 && <Button variant="outline" size="sm" onClick={() => dispatch(clearCompare())}><X className="h-4 w-4" />Reset</Button>}
@@ -105,13 +101,15 @@ export default function PackageComparison() {
         {/* ------------------------------------------------ desktop / tablet */}
         <div className="hidden md:block">
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Packages to compare">
-            {plans.map((p) => { const on = ids.includes(p.id); return (
-              <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
-                className={cn("flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-xs font-semibold transition-colors", on ? "border-brand-600 bg-brand-50 text-brand-text" : "border-line-strong bg-surface text-body hover:border-brand-400")}>
-                <span className="relative h-6 w-8 overflow-hidden rounded-full bg-white">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="32px" className="object-contain" />}</span>
-                {p.name}{on && <Check className="h-3.5 w-3.5" />}
-              </button>
-            ); })}
+            {plans.map((p) => {
+              const on = ids.includes(p.id); return (
+                <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
+                  className={cn("flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-xs font-semibold transition-colors", on ? "border-brand-600 bg-brand-50 text-brand-text" : "border-transparent bg-softer/80 dark:bg-navy-900/90 text-body hover:text-ink")}>
+                  <span className="relative h-6 w-8 overflow-hidden rounded-full bg-transparent">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="32px" className="object-contain" />}</span>
+                  {p.name}{on && <Check className="h-3.5 w-3.5" />}
+                </button>
+              );
+            })}
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
@@ -119,7 +117,7 @@ export default function PackageComparison() {
               const on = pinned === it.p.id;
               return (
                 <button key={it.label} onClick={() => setPinned(on ? null : it.p.id)} aria-pressed={on}
-                  className={cn("group flex items-center gap-3 rounded-md border p-3 text-left transition-all", on ? "border-brand-500 bg-brand-50 shadow-sm" : "border-line bg-surface hover:border-brand-300")}>
+                  className={cn("group flex items-center gap-3 rounded-md border p-3 text-left transition-all", on ? "border-brand-500 bg-brand-500/10" : "border-transparent bg-softer/80 dark:bg-navy-900/90 hover:-translate-y-0.5")}>
                   <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-md", on ? "bg-brand-600 text-white" : "bg-brand-500/10 text-brand-text")}><it.icon className="h-4 w-4" /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-500">{it.label}</span>
@@ -142,7 +140,7 @@ export default function PackageComparison() {
                       <div className="relative">
                         <button onClick={() => setPinned(pinned === p.id ? null : p.id)} aria-label={pinned === p.id ? `Unpin ${p.name}` : `Pin ${p.name}`} aria-pressed={pinned === p.id} className={cn("absolute -left-1 -top-1 grid h-6 w-6 place-items-center rounded-full hover:bg-softer", pinned === p.id ? "text-brand-text" : "text-slate-400")}><Pin className="h-3.5 w-3.5" /></button>
                         {cols.length > 2 && <button onClick={() => toggle(p.id)} aria-label={`Remove ${p.name}`} className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-softer hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
-                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
+                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-transparent">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
                         <span className="mt-1.5 block text-sm font-bold leading-tight text-ink">{p.name}</span>
                         {p.siteTitle && <span className="block text-xs font-normal text-body">{p.siteTitle}</span>}
                         <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
@@ -202,15 +200,15 @@ export default function PackageComparison() {
                 </select>
               </label>
             ))}
-            <button onClick={() => { setAId(bId); setBId(aId); }} aria-label="Swap packages" className="col-start-2 row-start-1 mb-0.5 grid h-10 w-10 place-items-center rounded-full border border-line-strong bg-surface text-body active:scale-90"><ArrowLeftRight className="h-4 w-4" /></button>
+            <button onClick={() => { setAId(bId); setBId(aId); }} aria-label="Swap packages" className="col-start-2 row-start-1 mb-0.5 grid h-10 w-10 place-items-center rounded-full bg-softer/80 dark:bg-navy-900/90 text-body active:scale-90"><ArrowLeftRight className="h-4 w-4" /></button>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             {[a, b].map((p) => {
               const other = p.id === a.id ? b : a;
               return (
-                <div key={p.id + (p === a ? "a" : "b")} className="glass rounded-md border border-line p-3">
-                  <span className="relative block h-20 overflow-hidden rounded-md bg-white">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
+                <div key={p.id + (p === a ? "a" : "b")} className="rounded-md bg-softer/80 dark:bg-navy-900/90 p-3">
+                  <span className="relative block h-20 overflow-hidden rounded-md bg-transparent">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
                   <p className="mt-2 text-sm font-bold leading-tight text-ink">{p.name}</p>
                   <dl className="mt-2 space-y-1 text-xs">
                     <div className="flex justify-between gap-1"><dt className="text-body">Device</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(p.devicePrice)}{p.devicePrice < other.devicePrice && <Best />}</dd></div>
@@ -229,7 +227,7 @@ export default function PackageComparison() {
               if (!rows.length) return null;
               const open = !!q || !closed[`m-${g.title}`];
               return (
-                <section key={g.title} className="overflow-hidden rounded-md border border-line">
+                <section key={g.title} className="overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90">
                   <button onClick={() => setClosed((c) => ({ ...c, [`m-${g.title}`]: !c[`m-${g.title}`] }))} aria-expanded={open} className="flex w-full items-center gap-2 bg-soft px-3 py-3 text-left">
                     <g.icon className="h-4 w-4 text-brand-text" /><span className="flex-1 text-sm font-semibold text-ink">{g.title}</span>
                     <span className="text-xs tabular-nums text-body">{rows.filter((r) => r.x).length} · {rows.filter((r) => r.y).length}</span>

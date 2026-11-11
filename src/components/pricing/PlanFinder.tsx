@@ -81,13 +81,13 @@ export default function PlanFinder() {
 
   const done = step >= 3 && result;
   return (
-    <section id="finder" className="scroll-mt-32 py-14">
+    <section id="finder" className="scroll-mt-32 bg-soft py-12 sm:py-16">
       <Container>
         <SectionHeading eyebrow="Find my plan" title="Not sure which package?" description="Answer three quick questions and we'll point you to the best-fitting published package." />
-        <div className="glass mx-auto max-w-3xl rounded-md border border-line p-5 sm:p-7">
+        <div className="mx-auto max-w-3xl rounded-lg bg-softer/80 dark:bg-navy-900/90 p-5 sm:p-7">
           {!done && (
             <div className="mb-5 flex items-center gap-3">
-              {step > 0 && <button onClick={() => setStep((s) => s - 1)} aria-label="Back" className="grid h-8 w-8 place-items-center rounded-full border border-line-strong text-body hover:text-ink"><ArrowLeft className="h-4 w-4" /></button>}
+              {step > 0 && <button onClick={() => setStep((s) => s - 1)} aria-label="Back" className="grid h-8 w-8 place-items-center rounded-full bg-surface text-body hover:text-ink dark:bg-navy-950/70"><ArrowLeft className="h-4 w-4" /></button>}
               <div className="flex flex-1 gap-1.5" aria-label={`Step ${step + 1} of 3`}>{[0, 1, 2].map((i) => <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-colors", i <= step ? "bg-brand-600" : "bg-line-strong")} />)}</div>
               <span className="text-xs font-semibold text-body">{step + 1}/3</span>
             </div>
@@ -110,7 +110,18 @@ export default function PlanFinder() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-brand-text">Best match</p>
                   <div className="mt-2 grid gap-5 sm:grid-cols-[200px_1fr]">
-                    <div className="relative h-36 overflow-hidden rounded-md border border-line bg-white sm:h-full sm:min-h-40">{result.best.image && <Image quality={90} src={result.best.image} alt={result.best.siteTitle ?? result.best.name} fill sizes="200px" className="object-contain p-2" />}</div>
+                    <div className="relative aspect-[858/600] w-full overflow-hidden rounded-md bg-surface/50 dark:bg-navy-950/60 sm:min-w-[200px]">
+                      {result.best.image && (
+                        <Image
+                          quality={90}
+                          src={result.best.image}
+                          alt={result.best.siteTitle ?? result.best.name}
+                          fill
+                          sizes="(min-width:640px) 240px, 100vw"
+                          className="object-contain"
+                        />
+                      )}
+                    </div>
                     <div>
                       <h3 className="text-xl font-bold text-ink">{result.best.name}</h3>
                       <p className="text-sm text-body">{formatBDT(result.best.devicePrice)} device + {formatBDT(result.best.monthlyCharge)}/month · first 12 months {formatBDT(year(result.best))}</p>
@@ -122,12 +133,12 @@ export default function PlanFinder() {
                     </div>
                   </div>
                   {result.alts.length > 0 && (
-                    <div className="mt-5 border-t border-line pt-4">
+                    <div className="mt-5 pt-4">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-body">Also consider</p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {result.alts.map((a) => (
-                          <button key={a.id} onClick={() => { dispatch(setCompare([result.best.id, a.id])); document.getElementById("compare")?.scrollIntoView({ behavior: "smooth" }); }} className="flex items-center gap-3 rounded-md border border-line-strong bg-surface p-2.5 text-left transition-colors hover:border-brand-400">
-                            <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded bg-white">{a.image && <Image quality={90} src={a.image} alt="" fill sizes="56px" className="object-contain" />}</span>
+                          <button key={a.id} onClick={() => { dispatch(setCompare([result.best.id, a.id])); document.getElementById("compare")?.scrollIntoView({ behavior: "smooth" }); }} className="flex items-center gap-3 rounded-md bg-surface p-2.5 text-left transition-all hover:-translate-y-0.5 dark:bg-navy-950/70">
+                            <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded bg-transparent">{a.image && <Image quality={90} src={a.image} alt="" fill sizes="56px" className="object-contain" />}</span>
                             <span className="min-w-0"><span className="block truncate text-sm font-semibold text-ink">{a.name}</span><span className="block text-xs text-body">{formatBDT(a.devicePrice)} + {formatBDT(a.monthlyCharge)}/mo · compare →</span></span>
                           </button>
                         ))}

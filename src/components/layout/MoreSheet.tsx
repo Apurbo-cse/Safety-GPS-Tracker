@@ -20,7 +20,7 @@ const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/features", label: "Features", icon: LayoutGrid },
   { href: "/pricing", label: "Pricing", icon: Tag },
-  { href: "/devices", label: "Tracking Devices", icon: Cpu },
+  { href: "/products", label: "Products", icon: Cpu },
   { href: "/solutions", label: "Solutions", icon: Building2 },
   { href: "/about", label: "About Us", icon: Info },
   { href: "/contact", label: "Contact", icon: Mail },

@@ -12,7 +12,7 @@ const TABS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/features", label: "Features", icon: LayoutGrid },
   { href: "/pricing", label: "Pricing", icon: Tag },
-  { href: "/devices", label: "Devices", icon: Cpu },
+  { href: "/products", label: "Products", icon: Cpu },
 ] as const;
 
 /** Native-app style tab bar, shown below the lg breakpoint. */

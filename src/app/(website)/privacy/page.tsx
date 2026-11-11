@@ -47,7 +47,14 @@ const sections: LegalSection[] = [
 export default function PrivacyPage() {
   return (
     <>
-      <PageHero eyebrow="Legal" title="Privacy Policy" description="How we collect, use and protect your personal and vehicle data." />
+      <PageHero
+        art="car"
+        eyebrow="Data Protection"
+        badgeText="Privacy & Security"
+        title="Privacy Policy & Vehicle"
+        titleHighlight="Data Protection"
+        description="How Safety GPS Tracker collects, processes, and protects your personal credentials, vehicle telematics, and real-time location records."
+      />
       <LegalPage
         updated="10 November 2026"
         intro={<p>{SITE.name} (&quot;we&quot;, &quot;us&quot;) provides GPS vehicle tracking through tracking devices, a web platform and Android and iOS apps. This policy explains what information we collect when you use our service and how we handle it.</p>}

@@ -99,7 +99,7 @@ export default function FeaturesExplorer() {
               "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
               cat === "All"
                 ? "bg-brand-600 text-white "
-                : "border border-line bg-surface text-body hover:border-brand-400"
+                : "bg-softer/80 dark:bg-navy-900/90 text-body hover:text-ink"
             )}
           >
             All Features ({features.length})
@@ -118,7 +118,7 @@ export default function FeaturesExplorer() {
                   "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all",
                   isSelected
                     ? "bg-brand-600 text-white "
-                    : "border border-line bg-surface text-body hover:border-brand-400"
+                    : "bg-softer/80 dark:bg-navy-900/90 text-body hover:text-ink"
                 )}
               >
                 {c} ({count})
@@ -156,7 +156,7 @@ export default function FeaturesExplorer() {
               const on = picked.includes(f.id);
               return (
                 <motion.article key={f.id} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.3, delay: (i % 6) * 0.04 }}
-                  className={cn("group glass relative flex flex-col overflow-hidden rounded-md border p-3.5 transition-all duration-300 hover:-translate-y-1   sm:p-4", on ? "border-brand-500 ring-2 ring-brand-500/25" : "border-line hover:border-brand-400")}>
+                  className={cn("group relative flex flex-col overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90 p-3.5 transition-all duration-300 hover:-translate-y-1 sm:p-4", on && "ring-2 ring-brand-500/40")}>
                   <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-brand-500/15 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative flex items-start gap-2.5">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-gradient-to-br from-navy-700 to-navy-950 text-white   ring-1 ring-white/10 transition-all duration-300 group-hover:from-brand-500 group-hover:to-brand-700 group-hover:scale-105"><DynIcon name={f.icon} className="h-4 w-4" /></span>

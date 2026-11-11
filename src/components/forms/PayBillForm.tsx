@@ -74,9 +74,9 @@ export default function PayBillForm() {
   return (
     <div className="mx-auto grid max-w-5xl gap-4 lg:grid-cols-[1fr_280px]">
       {/* ================= main card ================= */}
-      <div className="overflow-hidden rounded-md border border-line bg-surface shadow-sm">
+      <div className="overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90">
         {/* stepper */}
-        <div className="border-b border-line bg-soft px-4 py-2.5">
+        <div className="bg-black/[0.03] px-4 dark:bg-white/[0.03] py-2.5">
           <ol className="flex items-center gap-2">
             {STEPS.map((s, i) => {
               const done = i < stepIdx, on = i === stepIdx;
@@ -111,7 +111,7 @@ export default function PayBillForm() {
                   <div className="flex flex-wrap gap-1.5">
                     {QUICK.map((v) => (
                       <button key={v} type="button" onClick={() => setValue("amount", v, { shouldValidate: true })}
-                        className={cn("rounded-full border px-3 py-1 text-xs font-semibold tabular-nums transition-colors", amount === v ? "border-brand-500 bg-brand-500/10 text-brand-text" : "border-line-strong bg-surface text-body hover:border-brand-400")}>
+                        className={cn("rounded-full border px-3 py-1 text-xs font-semibold tabular-nums transition-colors", amount === v ? "border-brand-500 bg-brand-500/10 text-brand-text" : "border-transparent bg-surface text-body hover:text-ink dark:bg-navy-950/70")}>
                         {formatBDT(v)}
                       </button>
                     ))}
@@ -124,7 +124,7 @@ export default function PayBillForm() {
                     {METHODS.map((m) => {
                       const on = method === m;
                       return (
-                        <label key={m} className={cn("relative flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/30", on ? "border-brand-500 bg-brand-500/5 shadow-sm" : "border-line-strong hover:border-brand-300")}>
+                        <label key={m} className={cn("relative flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/30", on ? "border-brand-500 bg-brand-500/10" : "border-transparent bg-surface hover:bg-surface/70 dark:bg-navy-950/70")}>
                           <input type="radio" value={m} className="sr-only" {...register("method")} onChange={() => setValue("method", m, { shouldValidate: true })} />
                           <MethodBadge m={m} size="h-7 w-7" />
                           <span className="min-w-0">
@@ -203,7 +203,7 @@ export default function PayBillForm() {
       {/* ================= side ================= */}
       <aside className="lg:sticky lg:top-24 lg:self-start">
         {/* live summary */}
-        <div className="overflow-hidden rounded-md border border-line bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90">
           <div className="relative bg-navy-950 px-4 py-3 text-white">
             <div aria-hidden className="grid-bg absolute inset-0 opacity-50" />
             <div className="relative">

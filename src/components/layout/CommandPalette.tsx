@@ -55,7 +55,7 @@ export default function CommandPalette() {
       { id: "a-cart", group: "Actions", label: "Open cart", icon: ShoppingCart, run: () => dispatch(setCartOpen(true)) },
       { id: "a-theme", group: "Actions", label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme", icon: theme === "dark" ? Sun : Moon, keywords: "dark light mode appearance", run: () => { const n = theme === "dark" ? "light" : "dark"; applyTheme(n); dispatch(setTheme(n)); } },
       ...plans.map((p): Cmd => ({ id: `pl-${p.id}`, group: "Packages", label: p.name, hint: `${formatBDT(p.devicePrice)} + ${formatBDT(p.monthlyCharge)}/mo`, icon: Tag, keywords: `${p.siteTitle ?? ""} price package`, run: () => { dispatch(selectPlan(p.id)); announceNavigation(); router.push("/pricing"); } })),
-      ...devices.map((d): Cmd => ({ id: `d-${d.id}`, group: "Devices", label: d.name, hint: d.category, icon: HardDrive, keywords: "tracker hardware", run: () => dispatch(openDeviceModal(d.id)) })),
+      ...devices.map((d): Cmd => ({ id: `d-${d.id}`, group: "Products", label: d.name, hint: d.category, icon: HardDrive, keywords: "tracker hardware", run: () => dispatch(openDeviceModal(d.id)) })),
       ...features.map((f): Cmd => ({ id: `f-${f.id}`, group: "Features", label: f.title, hint: f.category, icon: f.category === "Reports & Analytics" ? FileText : f.category === "Platform" ? Layers : CreditCard, keywords: f.description, run: () => dispatch(openFeatureModal(f.id)) })),
     ];
   }, [dispatch, router, theme]);
@@ -86,7 +86,7 @@ export default function CommandPalette() {
             initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.98 }} transition={{ duration: 0.18 }}>
             <div className="flex items-center gap-3 border-b border-line px-4">
               <Search className="h-5 w-5 text-slate-400" />
-              <input ref={inputRef} value={q} onChange={(e) => { setQ(e.target.value); setActive(0); }} placeholder="Search pages, features, devices, packages…" aria-label="Search" className="no-ring h-14 flex-1 bg-transparent text-base text-ink outline-none focus-visible:outline-none placeholder:text-slate-400" />
+              <input ref={inputRef} value={q} onChange={(e) => { setQ(e.target.value); setActive(0); }} placeholder="Search pages, features, products, packages…" aria-label="Search" className="no-ring h-14 flex-1 bg-transparent text-base text-ink outline-none focus-visible:outline-none placeholder:text-slate-400" />
               <kbd className="rounded border border-line px-1.5 py-0.5 text-xs text-slate-500">Esc</kbd>
             </div>
             <ul ref={listRef} role="listbox" className="max-h-[52vh] overflow-y-auto p-2">

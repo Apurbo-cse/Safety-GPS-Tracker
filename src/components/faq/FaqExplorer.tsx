@@ -59,7 +59,7 @@ export default function FaqExplorer() {
   };
 
   return (
-    <section className="bg-sec-warm py-10 sm:py-14">
+    <section className="bg-surface py-12 sm:py-16">
       <Container className="grid gap-6 lg:grid-cols-[260px_1fr] lg:gap-10">
         {/* ---------- sidebar ---------- */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -92,7 +92,7 @@ export default function FaqExplorer() {
                   aria-pressed={on}
                   className={cn(
                     "flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors lg:w-full",
-                    on ? "border-brand-500 bg-brand-600 text-white" : "border-line bg-surface text-body hover:border-brand-300 hover:text-ink",
+                    on ? "bg-brand-600 text-white" : "bg-softer/80 dark:bg-navy-900/90 text-body hover:text-ink",
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -136,13 +136,13 @@ export default function FaqExplorer() {
           </div>
 
           {groups.length === 0 ? (
-            <div className="rounded-md border border-dashed border-line-strong bg-surface p-10 text-center">
+            <div className="rounded-md bg-softer/80 dark:bg-navy-900/90 p-10 text-center">
               <HelpCircle className="mx-auto h-8 w-8 text-slate-400" />
               <p className="mt-2 text-sm font-bold text-ink">No matching questions</p>
               <p className="mt-1 text-sm text-body">Try another word, or ask our team directly.</p>
               <div className="mt-4 flex justify-center gap-2">
                 <button onClick={() => { setQuery(""); setCat("All"); }} className="rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-500">Reset search</button>
-                <Link href="/contact" className="rounded-md border border-line-strong bg-surface px-3 py-2 text-sm font-semibold text-ink hover:border-brand-500">Ask a question</Link>
+                <Link href="/contact" className="rounded-md bg-surface px-3 py-2 text-sm font-semibold text-ink hover:text-brand-text dark:bg-navy-950/70">Ask a question</Link>
               </div>
             </div>
           ) : (
@@ -164,8 +164,8 @@ export default function FaqExplorer() {
                             key={f.id}
                             id={f.id}
                             className={cn(
-                              "scroll-mt-28 overflow-hidden rounded-md border bg-surface transition-colors",
-                              isOpen ? "border-brand-500/60 ring-1 ring-brand-500/20" : "border-line hover:border-brand-300",
+                              "scroll-mt-28 overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90 transition-all",
+                              !isOpen && "hover:-translate-y-0.5",
                             )}
                           >
                             <button

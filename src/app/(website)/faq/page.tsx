@@ -27,9 +27,11 @@ export default function FaqPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <PageHero
         art="car"
-        eyebrow="Help centre"
-        title="Frequently asked questions"
-        description={`${FAQS.length} answers about tracking, security, devices, packages and billing — search or browse by topic.`}
+        eyebrow="Help Centre"
+        badgeText="24/7 Knowledge Base"
+        title="Frequently Asked Questions"
+        titleHighlight="& Support Guide"
+        description={`${FAQS.length} detailed answers about live tracking, remote engine lock, device installation, pricing packages and monthly billing — search or browse by topic.`}
       />
       <FaqExplorer />
       <ContactCta className="bg-sec-warm" title="Still have a question?" />

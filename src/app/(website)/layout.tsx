@@ -1,4 +1,3 @@
-import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
 import MobilePageBar from "@/components/layout/MobilePageBar";
 import Footer from "@/components/layout/Footer";
@@ -15,7 +14,6 @@ import LeadModal from "@/components/forms/LeadModal";
 export default function WebsiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <TopBar />
       <Navbar />
       <MobilePageBar />
       <div className="pb-[calc(3.6rem+env(safe-area-inset-bottom))] lg:pb-0">

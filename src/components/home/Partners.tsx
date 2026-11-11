@@ -174,7 +174,7 @@ function NetworkDiagram() {
           <span aria-hidden className="absolute h-[124px] w-[124px] animate-[spin_16s_linear_infinite] rounded-full border border-dashed border-line-strong">
             <Satellite className="absolute -top-2.5 left-1/2 h-5 w-5 -translate-x-1/2 text-brand-500" />
           </span>
-          <div className="relative grid h-[76px] w-[76px] place-items-center rounded-2xl border border-line bg-white shadow-[0_0_36px_-6px_rgb(240_90_34/0.55)]">
+          <div className="relative grid h-[76px] w-[76px] place-items-center rounded-md border border-line bg-white shadow-[0_0_36px_-6px_rgb(240_90_34/0.55)]">
             <Image src="/img/app/icon.png" alt="" width={40} height={43} className="h-10 w-auto" />
           </div>
         </div>

@@ -35,8 +35,17 @@ export default function PlanFeaturesModal() {
       {plan && (
         <div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-md border border-line bg-white sm:w-40">
-              {plan.image && <Image quality={90} src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="160px" className="object-contain p-1.5" />}
+            <div className="relative aspect-[858/600] w-full shrink-0 overflow-hidden rounded-md bg-surface/50 dark:bg-navy-950/60 sm:w-44">
+              {plan.image && (
+                <Image
+                  quality={90}
+                  src={plan.image}
+                  alt={plan.siteTitle ?? plan.name}
+                  fill
+                  sizes="(min-width:640px) 176px, 100vw"
+                  className="object-contain"
+                />
+              )}
             </div>
             <div className="min-w-0 flex-1">
               {plan.siteTitle && <p className="text-xs text-body">Device: {plan.siteTitle}</p>}

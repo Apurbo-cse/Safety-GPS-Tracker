@@ -8,9 +8,16 @@ export const metadata = pageMeta("Pay Bill", "Pay your Safety GPS Tracker bill w
 export default function PayBillPage() {
   return (
     <>
-      <PageHero art="van" eyebrow="Pay bill" title="Pay your monthly bill" description="Enter your invoice details, review and confirm. This page is a demonstration interface — no money is charged." />
-      <section className="bg-sec-gray">
-        <Container className="py-6 sm:py-8">
+      <PageHero
+        art="van"
+        eyebrow="Billing Portal"
+        badgeText="Instant Online Payment"
+        title="Pay Your Monthly Service Bill"
+        titleHighlight="Quickly & Securely"
+        description="Enter your vehicle registration or invoice number to pay your monthly tracking subscription via bKash, Nagad, Rocket or cards."
+      />
+      <section className="bg-soft py-10 sm:py-14">
+        <Container className="max-w-3xl">
           <PayBillForm />
         </Container>
       </section>
