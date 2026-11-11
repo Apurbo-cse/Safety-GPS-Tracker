@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -21,9 +22,44 @@ export default function BottomNav() {
   const moreOpen = useAppSelector((s) => s.ui.mobileNavOpen);
   const moreActive = moreOpen || ["/solutions", "/about", "/contact", "/pay-bill"].some((h) => pathname.startsWith(h));
 
+  /* Hide while scrolling down, show again when scrolling up or near the top */
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const dy = y - lastY.current;
+        if (y < 80) setHidden(false);
+        else if (dy > 8) setHidden(true);
+        else if (dy < -8) setHidden(false);
+        if (Math.abs(dy) > 8 || y < 80) lastY.current = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  // show again after navigating to a new page
+  const [shownFor, setShownFor] = useState(pathname);
+  if (shownFor !== pathname) {
+    setShownFor(pathname);
+    setHidden(false);
+  }
+
+  const isHidden = hidden && !moreOpen;
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-nav-hidden", isHidden);
+    return () => document.documentElement.removeAttribute("data-nav-hidden");
+  }, [isHidden]);
+
   const item = "relative flex flex-1 flex-col items-center justify-center gap-0.5 pt-1.5 text-xs font-semibold transition-colors active:scale-95";
   return (
-    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)]   backdrop-blur-xl lg:hidden">
+    <nav aria-label="Primary" className={cn("fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-transform duration-300 ease-out lg:hidden", isHidden && "translate-y-full")}>
       <div className="mx-auto flex h-[3.6rem] max-w-xl items-stretch">
         {TABS.map((t) => {
           const active = t.href === "/" ? pathname === "/" : pathname.startsWith(t.href);

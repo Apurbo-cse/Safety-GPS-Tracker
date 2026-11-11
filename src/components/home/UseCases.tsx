@@ -52,7 +52,7 @@ export default function UseCases() {
             <div
               role="tablist"
               aria-label="Use cases"
-              className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:col-span-4 lg:flex lg:flex-col [&::-webkit-scrollbar]:hidden"
+              className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:col-span-4 lg:flex lg:flex-col [&::-webkit-scrollbar]:hidden"
             >
               {list.map((u, i) => {
                 const on = i === active;

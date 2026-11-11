@@ -282,7 +282,7 @@ button { -webkit-user-select: none; user-select: none; }
 /* Swipeable card rows on phones (grid on tablet and up) */
 @media (max-width: 767px) {
   .swipe-row {
-    display: flex; overflow-x: auto; gap: 14px; margin-inline: -1rem; padding: 4px 1rem 10px;
+    display: flex; overflow-x: auto; gap: 14px; margin-inline: -0.75rem; padding: 4px 0.75rem 10px;
     scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
   }
   .swipe-row::-webkit-scrollbar { display: none; }
@@ -351,6 +351,11 @@ button { -webkit-user-select: none; user-select: none; }
 }
 .card-pro:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -18px rgb(240 90 34 / 0.35); }
 .card-pro:hover::after { opacity: 1; }
+
+/* Floating action buttons slide down with the bottom nav when it hides on scroll */
+.fab-stack { transition: transform .3s ease-out; }
+html[data-nav-hidden] .fab-stack { transform: translateY(calc(3.6rem + env(safe-area-inset-bottom))); }
+@media (min-width: 1024px) { html[data-nav-hidden] .fab-stack { transform: none; } }
 
 /* Footer watermark: an orange glow follows the cursor through the letters */
 .footer-mark {

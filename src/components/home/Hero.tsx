@@ -144,7 +144,7 @@ export default function Hero() {
         })}
       </Swiper>
       <div className="relative border-t border-white/10 bg-navy-950">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-4 py-3 text-xs text-slate-400 sm:justify-between sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-1 px-3 py-3 text-xs text-slate-400 sm:justify-between sm:px-6 lg:px-8">
           <span className="flex items-center gap-2">
             Networks:
             <span className="flex items-center gap-0.5">

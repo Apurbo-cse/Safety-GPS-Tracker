@@ -65,7 +65,7 @@ export default function PricingPreview() {
           <p className="text-sm font-semibold text-ink"><span className="mr-2 inline-grid h-6 w-6 place-items-center rounded-full bg-brand-600 text-xs text-white">1</span>Choose a package</p>
           <Link href="/pricing" className="hidden items-center gap-1 text-sm font-semibold text-brand-text hover:underline sm:inline-flex">Compare all {plans.length} <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <div role="radiogroup" aria-label="Choose a package" className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+        <div role="radiogroup" aria-label="Choose a package" className="-mx-3 flex snap-x gap-3 overflow-x-auto px-3 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
           {plans.map((p) => {
             const on = p.id === planId;
             return (

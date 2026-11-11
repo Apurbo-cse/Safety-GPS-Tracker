@@ -12,7 +12,7 @@ export default function FloatingActions() {
     return () => window.removeEventListener("scroll", on);
   }, []);
   return (
-    <div className="fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] right-4 z-40 lg:bottom-5 flex flex-col items-end gap-3 sm:right-6">
+    <div className="fab-stack fixed bottom-[calc(4.6rem+env(safe-area-inset-bottom))] right-4 z-40 lg:bottom-5 flex flex-col items-end gap-3 sm:right-6">
       <AnimatePresence>
         {show && (
           <motion.button

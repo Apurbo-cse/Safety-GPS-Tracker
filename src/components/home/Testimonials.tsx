@@ -59,7 +59,7 @@ export default function Testimonials() {
               </dl>
             </div>
 
-            <ul role="tablist" aria-label="Customer reviews" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:flex lg:flex-col [&::-webkit-scrollbar]:hidden">
+            <ul role="tablist" aria-label="Customer reviews" className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:flex lg:flex-col [&::-webkit-scrollbar]:hidden">
               {testimonials.map((r, i) => {
                 const on = i === active;
                 return (

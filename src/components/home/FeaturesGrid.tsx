@@ -203,7 +203,7 @@ export default function FeaturesGrid() {
         </div>
 
         <LayoutGroup>
-          <div role="tablist" aria-label="Feature categories" className="-mx-4 mt-8 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
+          <div role="tablist" aria-label="Feature categories" className="-mx-3 mt-8 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
             {TABS.map((t) => {
               const active = tab === t.key;
               return (

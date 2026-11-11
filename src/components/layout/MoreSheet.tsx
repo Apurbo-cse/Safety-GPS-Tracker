@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, CreditCard, Info, LogIn, LogOut, Mail, Phone, Search, ShoppingCart, UserPlus, Briefcase, type LucideIcon } from "lucide-react";
+import { Building2, CreditCard, Info, LogIn, LogOut, Mail, Phone, Search, ShoppingCart, UserPlus, Briefcase, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { announceNavigation } from "@/lib/navigate";
 import ThemeToggle from "./ThemeToggle";
@@ -18,7 +18,7 @@ const Tile = ({ icon: Icon, label, onClick, href }: { icon: LucideIcon; label: s
   return href ? <Link href={href} onClick={onClick} className={cls}>{body}</Link> : <button onClick={onClick} className={cls}>{body}</button>;
 };
 
-/** Bottom sheet opened from the "More" tab on phones and tablets. */
+/** Left-side drawer opened from the "More" tab / menu button on phones and tablets. */
 export default function MoreSheet() {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -43,16 +43,16 @@ export default function MoreSheet() {
           <div className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm" onClick={close} />
           <motion.div
             role="dialog" aria-modal="true" aria-label="More"
-            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-md border-t border-line bg-surface px-4 pb-[calc(4.8rem+env(safe-area-inset-bottom))] pt-2  "
-            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-            drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }} onDragEnd={(_, i) => { if (i.offset.y > 90 || i.velocity.y > 600) close(); }}
+            className="absolute inset-y-0 left-0 flex w-[84%] max-w-sm flex-col overflow-y-auto border-r border-line bg-surface px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))] shadow-2xl"
+            initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0.6, right: 0 }} onDragEnd={(_, i) => { if (i.offset.x < -90 || i.velocity.x < -600) close(); }}
           >
-            <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line-strong" aria-hidden />
-            <div className="mb-4 flex items-center justify-between">
-              <div><p className="text-base font-bold text-ink">{user ? user.name : "Safety GPS Tracker"}</p><p className="text-xs text-body">{user ? "Signed in (demo)" : "Real-time GPS vehicle tracking"}</p></div>
-              <ThemeToggle showLabels />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="min-w-0"><p className="truncate text-base font-bold text-ink">{user ? user.name : "Safety GPS Tracker"}</p><p className="text-xs text-body">{user ? "Signed in (demo)" : "Real-time GPS vehicle tracking"}</p></div>
+              <button onClick={close} aria-label="Close menu" className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line text-body transition-colors hover:bg-softer hover:text-ink"><X className="h-4 w-4" /></button>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="mb-4"><ThemeToggle showLabels /></div>
+            <div className="mb-4 grid grid-cols-3 gap-2.5">
               <Tile icon={Building2} label="Solutions" href="/solutions" onClick={close} />
               <Tile icon={Info} label="About Us" href="/about" onClick={close} />
               <Tile icon={Mail} label="Contact" href="/contact" onClick={close} />
@@ -67,7 +67,7 @@ export default function MoreSheet() {
               </>)}
               <Tile icon={Briefcase} label="Sales" href={`tel:${SITE.phone}`} onClick={close} />
             </div>
-            <a href={`tel:${SITE.phone}`} className="mt-4 flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-3.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
+            <a href={`tel:${SITE.phone}`} className="mt-auto flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-3.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
           </motion.div>
         </motion.div>
       )}
