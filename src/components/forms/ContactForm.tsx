@@ -81,7 +81,7 @@ export default function ContactForm() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-ink">{d.label}</span>
-                  <span className="hidden text-xs text-slate-500 sm:block">{d.desc}</span>
+                  <span className="block text-[11px] leading-tight text-slate-500 sm:text-xs">{d.desc}</span>
                 </span>
               </label>
             );

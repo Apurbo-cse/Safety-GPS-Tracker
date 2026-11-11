@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, CreditCard, Info, LogIn, LogOut, Mail, Phone, Search, ShoppingCart, UserPlus, Briefcase, X, type LucideIcon } from "lucide-react";
+import { Building2, CreditCard, HelpCircle, Info, LogIn, LogOut, Mail, Phone, Search, ShoppingCart, UserPlus, Briefcase, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { announceNavigation } from "@/lib/navigate";
 import ThemeToggle from "./ThemeToggle";
@@ -57,6 +57,7 @@ export default function MoreSheet() {
               <Tile icon={Info} label="About Us" href="/about" onClick={close} />
               <Tile icon={Mail} label="Contact" href="/contact" onClick={close} />
               <Tile icon={CreditCard} label="Pay Bill" href="/pay-bill" onClick={close} />
+              <Tile icon={HelpCircle} label="FAQ" href="/faq" onClick={close} />
               <Tile icon={Search} label="Search" onClick={() => { close(); dispatch(setPalette(true)); }} />
               <Tile icon={ShoppingCart} label={cartCount ? `Cart (${cartCount})` : "Cart"} onClick={() => { close(); dispatch(setCartOpen(true)); }} />
               {user ? (
@@ -67,7 +68,7 @@ export default function MoreSheet() {
               </>)}
               <Tile icon={Briefcase} label="Sales" href={`tel:${SITE.phone}`} onClick={close} />
             </div>
-            <a href={`tel:${SITE.phone}`} className="mt-auto flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-3.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
+            <a href={`tel:${SITE.phone}`} className="mt-auto flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-2.5 text-sm font-bold text-white     active:scale-[.98]"><Phone className="h-4 w-4" />Call {SITE.phone}</a>
           </motion.div>
         </motion.div>
       )}

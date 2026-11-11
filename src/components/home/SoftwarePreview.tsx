@@ -344,7 +344,7 @@ export default function SoftwarePreview() {
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
             <span className="text-sm font-bold">Fleet console</span>
             <span className="truncate text-xs text-slate-500">/ {current.label}</span>
-            <span className="ml-auto hidden text-xs text-slate-500 sm:inline">Demo data</span>
+            <span className="ml-auto text-xs text-slate-500">Demo data</span>
             <span className="flex items-center gap-1.5 rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-semibold text-green-400">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400" />Live
             </span>

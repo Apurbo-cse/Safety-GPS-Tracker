@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Container from "@/components/common/Container";
 import { SITE } from "@/lib/site";
+import { FAQS as ALL_FAQS } from "@/data/faqs";
 import { cn } from "@/utils/format";
 
 type FaqCategory =
@@ -21,72 +22,8 @@ type FaqCategory =
   | "Hardware & Sensors"
   | "Billing & Support";
 
-type CategorizedFaq = {
-  id: string;
-  category: Exclude<FaqCategory, "All">;
-  q: string;
-  a: string;
-  tag: string;
-};
-
-const FAQS: CategorizedFaq[] = [
-  {
-    id: "faq-1",
-    category: "Tracking & GPS",
-    q: "How fast does the GPS location update on the map?",
-    a: "Safety GPS Tracker features an ultra-low latency 10-second satellite refresh rate. This ensures road turns, highway speed changes, and traffic stops are reflected accurately in real-time without sluggish delays.",
-    tag: "10s Ultra-Fast Ping",
-  },
-  {
-    id: "faq-2",
-    category: "Security & Relay",
-    q: "How does the Remote Engine Immobilizer work?",
-    a: "Through your mobile app or web portal, you can tap 'Immobilize Engine'. An encrypted command is transmitted via the onboard 4G IoT relay in under 400 milliseconds to cut power to the fuel solenoid. A smart speed-latch ensures the command only executes safely when the vehicle slows down.",
-    tag: "Solid-State Relay",
-  },
-  {
-    id: "faq-3",
-    category: "Hardware & Sensors",
-    q: "Can I monitor fuel pilferage and diesel consumption?",
-    a: "Yes. Our Fuel Monitoring Package pairs with capacitive and ultrasonic fuel sensor rods (±1% accuracy) installed in your vehicle's fuel tank, giving you instant alerts for sudden fuel drops, tank drainage, and refuel receipts.",
-    tag: "99.5% Accuracy Rods",
-  },
-  {
-    id: "faq-4",
-    category: "Tracking & GPS",
-    q: "What happens if a vehicle enters cellular dead zones on remote highways?",
-    a: "Our hardware uses Multi-Carrier 4G IoT SIM cards with automatic network switching across Grameenphone, Robi, and Banglalink towers. In rare instances where all networks are unreachable, internal flash memory stores up to 30,000 GPS points and uploads them automatically the moment signal returns.",
-    tag: "Dual-SIM Roaming",
-  },
-  {
-    id: "faq-5",
-    category: "Hardware & Sensors",
-    q: "Do you provide doorstep installation across all 64 districts in Bangladesh?",
-    a: "Yes! Our certified telematics technicians provide free doorstep installation, covert wiring, and device calibration in Dhaka, Chittagong, Sylhet, Rajshahi, Khulna, and all 64 districts.",
-    tag: "64 Districts Coverage",
-  },
-  {
-    id: "faq-6",
-    category: "Billing & Support",
-    q: "Can multiple dispatchers track the fleet simultaneously on Android, iOS, and PC?",
-    a: "Absolutely. One account gives your dispatchers and executives simultaneous multi-login access on native Android and iOS mobile apps as well as any desktop web browser with role-based access control.",
-    tag: "Multi-Platform Access",
-  },
-  {
-    id: "faq-7",
-    category: "Hardware & Sensors",
-    q: "Is this tracking hardware approved by BTRC and BRTA compliant?",
-    a: "Yes, 100%. All tracking units supplied by Safety GPS Tracker are officially BTRC approved (Reg. BTRC/LL/GPS-2021) and comply with BRTA digital safety guidelines for commercial and private motor vehicles.",
-    tag: "BTRC Licensed",
-  },
-  {
-    id: "faq-8",
-    category: "Security & Relay",
-    q: "What happens if a thief attempts to cut or disconnect the tracker?",
-    a: "The moment the primary wiring is severed, the device triggers an instant 'Power Cut / Tamper Alert' notification to your phone. The onboard backup battery keeps the GPS running for up to 72 hours while alerting our 24/7 recovery dispatch desk.",
-    tag: "Tamper & Battery",
-  },
-];
+// Home shows the core questions; the full list lives on /faq
+const FAQS = ALL_FAQS.filter((f) => f.category !== "Pricing & Packages").slice(0, 8);
 
 const CATEGORIES: FaqCategory[] = [
   "All",
@@ -201,6 +138,13 @@ export default function HomeFaq() {
                 >
                   <Mail className="h-3.5 w-3.5 text-brand-text" />
                   <span>Contact Form</span>
+                </Link>
+                <Link
+                  href="/faq"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-2 text-xs font-semibold text-body hover:border-brand-400 hover:text-ink transition-colors"
+                >
+                  <HelpCircle className="h-3.5 w-3.5 text-brand-text" />
+                  <span>All {ALL_FAQS.length} FAQs</span>
                 </Link>
               </div>
             </div>

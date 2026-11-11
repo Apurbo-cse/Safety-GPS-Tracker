@@ -9,6 +9,16 @@ export default function AuthShell({ title, subtitle, children, footer }: { title
       <div className="flex flex-col px-5 py-8 sm:px-10">
         <div className="flex items-center justify-between"><Logo /><ThemeToggle /></div>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
+          <div className="relative mb-6 overflow-hidden rounded-md bg-navy-950 p-4 text-white lg:hidden">
+            <div className="grid-bg absolute inset-0 opacity-60" /><div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-500/30 blur-2xl" />
+            <div className="relative flex gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-white/10 ring-1 ring-white/20"><ShieldCheck className="h-5 w-5" /></span>
+              <div>
+                <p className="text-sm font-bold leading-snug">Know where every vehicle is, every time you check.</p>
+                <p className="mt-1 text-xs text-slate-300">Create an account to order GPS tracking packages and devices and pay your monthly bill.</p>
+              </div>
+            </div>
+          </div>
           <h1 className="text-2xl font-bold text-ink">{title}</h1>
           <p className="mt-1 text-sm text-body">{subtitle}</p>
           <div className="mt-6">{children}</div>

@@ -80,7 +80,7 @@ export default function UseCases() {
                       <span className="block truncate text-sm font-bold text-ink">{u.title}</span>
                       <span className="block truncate text-xs text-slate-500">{LIVE[u.id]?.unit} · {LIVE[u.id]?.status}</span>
                     </span>
-                    <span className="hidden text-xs font-bold tabular-nums text-slate-400 lg:block">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-xs font-bold tabular-nums text-slate-400">{String(i + 1).padStart(2, "0")}</span>
                     {/* progress */}
                     <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-line-soft">
                       {on && (

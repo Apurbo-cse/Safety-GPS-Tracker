@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "light
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap";
+  "inline-flex items-center justify-center gap-1.5 rounded-md font-semibold transition-all active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap";
 const variants: Record<Variant, string> = {
   primary: "gloss-btn text-white",
   secondary: "bg-navy-900 text-white hover:bg-navy-800",
@@ -15,9 +15,9 @@ const variants: Record<Variant, string> = {
   light: "bg-white text-navy-950 hover:bg-white/90",
 };
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs sm:h-9 sm:text-sm",
-  md: "h-9 px-4 text-sm sm:h-11 sm:px-5",
-  lg: "h-10 px-4 text-sm sm:h-12 sm:px-6 sm:text-base",
+  sm: "h-8 px-2.5 text-xs",
+  md: "h-9 px-3.5 text-sm",
+  lg: "h-10 px-4 text-sm sm:h-11 sm:px-5",
 };
 
 interface Common { variant?: Variant; size?: Size; className?: string; children: React.ReactNode }

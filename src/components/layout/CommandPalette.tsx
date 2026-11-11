@@ -48,7 +48,7 @@ export default function CommandPalette() {
   const commands = useMemo<Cmd[]>(() => {
     const go = (href: string) => () => { announceNavigation(); router.push(href); };
     return [
-      ...[...NAV_LINKS, { href: "/pay-bill", label: "Pay Bill" }, { href: "/login", label: "Login" }, { href: "/register", label: "Register" }].map((l): Cmd => ({ id: `p-${l.href}`, group: "Pages", label: l.label, hint: l.href, icon: Globe, run: go(l.href) })),
+      ...[...NAV_LINKS, { href: "/pay-bill", label: "Pay Bill" }, { href: "/faq", label: "FAQ" }, { href: "/login", label: "Login" }, { href: "/register", label: "Register" }].map((l): Cmd => ({ id: `p-${l.href}`, group: "Pages", label: l.label, hint: l.href, icon: Globe, run: go(l.href) })),
       { id: "a-call", group: "Actions", label: `Call sales ${SITE.phone}`, icon: Phone, keywords: "phone contact support", run: () => { window.location.href = `tel:${SITE.phone}`; } },
       { id: "a-mail", group: "Actions", label: `Email ${SITE.email}`, icon: Mail, run: () => { window.location.href = `mailto:${SITE.email}`; } },
       { id: "a-demo", group: "Actions", label: "Request a demo", icon: Sparkles, run: () => dispatch(openDemoModal("Demo request (command palette)")) },
@@ -100,8 +100,10 @@ export default function CommandPalette() {
                     <button role="option" aria-selected={i === active} data-i={i} onMouseMove={() => setActive(i)} onClick={() => run(c)}
                       className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === active ? "bg-brand-50 text-ink" : "text-body-strong")}>
                       <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-md", i === active ? "bg-brand-600 text-white" : "bg-softer text-body")}><c.icon className="h-4 w-4" /></span>
-                      <span className="min-w-0 flex-1 truncate font-medium">{c.label}</span>
-                      {c.hint && <span className="hidden truncate text-xs text-slate-500 sm:block">{c.hint}</span>}
+                      <span className="min-w-0 flex-1 sm:flex sm:items-center sm:gap-3">
+                        <span className="block truncate font-medium sm:flex-1">{c.label}</span>
+                        {c.hint && <span className="block truncate text-xs text-slate-500">{c.hint}</span>}
+                      </span>
                       {i === active && <CornerDownLeft className="h-3.5 w-3.5 text-slate-400" />}
                     </button>
                   </li>

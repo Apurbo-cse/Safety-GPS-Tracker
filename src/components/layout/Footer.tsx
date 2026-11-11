@@ -28,6 +28,7 @@ const PRODUCT_LINKS = [
 const COMPANY_LINKS = [
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
+  { label: "FAQ", href: "/faq" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
 ];
@@ -90,7 +91,7 @@ function CallbackForm() {
           />
         </label>
         <button type="submit" className="gloss-btn inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-sm font-semibold text-white">
-          <PhoneCall className="h-4 w-4" /><span className="hidden sm:inline">Call me</span>
+          <PhoneCall className="h-4 w-4" /><span>Call me</span>
         </button>
       </div>
       {error && <p role="alert" className="mt-1.5 text-xs text-red-400">{error}</p>}
