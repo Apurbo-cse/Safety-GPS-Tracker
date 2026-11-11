@@ -1,0 +1,119 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:960px;height:960px;background:transparent;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .stage{position:relative;width:960px;height:960px}
+  .glow{position:absolute;left:180px;top:150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(240,90,34,.28),rgba(14,165,233,.12) 55%,transparent 70%)}
+  .ring{position:absolute;border-radius:50%;background:rgba(148,163,184,.12)}
+  /* phone */
+  .phone{position:absolute;left:300px;top:70px;width:360px;height:740px;border-radius:58px;background:#0d1117;padding:13px;box-shadow:0 50px 90px -30px rgba(12,30,49,.55),0 0 0 2px #2a313c inset}
+  .btn{position:absolute;width:4px;border-radius:2px;background:#20262f}
+  .screen{position:relative;width:100%;height:100%;border-radius:46px;overflow:hidden;background:#eef2f6}
+  .island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:112px;height:32px;border-radius:20px;background:#0d1117;z-index:5}
+  .status{position:absolute;top:0;left:0;right:0;height:56px;display:flex;justify-content:space-between;align-items:center;padding:6px 30px 0;font-size:15px;font-weight:700;color:#0f172a;z-index:4}
+  .appbar{position:absolute;top:56px;left:14px;right:14px;height:54px;border-radius:18px;background:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 8px 20px -10px rgba(15,23,42,.25);z-index:3}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#ff7d49,#f05a22);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+  .appbar b{font-size:15px;color:#0f172a}
+  .appbar small{display:block;font-size:11px;color:#64748b;font-weight:500}
+  .live{margin-left:auto;font-size:11px;font-weight:700;color:#16a34a;background:#dcfce7;padding:4px 9px;border-radius:999px}
+  .map{position:absolute;inset:0}
+  .sheet{position:absolute;left:12px;right:12px;bottom:84px;border-radius:22px;background:#fff;padding:16px;box-shadow:0 14px 30px -12px rgba(15,23,42,.35);z-index:3}
+  .row{display:flex;align-items:center;justify-content:space-between}
+  .plate{font-size:16px;font-weight:800;color:#0f172a}
+  .addr{font-size:12px;color:#64748b;margin-top:3px}
+  .pill{font-size:11px;font-weight:700;color:#16a34a;background:#dcfce7;padding:4px 9px;border-radius:999px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .stat{background:#f1f5f9;border-radius:12px;padding:8px 10px}
+  .stat b{display:block;font-size:15px;color:#0f172a}
+  .stat span{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .a{height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700}
+  .a.lock{background:#f05a22;color:#fff}
+  .a.share{background:#f1f5f9;color:#0f172a}
+  .nav{position:absolute;left:0;right:0;bottom:0;height:76px;background:#fff;display:flex;justify-content:space-around;align-items:center;padding-bottom:12px;border-top:1px solid #eef2f6;z-index:3}
+  .nav i{display:block;width:22px;height:22px;border-radius:7px;background:#cbd5e1;margin:0 auto 4px}
+  .nav div{font-size:10px;color:#94a3b8;text-align:center;font-weight:600}
+  .nav .on i{background:#f05a22}.nav .on{color:#f05a22}
+  /* floating cards */
+  .card{position:absolute;background:#fff;border-radius:22px;box-shadow:0 24px 50px -18px rgba(15,23,42,.35);display:flex;align-items:center;gap:12px;padding:14px 18px 14px 14px;z-index:10}
+  .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center}
+  .card b{display:block;font-size:15px;color:#0f172a}
+  .card span{font-size:12px;color:#64748b}
+</style></head>
+<body><div class="stage">
+  <div class="ring" style="left:130px;top:100px;width:700px;height:700px"></div>
+  <div class="ring" style="left:230px;top:200px;width:500px;height:500px;background:rgba(240,90,34,.08)"></div>
+  <div class="glow"></div>
+
+  <div class="phone">
+    <span class="btn" style="left:-3px;top:150px;height:56px"></span>
+    <span class="btn" style="left:-3px;top:220px;height:56px"></span>
+    <span class="btn" style="right:-3px;top:190px;height:90px"></span>
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+
+      <!-- map -->
+      <svg class="map" viewBox="0 0 334 714" preserveAspectRatio="xMidYMid slice">
+        <rect width="334" height="714" fill="#e9eef3"/>
+        <rect x="200" y="140" width="110" height="90" rx="10" fill="#d7ecd9"/>
+        <rect x="20" y="420" width="90" height="70" rx="10" fill="#d7ecd9"/>
+        <path d="M230 470 q40 10 60 60 q10 40 44 50 v80 h-120z" fill="#cfe3f5"/>
+        <g stroke="#fff" stroke-width="16" fill="none" stroke-linecap="round">
+          <path d="M-10 190 L344 160"/><path d="M-10 330 L344 300"/><path d="M-10 470 L344 440"/><path d="M-10 610 L344 590"/>
+          <path d="M70 0 L90 714"/><path d="M180 0 L200 714"/><path d="M290 0 L300 714"/>
+        </g>
+        <g stroke="#fde68a" stroke-width="22" fill="none" stroke-linecap="round" opacity=".9">
+          <path d="M-10 260 C 100 250, 200 220, 344 120"/>
+        </g>
+        <g stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".9">
+          <path d="M-10 260 C 100 250, 200 220, 344 120"/>
+        </g>
+        <!-- route -->
+        <path d="M40 560 C 120 540, 110 420, 180 380 S 250 260, 250 200" fill="none" stroke="#f05a22" stroke-opacity=".25" stroke-width="16" stroke-linecap="round"/>
+        <path d="M40 560 C 120 540, 110 420, 180 380 S 250 260, 250 200" fill="none" stroke="#f05a22" stroke-width="6" stroke-linecap="round"/>
+        <path d="M40 560 C 120 540, 110 420, 180 380 S 250 260, 250 200" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 9" stroke-linecap="round"/>
+        <circle cx="40" cy="560" r="9" fill="#fff" stroke="#f05a22" stroke-width="4"/>
+        <!-- vehicle pin -->
+        <circle cx="250" cy="200" r="34" fill="#f05a22" opacity=".15"/>
+        <circle cx="250" cy="200" r="22" fill="#f05a22" opacity=".25"/>
+        <circle cx="250" cy="200" r="14" fill="#f05a22" stroke="#fff" stroke-width="4"/>
+        <path d="M244 200 l6 -9 l6 9 l-6 -3z" fill="#fff"/>
+        <!-- other vehicles -->
+        <circle cx="110" cy="300" r="8" fill="#0ea5e9" stroke="#fff" stroke-width="3"/>
+        <circle cx="300" cy="420" r="8" fill="#94a3b8" stroke="#fff" stroke-width="3"/>
+      </svg>
+
+      <div class="appbar"><div class="logo">S</div><div><b>Safety GPS</b><small>3 vehicles · all online</small></div><span class="live">● LIVE</span></div>
+
+      <div class="sheet">
+        <div class="row"><div><div class="plate">Dhaka Metro-GA 12</div><div class="addr">Mirpur Road, Dhanmondi · 8s ago</div></div><span class="pill">Moving</span></div>
+        <div class="stats">
+          <div class="stat"><b>42</b><span>km/h</span></div>
+          <div class="stat"><b>78%</b><span>Fuel</span></div>
+          <div class="stat"><b>64 km</b><span>Today</span></div>
+        </div>
+        <div class="actions"><div class="a lock"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Lock engine</div><div class="a share">↗ Share</div></div>
+      </div>
+
+      <div class="nav">
+        <div class="on"><i></i>Map</div><div><i></i>Vehicles</div><div><i></i>Alerts</div><div><i></i>Reports</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- floating cards -->
+  <div class="card" style="left:70px;top:150px">
+    <div class="ic" style="background:#dcfce7"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+    <div><b>Ignition ON</b><span>Metro-GA 12 · just now</span></div>
+  </div>
+  <div class="card" style="left:600px;top:400px">
+    <div class="ic" style="background:#f05a22;box-shadow:0 10px 20px -6px rgba(240,90,34,.6)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <div><b>Engine locked</b><span>Command confirmed</span></div>
+  </div>
+  <div class="card" style="left:110px;top:640px">
+    <div class="ic" style="background:#fef3c7"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div><b>Left geo-fence</b><span>Office zone · 2 min ago</span></div>
+  </div>
+</div></body></html>

@@ -19,11 +19,10 @@ import {
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import ContactForm from "@/components/forms/ContactForm";
-import { AlertsScreen, LockScreen, MapScreen, Phone as PhoneMock } from "@/components/pages/MobileAppPage";
-import ProductArt from "@/components/devices/ProductArt";
 import { DeviceTile } from "@/components/devices/ProductTile";
 import PlanTile from "@/components/pricing/PlanTile";
 import { plans } from "@/data/pricing";
+import { productImage } from "@/data/catalogue";
 import { devices } from "@/data/devices";
 import { FAQS } from "@/data/faqs";
 import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
@@ -459,12 +458,9 @@ export function AppBlock() {
   return (
     <section className="bg-soft py-12 sm:py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
-        {/* phones (illustrated) */}
-        <div className="relative order-last mx-auto flex w-full max-w-[520px] items-center justify-center lg:order-first">
-          <div aria-hidden className="absolute inset-x-[10%] inset-y-[15%] rounded-full bg-gradient-to-tr from-brand-500/20 to-sky-500/10 blur-3xl" />
-          <PhoneMock title="Alerts" className="relative hidden w-[34%] max-w-none -rotate-6 translate-x-6 translate-y-6 scale-90 opacity-95 sm:block"><AlertsScreen /></PhoneMock>
-          <PhoneMock title="Live map" className="relative z-10 w-[42%] max-w-none sm:w-[38%]"><MapScreen /></PhoneMock>
-          <PhoneMock title="Engine" className="relative hidden w-[34%] max-w-none rotate-6 -translate-x-6 translate-y-6 scale-90 opacity-95 sm:block"><LockScreen /></PhoneMock>
+        {/* app visual (rendered artwork: public/img/app/app-showcase.png) */}
+        <div className="relative order-last mx-auto w-full max-w-[500px] lg:order-first">
+          <Image src="/img/app/app-showcase.png" alt="Safety GPS Tracker mobile app showing a live map, engine lock and alerts" width={1580} height={1700} sizes="(min-width:1024px) 520px, 100vw" className="h-auto w-full" />
         </div>
 
         <div>
@@ -540,7 +536,7 @@ export function CategoryGrid() {
             return (
               <button key={c.label} onClick={() => openList(c.section, c.tab)} className="group overflow-hidden rounded-lg bg-softer/80 text-left transition-all hover:-translate-y-1 dark:bg-navy-900/90">
                 <span className="relative block aspect-[4/3] overflow-hidden">
-                  {d && <ProductArt d={d} className="transition-transform duration-500 group-hover:scale-105" />}
+                  {d && <Image src={productImage(d)} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-contain transition-transform duration-500 group-hover:scale-105" />}
                 </span>
                 <span className="flex items-center justify-between gap-2 p-3 sm:p-4">
                   <span className="min-w-0">

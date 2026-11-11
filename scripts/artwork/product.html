@@ -1,0 +1,119 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:858px;height:600px;background:transparent;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+  .stage{position:relative;width:858px;height:600px}
+  .glow{position:absolute;inset:0;background:radial-gradient(420px 320px at 62% 46%,var(--a30),transparent 70%)}
+  .disc{position:absolute;left:150px;top:70px;width:560px;height:460px;border-radius:50%;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%)}
+  .grid{position:absolute;inset:40px 90px;opacity:.5;background-image:radial-gradient(rgba(100,116,139,.35) 1.4px,transparent 1.6px);background-size:26px 26px;-webkit-mask-image:radial-gradient(closest-side,#000 40%,transparent);mask-image:radial-gradient(closest-side,#000 40%,transparent)}
+  .route{position:absolute;inset:0}
+  .vehicle{position:absolute;left:70px;top:120px;width:560px;height:360px}
+  .shadow{position:absolute;left:110px;bottom:92px;width:520px;height:40px;border-radius:50%;background:radial-gradient(closest-side,rgba(15,23,42,.35),transparent)}
+  /* device */
+  .dev{position:absolute;right:86px;bottom:96px;width:250px;height:156px;border-radius:30px;background:linear-gradient(160deg,#2a3546 0%,#121a27 55%,#0a0f18 100%);box-shadow:0 30px 50px -18px rgba(2,6,23,.65),inset 0 2px 0 rgba(255,255,255,.18),inset 0 -6px 14px rgba(0,0,0,.45)}
+  .dev::before{content:"";position:absolute;inset:10px;border-radius:22px;border:1.5px solid rgba(255,255,255,.07)}
+  .dev .shine{position:absolute;left:18px;right:18px;top:10px;height:46px;border-radius:20px 20px 40px 40px;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0))}
+  .brand{position:absolute;left:28px;bottom:26px;font-size:15px;font-weight:800;letter-spacing:.18em;color:rgba(255,255,255,.75)}
+  .brand small{display:block;font-size:9px;letter-spacing:.24em;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px}
+  .leds{position:absolute;right:26px;top:28px;display:flex;gap:8px}
+  .led{width:11px;height:11px;border-radius:50%;box-shadow:0 0 12px 2px currentColor}
+  .strip{position:absolute;left:28px;top:30px;width:92px;height:10px;border-radius:5px;background:var(--a);opacity:.9;box-shadow:0 0 14px var(--a)}
+  .wire{position:absolute;right:240px;bottom:150px;width:120px;height:80px;border:6px solid #1f2937;border-color:transparent transparent #1f2937 #1f2937;border-radius:0 0 0 60px}
+  /* variants */
+  .mic{position:absolute;left:50%;top:50%;transform:translate(-50%,-38%);width:62px;height:62px;border-radius:50%;background:radial-gradient(circle,#334155 1.6px,transparent 2px) 0 0/8px 8px,#0b1220;box-shadow:inset 0 0 0 3px var(--a),0 0 18px var(--a40)}
+  .lens{position:absolute;left:50%;top:50%;transform:translate(-50%,-44%);width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#7dd3fc 0 6px,#0ea5e9 7px 16px,#082f49 17px 26px,#1e293b 27px 34px,#0b1220 35px)}
+  .pins{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:grid;grid-template-columns:repeat(8,12px);gap:7px}
+  .pins i{height:22px;border-radius:3px;background:linear-gradient(#fcd34d,#b45309)}
+  .sos{position:absolute;right:250px;bottom:110px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#334155,#0b1220 70%);box-shadow:0 34px 50px -18px rgba(2,6,23,.7),inset 0 3px 0 rgba(255,255,255,.15)}
+  .sos b{position:absolute;inset:38px;border-radius:50%;background:radial-gradient(circle at 45% 35%,#f87171,#dc2626 55%,#991b1b);display:grid;place-items:center;color:#fff;font-size:44px;letter-spacing:.06em;box-shadow:0 0 0 8px rgba(239,68,68,.18),0 0 40px rgba(239,68,68,.45),inset 0 6px 10px rgba(255,255,255,.3)}
+  .relay{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);width:440px;height:280px}
+  .pin{position:absolute;right:205px;top:78px}
+</style></head>
+<body><div class="stage" id="s"></div>
+<script>
+const id = new URLSearchParams(location.search).get("id") || "premium-without-voice";
+const ACC = { gps:"#f05a22", voice:"#10b981", video:"#0ea5e9", hw:"#f59e0b" };
+const P = {
+  "premium-pro-voice":   { v:"car",  dev:"voice", a:ACC.voice },
+  "premium-with-voice":  { v:"suv",  dev:"voice", a:ACC.voice },
+  "premium-without-voice":{ v:"car", dev:"tracker", a:ACC.gps },
+  "bike-premium":        { v:"bike", dev:"tracker", a:ACC.gps },
+  "excavator-device":    { v:"excavator", dev:"tracker", a:ACC.gps },
+  "truck-tracking":      { v:"truck",dev:"voice", a:ACC.gps },
+  "live-video-tracking": { v:"van",  dev:"video", a:ACC.video },
+  "easy-obd":            { v:"suv",  dev:"obd", a:ACC.hw },
+  "engine-lock-relay":   { v:"none", dev:"relay", a:ACC.hw },
+  "panic-sos-button":    { v:"none", dev:"sos", a:"#ef4444" },
+}[id];
+const a = P.a;
+const hex2 = (h,o)=>{const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${o})`};
+document.documentElement.style.setProperty("--a",a);
+document.documentElement.style.setProperty("--a30",hex2(a,.30));
+document.documentElement.style.setProperty("--a40",hex2(a,.55));
+
+const defs = `<defs>
+  <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4f6e"/><stop offset=".55" stop-color="#22324a"/><stop offset="1" stop-color="#141f31"/></linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6e8f8"/><stop offset="1" stop-color="#7fa6cc"/></linearGradient>
+  <radialGradient id="rim"><stop offset="0" stop-color="#e2e8f0"/><stop offset=".6" stop-color="#94a3b8"/><stop offset="1" stop-color="#475569"/></radialGradient>
+  <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${hex2(a,.6)}"/></linearGradient>
+</defs>`;
+const W = (x,y,r=30)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#0f141c"/><circle cx="${x}" cy="${y}" r="${r*.55}" fill="url(#rim)"/><circle cx="${x}" cy="${y}" r="${r*.16}" fill="#334155"/>`;
+const V = {
+car:`<path d="M40 250 q0-36 36-44 l58-12 q30-48 88-52 h86 q48 4 78 50 l46 8 q30 8 30 38 v22 q0 12-12 12 h-398 q-12 0-12-12z" fill="url(#body)"/>
+ <path d="M150 192 q26-36 70-38 h34 v38z M270 154 h30 q36 2 58 38 h-88z" fill="url(#glass)"/>
+ <path d="M60 238 h420" stroke="rgba(255,255,255,.12)" stroke-width="3"/>
+ <rect x="44" y="246" width="28" height="10" rx="4" fill="${a}"/><rect x="452" y="240" width="26" height="10" rx="4" fill="#fde68a"/>
+ ${W(130,282)}${W(380,282)}`,
+suv:`<path d="M36 256 v-46 q0-20 20-24 l64-12 q22-52 74-52 h120 q38 0 64 46 l52 12 q26 6 26 34 v42 q0 12-12 12 h-396 q-12 0-12-12z" fill="url(#body)"/>
+ <path d="M134 172 q18-38 56-38 h48 v38z M252 134 h56 q26 0 42 38 h-98z" fill="url(#glass)"/>
+ <rect x="120" y="106" width="236" height="10" rx="5" fill="#1b2a40"/>
+ <rect x="40" y="226" width="28" height="10" rx="4" fill="${a}"/>
+ ${W(132,284,33)}${W(378,284,33)}`,
+van:`<path d="M30 268 v-130 q0-28 28-28 h280 q26 0 42 26 l52 70 q12 14 12 34 v28 q0 12-12 12 h-390 q-12 0-12-12z" fill="url(#body)"/>
+ <path d="M346 140 l42 60 h-64 v-60z" fill="url(#glass)"/>
+ <rect x="62" y="140" width="72" height="48" rx="6" fill="url(#glass)"/><rect x="150" y="140" width="72" height="48" rx="6" fill="url(#glass)"/><rect x="238" y="140" width="70" height="48" rx="6" fill="url(#glass)"/>
+ <rect x="30" y="226" width="420" height="10" fill="url(#acc)"/>
+ ${W(118,284)}${W(380,284)}`,
+truck:`<rect x="20" y="80" width="300" height="180" rx="10" fill="url(#body)"/>
+ <rect x="20" y="80" width="300" height="16" rx="8" fill="url(#acc)"/>
+ <path d="M40 120 h260 M40 160 h260 M40 200 h260" stroke="rgba(255,255,255,.07)" stroke-width="3"/>
+ <path d="M328 124 h74 q20 0 32 20 l30 48 q8 12 8 28 v40 h-144z" fill="url(#body)"/>
+ <path d="M344 140 h52 l30 48 h-82z" fill="url(#glass)"/>
+ ${W(80,280)}${W(160,280)}${W(410,280)}`,
+bike:`${W(110,270,46)}${W(390,270,46)}
+ <circle cx="110" cy="270" r="46" fill="none" stroke="#0f141c" stroke-width="12"/><circle cx="390" cy="270" r="46" fill="none" stroke="#0f141c" stroke-width="12"/>
+ <path d="M110 270 L190 196 L300 196 L390 270" fill="none" stroke="url(#body)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M170 192 q70-38 150-14 l-18 40 h-110z" fill="url(#acc)"/>
+ <path d="M182 176 h84" stroke="#0f141c" stroke-width="16" stroke-linecap="round"/>
+ <path d="M318 200 l30-66 h30" fill="none" stroke="#22324a" stroke-width="11" stroke-linecap="round"/>`,
+excavator:`<rect x="30" y="262" width="300" height="46" rx="23" fill="#0f141c"/>
+ ${[66,118,170,222,274].map(x=>`<circle cx="${x}" cy="285" r="13" fill="url(#rim)"/>`).join("")}
+ <rect x="50" y="196" width="260" height="62" rx="10" fill="url(#acc)"/>
+ <path d="M100 196 v-74 q0-12 12-12 h74 q12 0 16 12 l12 74z" fill="url(#acc)"/>
+ <rect x="120" y="128" width="60" height="46" rx="6" fill="url(#glass)"/>
+ <path d="M270 206 L380 110 L460 196" fill="none" stroke="${a}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M440 186 l46 12 l-12 54 q-38 8-58-22z" fill="url(#body)"/>`,
+none:``};
+const DEV = {
+tracker:`<div class="dev"><span class="shine"></span><span class="strip"></span><span class="leds"><i class="led" style="color:#22c55e;background:#22c55e"></i><i class="led" style="color:${a};background:${a}"></i></span><span class="brand">SAFETY<small>GPS TRACKER</small></span></div>`,
+voice:`<div class="dev"><span class="shine"></span><span class="mic"></span><span class="leds"><i class="led" style="color:#22c55e;background:#22c55e"></i></span><span class="brand">SAFETY<small>VOICE GPS</small></span></div>`,
+video:`<div class="dev" style="width:270px"><span class="shine"></span><span class="lens"></span><span class="leds"><i class="led" style="color:#ef4444;background:#ef4444"></i></span><span class="brand">SAFETY<small>LIVE VIDEO</small></span></div>`,
+obd:`<div class="dev" style="height:140px;border-radius:24px 24px 60px 60px"><span class="shine"></span><span class="pins">${"<i></i>".repeat(8)}</span><span class="leds"><i class="led" style="color:#22c55e;background:#22c55e"></i></span><span class="brand" style="bottom:18px">SAFETY<small>OBD-II</small></span></div>`,
+relay:`<svg class="relay" viewBox="0 0 300 190">${defs}
+  <path d="M60 60 H-10 M60 130 H-10 M240 60 H310 M240 130 H310" stroke="${a}" stroke-width="10" stroke-linecap="round"/>
+  <rect x="50" y="20" width="200" height="150" rx="26" fill="#121a27"/><rect x="50" y="20" width="200" height="60" rx="26" fill="rgba(255,255,255,.08)"/>
+  <path d="M86 98 h34 l18-34 l22 66 l20-34 h36" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="150" y="156" text-anchor="middle" font-size="14" font-weight="800" letter-spacing="3" fill="rgba(255,255,255,.6)" font-family="Helvetica Neue,Arial">RELAY KIT</text></svg>`,
+sos:`<div class="sos"><b>SOS</b></div>`,
+};
+const pin = `<svg class="pin" width="70" height="90" viewBox="0 0 70 90"><circle cx="35" cy="70" r="16" fill="${hex2(a,.2)}"/><path d="M35 72 C 14 50, 10 36, 10 30 a25 25 0 0 1 50 0 c0 6-4 20-25 42z" fill="${a}"/><circle cx="35" cy="30" r="10" fill="#fff"/></svg>`;
+const route = `<svg class="route" viewBox="0 0 858 600"><path d="M30 560 C 220 540, 300 420, 470 360 S 640 210, 688 140" fill="none" stroke="${a}" stroke-opacity=".22" stroke-width="16" stroke-linecap="round"/><path d="M30 560 C 220 540, 300 420, 470 360 S 640 210, 688 140" fill="none" stroke="${a}" stroke-width="4" stroke-dasharray="10 14" stroke-linecap="round"/></svg>`;
+const solo = P.v === "none";
+document.getElementById("s").innerHTML = `
+  <div class="glow"></div><div class="disc"></div><div class="grid"></div>
+  ${route}${pin}
+  ${solo ? "" : `<div class="shadow"></div><svg class="vehicle" viewBox="0 0 520 330">${defs}${V[P.v]}</svg>`}
+  ${solo && P.dev==="sos" ? DEV.sos.replace('class="sos"','class="sos" style="right:304px;bottom:150px"') : solo ? DEV[P.dev] : DEV[P.dev]}
+`;
+</script></body></html>

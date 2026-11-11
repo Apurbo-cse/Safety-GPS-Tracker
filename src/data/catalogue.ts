@@ -15,6 +15,9 @@ export const catalogue: CatalogueNode[] = deviceCategories
     return { name, slug: slugify(name), count: items.length, subs };
   });
 
+/** Rendered product artwork in public/img/products (falls back to the price-list image). */
+export const productImage = (d: Device) => `/img/products/${d.id}.png`;
+
 export const deviceUrl = (d: Device) => `/products/${d.id}`;
 export const productUrl = (d: Device) => `/products/${d.id}`;
 export const categoryUrl = (cat: string, sub?: string) => `/products/category/${slugify(cat)}${sub ? `/${slugify(sub)}` : ""}`;

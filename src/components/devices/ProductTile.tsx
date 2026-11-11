@@ -13,13 +13,11 @@ import { addToCart } from "@/store/slices/cartSlice";
 import { openDeviceModal, setCartOpen, openDemoModal } from "@/store/slices/uiSlice";
 import { toggleWishlist } from "@/store/slices/wishlistSlice";
 import { cn, formatBDT } from "@/utils/format";
-import ProductArt from "./ProductArt";
+import { productImage } from "@/data/catalogue";
 import type { Device } from "@/types";
 
 export type TileProps = {
   image?: string;
-  /** illustrated artwork shown instead of the photo */
-  art?: React.ReactNode;
   visual?: Device["visual"];
   name: string;
   sub?: string;
@@ -52,7 +50,6 @@ export type TileProps = {
  */
 export default function ProductTile({
   image,
-  art,
   visual,
   name,
   sub,
@@ -110,7 +107,7 @@ export default function ProductTile({
         {/* Media / Link */}
         {href ? (
           <Link href={href} aria-label={name} className="block h-full w-full">
-            {art ? art : image ? (
+            {image ? (
               <Image
                 src={image}
                 alt={name}
@@ -124,7 +121,7 @@ export default function ProductTile({
           </Link>
         ) : (
           <div onClick={onView} className="h-full w-full cursor-pointer">
-            {art ? art : image ? (
+            {image ? (
               <Image
                 src={image}
                 alt={name}
@@ -224,7 +221,7 @@ export function DeviceTile({ d }: { d: Device }) {
 
   return (
     <ProductTile
-      art={<ProductArt d={d} />}
+      image={productImage(d)}
       visual={d.visual}
       name={d.name}
       category={d.category}
