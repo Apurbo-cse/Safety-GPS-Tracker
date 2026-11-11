@@ -38,7 +38,7 @@ export default function MobilePageBar() {
         <button onClick={back} aria-label="Go back" className="grid h-10 w-10 place-items-center rounded-full text-ink transition-colors active:bg-softer">
           <ChevronLeft className="h-6 w-6" />
         </button>
-        <h1 className="min-w-0 flex-1 truncate text-center text-base font-bold text-ink">{title}</h1>
+        <p className="min-w-0 flex-1 truncate text-center text-base font-bold text-ink">{title}</p>
         <button onClick={() => dispatch(setPalette(true))} aria-label="Search" className="grid h-10 w-10 place-items-center rounded-full text-body transition-colors active:bg-softer">
           <Search className="h-5 w-5" />
         </button>

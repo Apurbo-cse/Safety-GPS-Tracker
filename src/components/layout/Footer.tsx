@@ -167,6 +167,19 @@ export default function Footer() {
           </div>
         </div>
 
+
+        {/* ---------- watermark ---------- */}
+        <p
+          aria-hidden
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            e.currentTarget.style.setProperty("--wx", `${e.clientX - r.left}px`);
+            e.currentTarget.style.setProperty("--wy", `${e.clientY - r.top}px`);
+          }}
+          className="footer-mark mt-8 select-none bg-clip-text text-center text-[clamp(3rem,15vw,11rem)] font-black leading-none tracking-tighter text-transparent"
+        >
+          SAFETY GPS
+        </p>
       </Container>
 
       {/* ---------- bottom bar ---------- */}
