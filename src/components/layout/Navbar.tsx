@@ -112,7 +112,9 @@ export default function Navbar() {
       onMouseLeave={handleMouseLeave}
       className={cn(
         "sticky top-0 z-50 border-b border-line/80 bg-surface/95 backdrop-blur-xl transition-all duration-300",
-        scrolled ? "shadow-md shadow-black/5 dark:shadow-black/25" : ""
+        scrolled ? "shadow-md shadow-black/5 dark:shadow-black/25" : "",
+        // phones/tablets: full navbar only on the home page; inner pages use MobilePageBar
+        pathname !== "/" && "max-lg:hidden"
       )}
     >
       <Container

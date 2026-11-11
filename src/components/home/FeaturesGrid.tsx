@@ -1,190 +1,49 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Lock, LockOpen, MapPin, Smartphone } from "lucide-react";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ArrowUpRight, Check, ChevronDown } from "lucide-react";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
-import Reveal from "@/components/common/Reveal";
 import { features, homeFeatureIds } from "@/data/features";
 import { DynIcon } from "@/lib/icons";
 import { useAppDispatch } from "@/store/hooks";
 import { openFeatureModal } from "@/store/slices/uiSlice";
-import type { FeatureCategory, FeatureItem } from "@/types";
 import { cn } from "@/utils/format";
 
-const TABS: { key: "All" | FeatureCategory; label: string }[] = [
-  { key: "All", label: "All" },
-  { key: "Vehicle Tracking", label: "Tracking" },
-  { key: "Vehicle Security", label: "Security" },
-  { key: "Driver Monitoring", label: "Driver" },
-  { key: "Reports & Analytics", label: "Reports" },
-  { key: "Maintenance & Reminders", label: "Reminders" },
-  { key: "Platform", label: "Platform" },
-];
+/** Picture for each home feature (photos use cover, device/app shots use contain) */
+const MEDIA: Record<string, { src: string; contain?: boolean }> = {
+  "real-time-gps-tracking": { src: "/img/platform.png", contain: true },
+  "remote-engine-lock": { src: "/img/hero-bike.jpg" },
+  "geo-fencing-alerts": { src: "/img/industries/logistics-bd.jpg" },
+  "route-history-playback": { src: "/img/hero-truck.jpg" },
+  "in-car-voice-monitoring": { src: "/img/packages/voice-gps.png", contain: true },
+  "speed-violation-alerts": { src: "/img/hero-car.jpg" },
+  "brta-document-expiry-alerts": { src: "/img/industries/business-fleet-v3.jpg" },
+  "android-application": { src: "/img/platform.png", contain: true },
+};
 
-const HERO_STATS = [
-  ["10 sec", "Refresh"],
-  ["3", "Map views"],
-  ["Web·iOS·Android", "Access"],
-];
-
-const ROUTE = "M20 150 C 70 140, 90 90, 150 92 S 240 130, 280 80 S 340 30, 380 28";
-
-/** Animated mini map for the hero card. */
-function MapVisual() {
+function FeatureImage({ id, alt, sizes, className }: { id: string; alt: string; sizes: string; className?: string }) {
+  const m = MEDIA[id];
+  if (!m) return null;
   return (
-    <div aria-hidden className="relative h-full min-h-40 overflow-hidden rounded-md sm:min-h-48 border border-white/10 bg-navy-900">
-      <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
-        <defs>
-          <pattern id="fg-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#fff" strokeOpacity=".05" /></pattern>
-        </defs>
-        <rect width="400" height="180" fill="url(#fg-grid)" />
-        {[[30, 20, 70, 40], [130, 15, 60, 50], [220, 110, 80, 50], [320, 70, 60, 60], [40, 100, 60, 40]].map(([x, y, w, h], i) => (
-          <rect key={i} x={x} y={y} width={w} height={h} rx="4" fill="#fff" fillOpacity=".04" />
-        ))}
-        <g stroke="#2c3340" strokeWidth="9" fill="none" strokeLinecap="round">
-          <path d="M0 70 H400" /><path d="M115 0 V180" /><path d="M300 0 V180" />
-        </g>
-        <path d={ROUTE} stroke="#f05a22" strokeOpacity=".3" strokeWidth="9" fill="none" strokeLinecap="round" />
-        <path d={ROUTE} stroke="#f98a55" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="8 10" className="route-flow" />
-        <circle cx="20" cy="150" r="6" fill="#22c55e" stroke="#fff" strokeWidth="2" />
-        <g>
-          <circle r="14" fill="#f05a22" fillOpacity=".25" />
-          <circle r="6" fill="#f05a22" stroke="#fff" strokeWidth="2.5" />
-          <animateMotion dur="7s" repeatCount="indefinite" path={ROUTE} />
-        </g>
-      </svg>
-      <MapPin className="absolute right-[3%] top-[4%] h-7 w-7 fill-brand-600 text-white drop-shadow" />
-      <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" />
-          <span className="relative h-1.5 w-1.5 rounded-full bg-green-400" />
-        </span>
-        Live · 10s refresh
-      </span>
-      <span className="absolute bottom-2.5 left-2.5 rounded-md border border-white/10 bg-navy-950/85 px-2.5 py-1.5 text-xs text-white backdrop-blur">
-        <b>Delivery Van 01</b> <span className="text-slate-400">· 42 km/h</span>
-      </span>
+    <div className={cn("relative overflow-hidden rounded-md bg-soft", className)}>
+      <Image src={m.src} alt={alt} fill quality={85} sizes={sizes} className={m.contain ? "object-contain p-3" : "object-cover"} />
     </div>
   );
 }
 
-/** Lock status that toggles, for the engine-lock card. */
-function LockVisual() {
-  const [locked, setLocked] = useState(true);
-  useEffect(() => {
-    const t = setInterval(() => setLocked((l) => !l), 2600);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div aria-hidden className="flex items-center gap-3 rounded-md border border-line bg-surface/70 p-3">
-      <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-full text-white transition-colors duration-500", locked ? "bg-emerald-600" : "bg-amber-500")}>
-        {locked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-ink">{locked ? "Engine locked" : "Engine unlocked"}</p>
-        <p className="flex items-center gap-1 text-xs text-slate-500"><Smartphone className="h-3 w-3" />Command sent from app</p>
-      </div>
-      <span className={cn("relative h-6 w-11 shrink-0 rounded-full transition-colors duration-500", locked ? "bg-emerald-600" : "bg-slate-300 dark:bg-slate-600")}>
-        <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all duration-500", locked ? "left-[22px]" : "left-0.5")} />
-      </span>
-    </div>
-  );
-}
-
-function FeatureIcon({ f, large }: { f: FeatureItem; large?: boolean }) {
-  const size = large ? "h-12 w-12" : "h-11 w-11";
-  if (f.image) {
-    return (
-      <span className={cn("grid shrink-0 place-items-center overflow-hidden rounded-md bg-white p-1.5 ring-1 ring-line", size)}>
-        <Image src={f.image} alt="" width={56} height={56} className="h-full w-full object-contain" />
-      </span>
-    );
-  }
-  return (
-    <span className={cn("grid shrink-0 place-items-center rounded-md bg-gradient-to-br from-navy-800 to-navy-950 text-white shadow-lg shadow-navy-950/20 transition-colors group-hover:from-brand-500 group-hover:to-brand-700", size)}>
-      <DynIcon name={f.icon} className="h-5 w-5" />
-    </span>
-  );
-}
+const items = homeFeatureIds.map((id) => features.find((f) => f.id === id)!).filter(Boolean);
 
 export default function FeaturesGrid() {
   const dispatch = useAppDispatch();
-  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("All");
-  const bento = tab === "All";
-  const items = bento
-    ? homeFeatureIds.map((id) => features.find((f) => f.id === id)!).filter(Boolean)
-    : features.filter((f) => f.category === tab).slice(0, 8);
-  const count = (k: (typeof TABS)[number]["key"]) => (k === "All" ? homeFeatureIds.length : features.filter((f) => f.category === k).length);
-
-  const card = (f: FeatureItem, i: number) => {
-    const hero = bento && i === 0;
-    const wide = bento && i === 1;
-    return (
-      <motion.div
-        key={f.id}
-        layout
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        transition={{ duration: 0.3, delay: (i % 4) * 0.04, ease: [0.16, 1, 0.3, 1] }}
-        className={cn(hero && "sm:col-span-2 lg:row-span-2", wide && "sm:col-span-2")}
-      >
-        <button
-          type="button"
-          onClick={() => dispatch(openFeatureModal(f.id))}
-          className={cn(
-            "spotlight card-pro group flex h-full w-full flex-col rounded-md border p-4 text-left sm:p-5",
-            hero ? "border-navy-800 bg-gradient-to-br from-navy-950 via-navy-900 to-[#3a1a0c] text-white" : "border-line glass",
-          )}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <FeatureIcon f={f} large={hero} />
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                hero ? "bg-white/10 text-brand-200" : "bg-brand-500/10 text-brand-text",
-              )}
-            >
-              {f.category}
-            </span>
-          </div>
-
-          <h3 className={cn("mt-4 font-bold", hero ? "text-lg text-white sm:text-xl" : "text-base text-ink")}>{f.title}</h3>
-          <p className={cn("mt-1.5 text-sm leading-relaxed", hero ? "max-w-md text-slate-300" : "text-body", !hero && !wide && "flex-1")}>
-            {f.description}
-          </p>
-
-          {hero && (
-            <>
-              <div className="mt-5 flex-1"><MapVisual /></div>
-              <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-                {HERO_STATS.map(([v, l]) => (
-                  <div key={l} className="rounded-md border border-white/10 bg-white/5 px-1.5 py-2">
-                    <dd className="truncate text-xs font-bold text-white sm:text-sm">{v}</dd>
-                    <dt className="text-[11px] text-slate-400">{l}</dt>
-                  </div>
-                ))}
-              </dl>
-            </>
-          )}
-          {wide && <div className="mt-4 flex-1"><LockVisual /></div>}
-
-          <span className={cn("mt-4 inline-flex items-center gap-1 text-sm font-semibold", hero ? "text-brand-300" : "text-brand-text")}>
-            Learn more <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-          </span>
-        </button>
-      </motion.div>
-    );
-  };
+  const [active, setActive] = useState(0);
+  const f = items[active];
 
   return (
-    <section className="bg-sec-white relative overflow-hidden py-16 sm:py-20">
-      <div aria-hidden className="dot-bg pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,#000,transparent_70%)]" />
-      <div aria-hidden className="pointer-events-none absolute -left-32 top-1/3 h-80 w-80 rounded-full bg-brand-500/10 blur-3xl" />
-      <Container className="relative">
+    <section className="bg-sec-white py-10 sm:py-14">
+      <Container>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="[&>div]:mb-0">
             <SectionHeading
@@ -202,39 +61,92 @@ export default function FeaturesGrid() {
           </Link>
         </div>
 
-        <LayoutGroup>
-          <div role="tablist" aria-label="Feature categories" className="-mx-3 mt-8 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
-            {TABS.map((t) => {
-              const active = tab === t.key;
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_400px] lg:gap-6">
+          {/* ---------- feature list ---------- */}
+          <ul className="grid content-start gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {items.map((it, i) => {
+              const on = i === active;
               return (
-                <button
-                  key={t.key}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setTab(t.key)}
-                  className={cn(
-                    "relative shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors",
-                    active ? "text-white" : "text-body hover:bg-softer hover:text-ink",
-                  )}
-                >
-                  {active && <motion.span layoutId="feature-tab" className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-600 to-brand-500 shadow-md shadow-brand-600/30" transition={{ type: "spring", bounce: 0.2, duration: 0.45 }} />}
-                  <span className="relative flex items-center gap-1.5">
-                    {t.label}
-                    <span className={cn("rounded-full px-1.5 text-[11px] tabular-nums", active ? "bg-white/20" : "bg-softer text-slate-500")}>{count(t.key)}</span>
-                  </span>
-                </button>
+                <li key={it.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    onMouseEnter={() => setActive(i)}
+                    aria-expanded={on}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-all duration-200",
+                      on ? "border-brand-500 bg-brand-500/5" : "border-line bg-surface hover:border-brand-300",
+                    )}
+                  >
+                    <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors", on ? "bg-brand-600 text-white" : "bg-softer text-body group-hover:text-brand-text")}>
+                      <DynIcon name={it.icon} className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={cn("block truncate text-sm font-bold", on ? "text-brand-text" : "text-ink")}>{it.title}</span>
+                      <span className="block truncate text-xs text-slate-500">{it.category}</span>
+                    </span>
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 text-slate-400 transition-transform lg:-rotate-90", on && "rotate-180 text-brand-text lg:-rotate-90")} />
+                  </button>
+
+                  {/* inline details on phone / tablet */}
+                  <AnimatePresence initial={false}>
+                    {on && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden lg:hidden"
+                      >
+                        <div className="px-1 pb-1 pt-2 text-sm leading-relaxed text-body">
+                          <FeatureImage id={it.id} alt={it.title} sizes="(min-width:640px) 50vw, 100vw" className="mb-2 aspect-[16/9]" />
+                          <p>{it.description}</p>
+                          <button onClick={() => dispatch(openFeatureModal(it.id))} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-text">
+                            Learn more <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
-          <Reveal>
-            <motion.div layout className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-              <AnimatePresence mode="popLayout" initial={false}>
-                {items.map(card)}
+          {/* ---------- preview (desktop) ---------- */}
+          <div className="hidden lg:block">
+            <div className="sticky top-24 overflow-hidden rounded-md border border-line bg-surface">
+              <div aria-hidden className="h-1 bg-gradient-to-r from-brand-600 to-brand-400" />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={f.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-4"
+                >
+                  <FeatureImage id={f.id} alt={f.title} sizes="400px" className="mb-3 aspect-[16/9] border border-line" />
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-text">{f.category}</span>
+                    <span className="text-xs font-bold tabular-nums text-slate-400">{String(active + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</span>
+                  </div>
+                  <h3 className="mt-2 text-lg font-bold text-ink">{f.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-body">{f.description}</p>
+                  <p className="mt-3 flex gap-2 rounded-md bg-soft p-2.5 text-sm leading-relaxed text-body-strong">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />{f.detail}
+                  </p>
+                  <button
+                    onClick={() => dispatch(openFeatureModal(f.id))}
+                    className="group mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text"
+                  >
+                    Learn more <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </motion.div>
               </AnimatePresence>
-            </motion.div>
-          </Reveal>
-        </LayoutGroup>
+            </div>
+          </div>
+        </div>
       </Container>
     </section>
   );

@@ -1,5 +1,6 @@
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
+import MobilePageBar from "@/components/layout/MobilePageBar";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/layout/CartDrawer";
 import DeviceModal from "@/components/devices/DeviceModal";
@@ -16,6 +17,7 @@ export default function WebsiteLayout({ children }: { children: React.ReactNode 
     <>
       <TopBar />
       <Navbar />
+      <MobilePageBar />
       <div className="pb-[calc(3.6rem+env(safe-area-inset-bottom))] lg:pb-0">
         <main id="main">{children}</main>
         <Footer />

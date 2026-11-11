@@ -49,23 +49,23 @@ const ALERTS = [
 type Sev = (typeof ALERTS)[number]["sev"];
 const SEV: Record<Sev, string> = { critical: "bg-red-500", warning: "bg-amber-500", info: "bg-sky-500" };
 
-const TABS: { id: string; label: string; icon: LucideIcon }[] = [
-  { id: "live", label: "Live map", icon: Radio },
-  { id: "playback", label: "Route playback", icon: RouteIcon },
-  { id: "fence", label: "Geo-fence", icon: Fence },
-  { id: "alerts", label: "Alerts", icon: Bell },
-  { id: "reports", label: "Reports", icon: BarChart3 },
+const TABS: { id: string; label: string; hint: string; tip: string; icon: LucideIcon }[] = [
+  { id: "live", label: "Live map", hint: "Lock an engine", tip: "Pick a vehicle, then lock or unlock its engine.", icon: Radio },
+  { id: "playback", label: "Route playback", hint: "Replay a trip", tip: "Press play or drag the slider to replay the trip.", icon: RouteIcon },
+  { id: "fence", label: "Geo-fence", hint: "Set a safe zone", tip: "Resize the zone, then drive the van out to trigger an alert.", icon: Fence },
+  { id: "alerts", label: "Alerts", hint: "Review events", tip: "Filter by severity and mark alerts as resolved.", icon: Bell },
+  { id: "reports", label: "Reports", hint: "Daily mileage", tip: "Hover the bars and switch between 7 and 30 days.", icon: BarChart3 },
 ];
 
 /* --------------------------------------------------------------- map base */
 function MapBase({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
     <svg viewBox="0 0 600 380" className={cn("h-full w-full", className)} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Demo map">
-      <defs><pattern id="sp-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" strokeOpacity=".05" /></pattern></defs>
-      <rect width="600" height="380" fill="#171a21" /><rect width="600" height="380" fill="url(#sp-grid)" />
-      <rect x="20" y="20" width="90" height="56" rx="8" fill="#1d2129" /><rect x="400" y="300" width="130" height="60" rx="8" fill="#1d2129" /><rect x="210" y="130" width="70" height="50" rx="8" fill="#1d2129" />
-      <rect x="40" y="320" width="110" height="46" rx="8" fill="#17261f" />
-      {ROADS.map((d) => <path key={d} d={d} fill="none" stroke="#2b313c" strokeWidth="14" strokeLinecap="round" />)}
+      <defs><pattern id="sp-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#94a3b8" strokeOpacity=".15" /></pattern></defs>
+      <rect width="600" height="380" className="fill-soft" /><rect width="600" height="380" fill="url(#sp-grid)" />
+      <rect x="20" y="20" width="90" height="56" rx="8" className="fill-line-soft" /><rect x="400" y="300" width="130" height="60" rx="8" className="fill-line-soft" /><rect x="210" y="130" width="70" height="50" rx="8" className="fill-line-soft" />
+      <rect x="40" y="320" width="110" height="46" rx="8" className="fill-green-500/15" />
+      {ROADS.map((d) => <path key={d} d={d} fill="none" className="stroke-line-strong" strokeWidth="14" strokeLinecap="round" />)}
       {children}
     </svg>
   );
@@ -100,29 +100,29 @@ function LiveTab() {
         {VEHICLES.map((x) => (
           <li key={x.id}>
             <button onClick={() => setSel(x.id)} aria-pressed={sel === x.id}
-              className={cn("flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors", sel === x.id ? "border-brand-500/60 bg-brand-500/10" : "border-white/5 bg-white/[0.03] hover:bg-white/[0.06]")}>
+              className={cn("flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors", sel === x.id ? "border-brand-500/60 bg-brand-500/10" : "border-line bg-soft hover:bg-softer")}>
               <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", STATUS[x.status].dot)} />
-              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{x.name}</span><span className="block truncate text-xs text-slate-400">{x.place}</span></span>
-              <span className="text-xs tabular-nums text-slate-300">{x.status === "running" ? `${x.speed} km/h` : STATUS[x.status].label}</span>
+              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-ink">{x.name}</span><span className="block truncate text-xs text-slate-400">{x.place}</span></span>
+              <span className="text-xs tabular-nums text-body">{x.status === "running" ? `${x.speed} km/h` : STATUS[x.status].label}</span>
             </button>
           </li>
         ))}
       </ul>
       <div className="grid gap-3 md:grid-cols-[1fr_210px] lg:grid-cols-1 xl:grid-cols-[1fr_220px]">
-        <div className="relative h-[260px] overflow-hidden rounded-md border border-white/10 sm:h-[340px]">
+        <div className="relative h-[260px] overflow-hidden rounded-md border border-line sm:h-[340px]">
           <MapBase>
             {VEHICLES.map((x) => <g key={x.id} onClick={() => setSel(x.id)} className="cursor-pointer"><Marker x={x.x} y={x.y} color={STATUS[x.status].hex} selected={x.id === sel} pulse={x.status === "running"} /></g>)}
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Demo data · simulated positions</span>
+          <span className="absolute left-3 top-3 rounded-full border border-line bg-surface/90 px-2.5 py-1 text-xs font-semibold text-body-strong backdrop-blur">Demo data · simulated positions</span>
         </div>
-        <div className="rounded-md border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm font-bold text-white">{v.name}</p>
+        <div className="rounded-md border border-line bg-soft p-4">
+          <p className="text-sm font-bold text-ink">{v.name}</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400"><MapPin className="h-3 w-3" />{v.place}</p>
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><Gauge className="h-3 w-3" />Speed</p><p className="mt-0.5 text-base font-bold tabular-nums text-white">{Math.max(speed, 0)}<span className="text-xs font-medium text-slate-400"> km/h</span></p></div>
-            <div className="rounded-md bg-white/5 p-2"><p className="flex items-center gap-1 text-slate-400"><KeyRound className="h-3 w-3" />Ignition</p><p className={cn("mt-0.5 text-base font-bold", v.status === "running" || v.status === "idle" ? "text-green-400" : "text-slate-300")}>{v.status === "running" || v.status === "idle" ? "ON" : "OFF"}</p></div>
+            <div className="rounded-md bg-softer p-2"><p className="flex items-center gap-1 text-slate-400"><Gauge className="h-3 w-3" />Speed</p><p className="mt-0.5 text-base font-bold tabular-nums text-ink">{Math.max(speed, 0)}<span className="text-xs font-medium text-slate-400"> km/h</span></p></div>
+            <div className="rounded-md bg-softer p-2"><p className="flex items-center gap-1 text-slate-400"><KeyRound className="h-3 w-3" />Ignition</p><p className={cn("mt-0.5 text-base font-bold", v.status === "running" || v.status === "idle" ? "text-green-400" : "text-body")}>{v.status === "running" || v.status === "idle" ? "ON" : "OFF"}</p></div>
           </div>
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-300"><User className="h-3 w-3 text-slate-400" />{v.driver}</p>
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-body"><User className="h-3 w-3 text-slate-400" />{v.driver}</p>
           <button onClick={toggleLock} disabled={v.status === "offline"}
             className={cn("mt-4 flex w-full items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40", isLocked ? "bg-green-600 text-white hover:bg-green-500" : "gloss-btn text-white")}>
             {isLocked ? <><LockOpen className="h-4 w-4" />Unlock engine</> : <><Lock className="h-4 w-4" />Lock engine</>}
@@ -168,36 +168,36 @@ function PlaybackTab() {
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_240px]">
       <div>
-        <div className="relative h-[260px] overflow-hidden rounded-md border border-white/10 sm:h-[340px]">
+        <div className="relative h-[260px] overflow-hidden rounded-md border border-line sm:h-[340px]">
           <MapBase>
-            <path ref={pathRef} d={ROUTE} fill="none" stroke="#3a414d" strokeWidth="6" strokeLinecap="round" />
+            <path ref={pathRef} d={ROUTE} fill="none" className="stroke-line-strong" strokeWidth="6" strokeLinecap="round" />
             <path d={ROUTE} fill="none" stroke="#f05a22" strokeWidth="5" strokeLinecap="round" pathLength={1} strokeDasharray="1 1" strokeDashoffset={1 - progress} />
             <Marker x={40} y={320} color="#22c55e" /><Marker x={570} y={60} color="#ef4444" />
             <g transform={`translate(${pt.x} ${pt.y})`}><circle r="14" fill="#f05a22" fillOpacity=".25" /><circle r="8" fill="#f05a22" stroke="#fff" strokeWidth="2.5" /></g>
           </MapBase>
-          <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur">Delivery Van 01 · demo trip</span>
+          <span className="absolute left-3 top-3 rounded-full border border-line bg-surface/90 px-2.5 py-1 text-xs font-semibold text-body-strong backdrop-blur">Delivery Van 01 · demo trip</span>
         </div>
-        <div className="mt-3 flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.03] p-3">
+        <div className="mt-3 flex items-center gap-3 rounded-md border border-line bg-soft p-3">
           <button onClick={() => { if (progress >= 1) seek(0); setPlaying((p) => !p); }} aria-label={playing ? "Pause" : "Play"} className="gloss-btn grid h-10 w-10 shrink-0 place-items-center rounded-full text-white">
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
           <input type="range" min={0} max={1000} value={Math.round(progress * 1000)} onChange={(e) => { setPlaying(false); seek(Number(e.target.value) / 1000); }} aria-label="Trip position" className="h-1.5 flex-1 cursor-pointer accent-brand-600" />
-          <div className="flex shrink-0 rounded-md border border-white/10 p-0.5 text-xs font-semibold">
-            {[1, 2, 4].map((r) => <button key={r} onClick={() => setRate(r)} aria-pressed={rate === r} className={cn("rounded px-2 py-1", rate === r ? "bg-white/15 text-white" : "text-slate-400")}>{r}×</button>)}
+          <div className="flex shrink-0 rounded-md border border-line p-0.5 text-xs font-semibold">
+            {[1, 2, 4].map((r) => <button key={r} onClick={() => setRate(r)} aria-pressed={rate === r} className={cn("rounded px-2 py-1", rate === r ? "bg-surface text-ink shadow-sm" : "text-slate-400")}>{r}×</button>)}
           </div>
         </div>
       </div>
       <div className="space-y-3">
         <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
           {[["Distance", `${(progress * 18.6).toFixed(1)} km`], ["Duration", `${Math.round(progress * 42)} min`], ["Top speed", `${maxSoFar} km/h`]].map(([k, val]) => (
-            <div key={k} className="rounded-md border border-white/10 bg-white/[0.03] p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-white">{val}</p></div>
+            <div key={k} className="rounded-md border border-line bg-soft p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-ink">{val}</p></div>
           ))}
         </div>
-        <div className="rounded-md border border-white/10 bg-white/[0.03] p-3">
+        <div className="rounded-md border border-line bg-soft p-3">
           <p className="mb-1 flex justify-between text-xs text-slate-400"><span>Speed</span><span>{stops} stop{stops === 1 ? "" : "s"}</span></p>
           <svg viewBox="0 0 300 76" className="h-16 w-full" role="img" aria-label="Speed over the trip">
             <polyline points={chart} fill="none" stroke="#f05a22" strokeWidth="2" strokeLinejoin="round" />
-            <line x1={(idx / 59) * 300} x2={(idx / 59) * 300} y1="0" y2="76" stroke="#fff" strokeOpacity=".5" />
+            <line x1={(idx / 59) * 300} x2={(idx / 59) * 300} y1="0" y2="76" className="stroke-slate-400" />
           </svg>
         </div>
       </div>
@@ -233,7 +233,7 @@ function FenceTab() {
 
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_250px]">
-      <div className="relative h-[260px] overflow-hidden rounded-md border border-white/10 sm:h-[340px]">
+      <div className="relative h-[260px] overflow-hidden rounded-md border border-line sm:h-[340px]">
         <MapBase>
           <circle cx={CX} cy={CY} r={radius} fill={outside ? "#ef4444" : "#f05a22"} fillOpacity=".14" stroke={outside ? "#ef4444" : "#f05a22"} strokeWidth="2.5" strokeDasharray="8 6" />
           <Marker x={CX} y={CY} color="#38bdf8" />
@@ -244,17 +244,17 @@ function FenceTab() {
         </span>
       </div>
       <div className="space-y-3">
-        <div className="rounded-md border border-white/10 bg-white/[0.03] p-3">
-          <label className="flex justify-between text-xs text-slate-400"><span>Zone radius</span><span className="tabular-nums text-white">{Math.round(radius * 9)} m</span></label>
+        <div className="rounded-md border border-line bg-soft p-3">
+          <label className="flex justify-between text-xs text-slate-400"><span>Zone radius</span><span className="tabular-nums text-ink">{Math.round(radius * 9)} m</span></label>
           <input type="range" min={50} max={170} value={radius} onChange={(e) => setRadius(Number(e.target.value))} aria-label="Zone radius" className="mt-2 w-full cursor-pointer accent-brand-600" />
           <div className="mt-3 flex gap-2">
             <button onClick={() => { if (t >= 1) setT(0); setMoving(true); }} disabled={moving} className="gloss-btn flex-1 rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Drive out</button>
-            <button onClick={() => { setMoving(false); setT(0); }} className="rounded-md border border-white/15 px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-white/5">Reset</button>
+            <button onClick={() => { setMoving(false); setT(0); }} className="rounded-md border border-line-strong px-3 py-2 text-sm font-semibold text-body-strong hover:bg-softer">Reset</button>
           </div>
         </div>
         <ul className="space-y-1.5" aria-live="polite">
           {log.map((l) => (
-            <li key={l.id} className="flex items-start gap-2 rounded-md border border-white/10 bg-white/[0.03] p-2.5 text-xs text-slate-200"><span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", l.out ? "bg-red-500" : "bg-green-500")} />{l.text}</li>
+            <li key={l.id} className="flex items-start gap-2 rounded-md border border-line bg-soft p-2.5 text-xs text-body-strong"><span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", l.out ? "bg-red-500" : "bg-green-500")} />{l.text}</li>
           ))}
         </ul>
       </div>
@@ -271,7 +271,7 @@ function AlertsTab() {
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {(["all", "critical", "warning", "info"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} aria-pressed={filter === f} className={cn("rounded-full border px-3 py-1 text-xs font-semibold capitalize", filter === f ? "border-brand-500 bg-brand-500/15 text-white" : "border-white/10 text-slate-300 hover:bg-white/5")}>{f}</button>
+          <button key={f} onClick={() => setFilter(f)} aria-pressed={filter === f} className={cn("rounded-full border px-3 py-1 text-xs font-semibold capitalize", filter === f ? "border-brand-500 bg-brand-500/10 text-brand-text" : "border-line text-body hover:bg-softer")}>{f}</button>
         ))}
         <span className="ml-auto text-xs text-slate-400">{open} open</span>
       </div>
@@ -279,10 +279,10 @@ function AlertsTab() {
         {list.map((a) => {
           const resolved = done.includes(a.id);
           return (
-            <li key={a.id} className={cn("flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.03] p-3 transition-opacity", resolved && "opacity-45")}>
+            <li key={a.id} className={cn("flex items-center gap-3 rounded-md border border-line bg-soft p-3 transition-opacity", resolved && "opacity-45")}>
               <span className={cn("h-9 w-1.5 shrink-0 rounded-full", SEV[a.sev])} />
-              <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold text-white", resolved && "line-through")}>{a.title}</span><span className="block truncate text-xs text-slate-400">{a.who} · {a.when}</span></span>
-              <button onClick={() => setDone((d) => (resolved ? d.filter((x) => x !== a.id) : [...d, a.id]))} aria-label={resolved ? "Reopen alert" : "Resolve alert"} className={cn("grid h-8 w-8 place-items-center rounded-full border", resolved ? "border-green-500 bg-green-500/20 text-green-400" : "border-white/15 text-slate-400 hover:text-white")}><Check className="h-4 w-4" /></button>
+              <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold text-ink", resolved && "line-through")}>{a.title}</span><span className="block truncate text-xs text-slate-400">{a.who} · {a.when}</span></span>
+              <button onClick={() => setDone((d) => (resolved ? d.filter((x) => x !== a.id) : [...d, a.id]))} aria-label={resolved ? "Reopen alert" : "Resolve alert"} className={cn("grid h-8 w-8 place-items-center rounded-full border", resolved ? "border-green-500 bg-green-500/20 text-green-400" : "border-line-strong text-slate-400 hover:text-ink")}><Check className="h-4 w-4" /></button>
             </li>
           );
         })}
@@ -300,11 +300,11 @@ function ReportsTab() {
   const shown = hover !== null ? data[hover] : Math.round(total / data.length);
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
-      <div className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <div className="rounded-md border border-line bg-soft p-4">
         <div className="mb-3 flex items-center justify-between">
-          <div><p className="text-xs text-slate-400">{hover !== null ? `Day ${hover + 1}` : "Daily average"}</p><p className="text-2xl font-bold tabular-nums text-white">{shown} <span className="text-sm font-medium text-slate-400">km</span></p></div>
-          <div className="flex rounded-md border border-white/10 p-0.5 text-xs font-semibold">
-            {([7, 30] as const).map((r) => <button key={r} onClick={() => { setRange(r); setHover(null); }} aria-pressed={range === r} className={cn("rounded px-2.5 py-1", range === r ? "bg-white/15 text-white" : "text-slate-400")}>{r} days</button>)}
+          <div><p className="text-xs text-slate-400">{hover !== null ? `Day ${hover + 1}` : "Daily average"}</p><p className="text-2xl font-bold tabular-nums text-ink">{shown} <span className="text-sm font-medium text-slate-400">km</span></p></div>
+          <div className="flex rounded-md border border-line p-0.5 text-xs font-semibold">
+            {([7, 30] as const).map((r) => <button key={r} onClick={() => { setRange(r); setHover(null); }} aria-pressed={range === r} className={cn("rounded px-2.5 py-1", range === r ? "bg-surface text-ink shadow-sm" : "text-slate-400")}>{r} days</button>)}
           </div>
         </div>
         <div className="flex h-44 items-end gap-1" onMouseLeave={() => setHover(null)}>
@@ -317,7 +317,7 @@ function ReportsTab() {
       </div>
       <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
         {[["Total distance", `${total.toLocaleString("en-US")} km`], ["Running time", `${Math.round(total / 38)} h`], ["Parked time", `${Math.round(total / 22)} h`]].map(([k, v]) => (
-          <div key={k} className="rounded-md border border-white/10 bg-white/[0.03] p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-white">{v}</p></div>
+          <div key={k} className="rounded-md border border-line bg-soft p-3"><p className="text-xs text-slate-400">{k}</p><p className="text-lg font-bold tabular-nums text-ink">{v}</p></div>
         ))}
       </div>
     </div>
@@ -329,50 +329,97 @@ const PANELS: Record<string, React.ReactNode> = {
 };
 
 /* --------------------------------------------------------------- section */
+const COUNTS = (Object.keys(STATUS) as Status[]).map((k) => ({ k, n: VEHICLES.filter((v) => v.status === k).length }));
+
 export default function SoftwarePreview() {
   const [tab, setTab] = useState("live");
+  const [sync, setSync] = useState(0);
+  useEffect(() => { const t = setInterval(() => setSync((n) => (n + 1) % 10), 1000); return () => clearInterval(t); }, []);
   const current = TABS.find((t) => t.id === tab)!;
+  const idx = TABS.findIndex((t) => t.id === tab);
 
   return (
-    <section className="relative overflow-hidden bg-navy-950 py-16 text-white sm:py-20">
-      <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl" aria-hidden />
-      <Container className="relative">
-        <SectionHeading light eyebrow="Tracking software preview" title="Try the fleet console" description="An interactive demo with simulated data — lock an engine, replay a trip, drag a geo-fence, clear alerts." />
+    <section className="bg-sec-gray py-14 sm:py-20">
+      <Container>
+        <SectionHeading eyebrow="Tracking software preview" title="Try the fleet console" description="An interactive demo with simulated data — pick a tool on the left and try it in the console." />
 
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-md border border-white/10 bg-[#0f1217]">
-          {/* top bar */}
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
-            <span className="text-sm font-bold">Fleet console</span>
-            <span className="truncate text-xs text-slate-500">/ {current.label}</span>
-            <span className="ml-auto text-xs text-slate-500">Demo data</span>
-            <span className="flex items-center gap-1.5 rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-semibold text-green-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400" />Live
-            </span>
-          </div>
-
-          <div className="md:grid md:grid-cols-[180px_1fr]">
-            {/* tabs */}
-            <nav role="tablist" aria-label="Software preview"
-              className="flex gap-1 overflow-x-auto border-b border-white/10 p-2 [scrollbar-width:none] md:flex-col md:overflow-visible md:border-b-0 md:border-r [&::-webkit-scrollbar]:hidden">
-              {TABS.map((t) => {
+        <div className="grid gap-4 lg:grid-cols-[280px_1fr] lg:gap-6">
+          {/* ---------- tool picker ---------- */}
+          <div>
+            <div role="tablist" aria-label="Console tools" className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:flex-col [&::-webkit-scrollbar]:hidden">
+              {TABS.map((t, i) => {
                 const on = tab === t.id;
                 return (
-                  <button key={t.id} role="tab" aria-selected={on} onClick={() => setTab(t.id)}
-                    className={cn("flex shrink-0 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold transition-colors",
-                      on ? "bg-brand-600 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white")}>
-                    <t.icon className="h-4 w-4" />{t.label}
+                  <button
+                    key={t.id}
+                    role="tab"
+                    aria-selected={on}
+                    onClick={() => setTab(t.id)}
+                    className={cn(
+                      "relative flex w-56 shrink-0 items-start gap-3 rounded-md border p-3 text-left transition-all lg:w-full",
+                      on ? "border-brand-500 bg-surface shadow-md shadow-brand-600/10" : "border-line bg-surface/60 hover:border-brand-300 hover:bg-surface",
+                    )}
+                  >
+                    {on && <motion.span layoutId="sp-rail" className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand-600" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+                    <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-md transition-colors", on ? "bg-brand-600 text-white" : "bg-softer text-body")}>
+                      <t.icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2 text-sm font-bold text-ink">
+                        {t.label}
+                        <span className="text-[10px] font-semibold tabular-nums text-slate-400">0{i + 1}</span>
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-snug text-body">{t.tip}</span>
+                    </span>
                   </button>
                 );
               })}
-            </nav>
+            </div>
+            <p className="mt-3 hidden items-center gap-2 text-xs text-slate-500 lg:flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />All data in this console is simulated.
+            </p>
+          </div>
+
+          {/* ---------- app window ---------- */}
+          <div className="min-w-0 overflow-hidden rounded-md border border-line bg-surface shadow-lg shadow-navy-950/5">
+            {/* title bar */}
+            <div className="flex items-center gap-3 border-b border-line bg-soft px-3 py-2">
+              <span className="hidden gap-1.5 sm:flex" aria-hidden>
+                <span className="h-2.5 w-2.5 rounded-full bg-red-400" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400" /><span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+              </span>
+              <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-xs text-body">
+                <MapPin className="h-3 w-3 shrink-0 text-brand-text" />
+                <span className="truncate">Fleet console <span className="text-slate-400">/</span> <b className="font-semibold text-ink">{current.label}</b></span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-semibold text-green-600 dark:text-green-400">
+                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-500" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-500" /></span>
+                Live
+              </span>
+            </div>
+
+            {/* status chips */}
+            <div className="flex gap-1.5 overflow-x-auto border-b border-line px-3 py-2 [scrollbar-width:none]">
+              {COUNTS.map(({ k, n }) => (
+                <span key={k} className="flex shrink-0 items-center gap-1.5 rounded-full bg-softer px-2.5 py-0.5 text-xs text-body">
+                  <span className={cn("h-1.5 w-1.5 rounded-full", STATUS[k].dot)} />{STATUS[k].label} <b className="tabular-nums text-ink">{n}</b>
+                </span>
+              ))}
+              <span className="ml-auto hidden shrink-0 text-xs text-slate-400 sm:inline">Tool {idx + 1} of {TABS.length}</span>
+            </div>
 
             {/* panel */}
-            <div className="min-w-0 p-3 sm:p-4" role="tabpanel" aria-label={current.label}>
+            <div className="p-3 sm:p-4" role="tabpanel" aria-label={current.label}>
               <AnimatePresence mode="wait">
                 <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>
                   {PANELS[tab]}
                 </motion.div>
               </AnimatePresence>
+            </div>
+
+            {/* status bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-soft px-4 py-2 text-[11px] text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-green-500" />Connected · last sync {sync}s ago</span>
+              <span>{VEHICLES.length} devices · demo data</span>
             </div>
           </div>
         </div>

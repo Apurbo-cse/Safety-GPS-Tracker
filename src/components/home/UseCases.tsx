@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Gauge, MapPin } from "lucide-react";
+import { ArrowRight, Check, Gauge, MapPin, Route } from "lucide-react";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import Reveal from "@/components/common/Reveal";
@@ -14,13 +14,43 @@ import { cn } from "@/utils/format";
 const IDS = ["logistics", "construction", "public-transport", "motorcycles"];
 const DURATION = 6000;
 
-/** Demo live readout shown over each use-case photo */
-const LIVE: Record<string, { unit: string; place: string; metric: [string, string]; status: string; tone: string }> = {
-  logistics: { unit: "Cargo Truck 07", place: "Dhaka–Chattogram Hwy", metric: ["Speed", "58 km/h"], status: "On route", tone: "bg-green-500" },
-  construction: { unit: "Excavator 02", place: "Purbachal site", metric: ["Engine hours", "6.4 h"], status: "On site", tone: "bg-amber-500" },
-  "public-transport": { unit: "Staff Bus 03", place: "Mirpur 10", metric: ["Speed", "46 km/h"], status: "Stop 5 of 12", tone: "bg-green-500" },
-  motorcycles: { unit: "Bike 12", place: "Dhanmondi 27", metric: ["Speed", "34 km/h"], status: "In geo-fence", tone: "bg-sky-500" },
+type Tone = "start" | "info" | "warn" | "ok";
+interface Live {
+  unit: string; place: string; metric: [string, string]; status: string; tone: string;
+  moving: boolean;
+  /** Where the marker rests when the vehicle is not moving */
+  at?: [number, number];
+  /** Route drawn over the photo (viewBox 0 0 160 100) */
+  route: string;
+  /** Demo trip events, oldest first; the last one is "now" */
+  trip: [string, string, Tone][];
+}
+
+/** Demo live readout + trip for each use case */
+const LIVE: Record<string, Live> = {
+  logistics: {
+    unit: "Cargo Truck 07", place: "Dhaka–Chattogram Hwy", metric: ["Speed", "58 km/h"], status: "On route", tone: "bg-green-500", moving: true,
+    route: "M12 58 C 40 50, 52 30, 80 32 S 120 44, 148 18",
+    trip: [["08:10", "Left Tejgaon depot", "start"], ["10:42", "Speed alert · 64 km/h", "warn"], ["12:05", "Passed Cumilla checkpoint", "info"], ["Now", "On route to Chattogram", "ok"]],
+  },
+  construction: {
+    unit: "Excavator 02", place: "Purbachal site", metric: ["Engine hours", "6.4 h"], status: "On site", tone: "bg-amber-500", moving: true,
+    route: "M60 50 C 70 30, 100 28, 110 42 S 90 62, 70 52 S 58 36, 60 50",
+    trip: [["07:30", "Engine on at site", "start"], ["09:15", "Left geo-fence · alert sent", "warn"], ["09:22", "Back inside site zone", "info"], ["Now", "Working · 6.4 engine hours", "ok"]],
+  },
+  "public-transport": {
+    unit: "Staff Bus 03", place: "Mirpur 10", metric: ["Speed", "46 km/h"], status: "Stop 5 of 12", tone: "bg-green-500", moving: true,
+    route: "M10 20 C 40 22, 50 40, 76 40 S 110 30, 150 52",
+    trip: [["07:00", "Departed Uttara", "start"], ["07:35", "Stop 3 · Banani", "info"], ["07:52", "Stop 4 · Mohakhali", "info"], ["Now", "Approaching Mirpur 10", "ok"]],
+  },
+  motorcycles: {
+    unit: "Bike 12", place: "Dhanmondi 27", metric: ["Speed", "0 km/h"], status: "Engine locked", tone: "bg-amber-500", moving: false, at: [90, 34],
+    route: "M30 56 C 50 40, 70 44, 90 34",
+    trip: [["18:20", "Parked at home", "start"], ["21:05", "Ignition ON · alert sent", "warn"], ["21:06", "Engine locked from app", "info"], ["Now", "Secured inside geo-fence", "ok"]],
+  },
 };
+
+const TONE: Record<Tone, string> = { start: "bg-slate-400", info: "bg-sky-500", warn: "bg-amber-500", ok: "bg-green-500" };
 
 export default function UseCases() {
   const list = IDS.map((id) => solutions.find((s) => s.id === id)!).filter(Boolean);
@@ -115,6 +145,21 @@ export default function UseCases() {
                       <Image quality={90} src={s.image} alt={s.title} fill sizes="(min-width:1024px) 33vw, (min-width:768px) 50vw, 100vw" className={s.contain ? "object-contain p-4" : "object-cover"} />
                     </motion.div>
                     <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-navy-950/20" />
+                    {live && (
+                      <svg aria-hidden viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
+                        <defs><filter id={`uc-glow-${s.id}`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.2" /></filter></defs>
+                        <path d={live.route} fill="none" stroke="#f05a22" strokeOpacity=".45" strokeWidth="3" strokeLinecap="round" filter={`url(#uc-glow-${s.id})`} />
+                        <motion.path
+                          d={live.route} fill="none" stroke="#fff" strokeWidth="1.1" strokeLinecap="round" strokeDasharray="2.5 2.5"
+                          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut" }}
+                        />
+                        <g transform={!live.moving && live.at ? `translate(${live.at[0]} ${live.at[1]})` : undefined}>
+                          <circle r="4.5" fill="#f05a22" fillOpacity=".3"><animate attributeName="r" values="3;6;3" dur="1.6s" repeatCount="indefinite" /></circle>
+                          <circle r="2.2" fill="#f05a22" stroke="#fff" strokeWidth=".8" />
+                          {live.moving ? <animateMotion dur="7s" repeatCount="indefinite" path={live.route} /> : null}
+                        </g>
+                      </svg>
+                    )}
 
                     <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur">
                       <span className="relative flex h-2 w-2">
@@ -161,8 +206,34 @@ export default function UseCases() {
                         </motion.li>
                       ))}
                     </ul>
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {s.features.map((f) => <span key={f} className="rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-body-strong">{f}</span>)}
+                    {live && (
+                      <div className="mt-4 rounded-md border border-line bg-surface p-3">
+                        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink"><Route className="h-3.5 w-3.5 text-brand-text" />Today&apos;s trip <span className="font-normal text-slate-400">· demo</span></p>
+                        <ol className="relative space-y-2 pl-4">
+                          <span aria-hidden className="absolute bottom-1.5 left-[4px] top-1.5 w-px bg-line-strong" />
+                          {live.trip.map(([time, label, tone], k) => {
+                            const now = k === live.trip.length - 1;
+                            return (
+                              <motion.li
+                                key={label}
+                                className="relative flex items-baseline gap-2 text-xs"
+                                initial={{ opacity: 0, x: -6 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + k * 0.12 }}
+                              >
+                                <span className={cn("absolute -left-4 top-1 h-2.5 w-2.5 rounded-full ring-2 ring-surface", TONE[tone])}>
+                                  {now && <span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" />}
+                                </span>
+                                <span className={cn("w-10 shrink-0 font-mono tabular-nums", now ? "font-bold text-green-600 dark:text-green-400" : "text-slate-500")}>{time}</span>
+                                <span className={cn(now ? "font-semibold text-ink" : "text-body")}>{label}</span>
+                              </motion.li>
+                            );
+                          })}
+                        </ol>
+                      </div>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {s.features.map((f) => <span key={f} className="rounded-full bg-softer px-2 py-0.5 text-[11px] font-medium text-body-strong">{f}</span>)}
                     </div>
                     <Link href={`/solutions#${s.id}`} className="group mt-5 inline-flex items-center gap-1 self-start text-sm font-semibold text-brand-text">
                       Explore this solution <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
