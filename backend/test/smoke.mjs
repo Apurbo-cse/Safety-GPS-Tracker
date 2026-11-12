@@ -439,10 +439,10 @@ r = await call("GET", "/posts"); ok(!r.json.items.some((x) => x.id === "smoke-po
 r = await call("GET", "/posts/smoke-post"); ok(r.status === 404, "a draft can't be opened by its address");
 r = await call("PUT", "/admin/posts/smoke-post", { token: writer.token, body: post({ title: "x" }) }); ok(r.status === 400, "a too-short title is refused");
 r = await call("PUT", "/admin/posts/smoke-post", { token: writer.token, body: post({ content: "<p></p>" }) }); ok(r.status === 400, "an empty post is refused");
-r = await call("PUT", "/admin/posts/smoke-post", { token: writer.token, body: post({ content: '<p>x</p><script>alert(1)</script><img src="https://evil.example/a.png" onerror="alert(1)">', published: true }) });
+r = await call("PUT", "/admin/posts/smoke-post", { token: writer.token, body: post({ content: '<p>Hello there</p><script>alert(1)</script><img src="https://evil.example/a.png" onerror="alert(1)">', published: true }) });
 ok(r.status === 200 && r.json.published === true && r.json.publishedAt && !/script|evil|onerror/.test(r.json.content), "publishing sanitises the content and stamps the time");
 r = await call("GET", "/posts"); ok(r.json.items.some((x) => x.id === "smoke-post") && !("content" in r.json.items[0]), "a published post is in the public list (without its full text)");
-r = await call("GET", "/posts/smoke-post"); ok(r.status === 200 && r.json.content.includes("<p>x</p>") && !/script/.test(r.json.content), "…and can be opened");
+r = await call("GET", "/posts/smoke-post"); ok(r.status === 200 && r.json.content.includes("<p>Hello there</p>") && !/script/.test(r.json.content), "…and can be opened");
 const cov = await upload(png("cover"), { token: writer.token });
 r = await call("PUT", "/admin/posts/smoke-post", { token: writer.token, body: post({ cover: cov.json.token, content: `<p>With cover</p><img src="${(await upload(png("inline"), { token: writer.token })).json.token}">`, published: true }) });
 const inlineTok = r.json.content.match(/media:[0-9a-f-]{36}/)[0];
