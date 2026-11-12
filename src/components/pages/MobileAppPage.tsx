@@ -14,7 +14,7 @@ import Container from "@/components/common/Container";
 import { GooglePlayStoreBadge, AppleAppStoreBadge } from "@/components/common/AppStoreBadges";
 import { DynIcon } from "@/lib/icons";
 import { features } from "@/data/features";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 import { cn } from "@/utils/format";
@@ -149,6 +149,7 @@ const SCREENS = [
 
 /* ================================================================ page */
 export default function MobileAppPage() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   const demo = () => dispatch(openDemoModal("Mobile app demo request"));
 
@@ -171,7 +172,7 @@ export default function MobileAppPage() {
               <span className="bg-gradient-to-r from-brand-400 via-orange-400 to-amber-300 bg-clip-text text-transparent">In Your Pocket</span>
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-200 sm:text-base">
-              The {SITE.name} app shows every vehicle on a live map, sends instant alerts and lets you lock the engine from anywhere — on Android, iPhone and the web.
+              The {site.name} app shows every vehicle on a live map, sends instant alerts and lets you lock the engine from anywhere — on Android, iPhone and the web.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <GooglePlayStoreBadge />

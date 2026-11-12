@@ -2,11 +2,14 @@
 import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
-import { Calendar, Car, Eye, MapPin, Package, Phone, Search, X } from "lucide-react";
+import { Calendar, Car, Eye, MapPin, Package, Phone, Receipt, Search, X } from "lucide-react";
+import { useCan } from "@/lib/useCan";
+import ExportButton from "./ExportButton";
 import Modal from "@/components/common/Modal";
-import { api, ApiError, type AdminOrder, type OrderStatus } from "@/lib/api";
+import type { AdminOrder, OrderStatus } from "@/lib/api";
+import { errorMessage, useAdminOrdersQuery, useSetOrderStatusMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, StatusBadge, STATUS, STATUS_ORDER, fmtDate, fmtDateTime, useLoad } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, StatusBadge, STATUS, STATUS_ORDER, fmtDate, fmtDateTime, view } from "./ui";
 
 const LIMIT = 15;
 const selectCls = "h-9 rounded-lg bg-surface px-2.5 text-xs font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:bg-navy-950";
@@ -28,7 +31,9 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
   const [detail, setDetail] = useState<AdminOrder | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const { data, error, loading, reload } = useLoad(() => api.admin.orders({ status, q: q || undefined, page, limit: LIMIT }), [status, q, page]);
+  const { data, error, loading, reload } = view(useAdminOrdersQuery({ status, q: q || undefined, page, limit: LIMIT }));
+  const [setOrderStatus] = useSetOrderStatusMutation();
+  const canManage = useCan("orders.manage");
 
   const setParam = (key: string, value: string | null) => {
     const p = new URLSearchParams(params.toString());
@@ -41,11 +46,10 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
     if (next === "cancelled" && !window.confirm(`Cancel order ${o.id}? The customer will see it as cancelled.`)) return;
     setBusy(o.id);
     try {
-      await api.admin.setStatus(o.id, next);
+      await setOrderStatus({ id: o.id, status: next }).unwrap();
       toast.success(`${o.id} → ${STATUS[next].label}`);
       setDetail((d) => (d && d.id === o.id ? { ...d, status: next } : d));
-      reload();
-    } catch (e) { toast.error(e instanceof ApiError ? e.message : "Could not update the order"); }
+    } catch (e) { toast.error(errorMessage(e, "Could not update the order")); }
     finally { setBusy(null); }
   };
 
@@ -54,7 +58,7 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
 
   return (
     <>
-      <PageHeader title="Orders" subtitle="Confirm, schedule and track customer orders." />
+      <PageHeader title="Orders" subtitle="Confirm, schedule and track customer orders." actions={<ExportButton kind="orders" range />} />
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Filter by status" className="flex flex-wrap gap-1 rounded-full bg-softer/80 p-1 dark:bg-navy-900/90">
@@ -84,11 +88,11 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
                       <td className="px-5 py-3 font-mono text-sm font-bold text-ink">{o.id}</td>
                       <td className="px-3 py-3"><span className="block font-semibold text-ink">{o.customer.name}</span><span className="block text-xs text-slate-500">{o.contact.phone}</span></td>
                       <td className="max-w-[14rem] px-3 py-3 text-body"><span className="block truncate">{o.items.map((i) => `${i.qty}× ${i.name}`).join(", ")}</span></td>
-                      <td className="px-3 py-3 text-right"><span className="block font-bold tabular-nums text-ink">{formatBDT(o.deviceTotal)}</span><span className="block text-xs text-slate-500">+{formatBDT(o.monthlyTotal)}/mo</span></td>
+                      <td className="px-3 py-3 text-right"><span className="block font-bold tabular-nums text-ink">{formatBDT(o.deviceTotal - o.discount)}</span><span className="block text-xs text-slate-500">+{formatBDT(o.monthlyTotal)}/mo</span></td>
                       <td className="px-3 py-3 text-xs text-slate-500">{fmtDateTime(o.createdAt)}</td>
                       <td className="px-3 py-3">
                         <label className="sr-only" htmlFor={`st-${o.id}`}>Status of {o.id}</label>
-                        <select id={`st-${o.id}`} className={selectCls} value={o.status} disabled={busy === o.id} onChange={(e) => void changeStatus(o, e.target.value as OrderStatus)}>
+                        <select id={`st-${o.id}`} className={selectCls} value={o.status} disabled={busy === o.id || !canManage} onChange={(e) => void changeStatus(o, e.target.value as OrderStatus)}>
                           {STATUS_ORDER.map((k) => <option key={k} value={k}>{STATUS[k].label}</option>)}
                         </select>
                       </td>
@@ -112,14 +116,16 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
                 {detail.items.map((i) => (
                   <li key={i.id} className="flex items-center justify-between gap-3 rounded-lg bg-softer/80 p-3 text-sm dark:bg-navy-900/90">
                     <span className="min-w-0"><span className="block truncate font-semibold text-ink">{i.name}</span><span className="text-xs text-slate-500">{i.qty} × {formatBDT(i.price)}{i.monthly ? ` + ${formatBDT(i.monthly)}/mo` : ""}</span></span>
-                    <span className="font-bold tabular-nums text-ink">{formatBDT(i.price * i.qty)}</span>
+                    <span className="text-right"><span className="block font-bold tabular-nums text-ink">{formatBDT(i.price * i.qty)}</span>{i.cost != null && <span className="block text-[11px] tabular-nums text-slate-500">cost {formatBDT(i.cost * i.qty)}</span>}</span>
                   </li>
                 ))}
               </ul>
               <dl className="mt-3 space-y-1 text-sm">
                 <div className="flex justify-between"><dt className="text-body">Devices</dt><dd className="font-bold tabular-nums">{formatBDT(detail.deviceTotal)}</dd></div>
+                {detail.discount > 0 && <div className="flex justify-between"><dt className="text-body">Coupon <span className="font-mono text-xs">{detail.couponCode}</span></dt><dd className="font-bold tabular-nums text-green-600">−{formatBDT(detail.discount)}</dd></div>}
                 <div className="flex justify-between"><dt className="text-body">Monthly</dt><dd className="font-bold tabular-nums">{formatBDT(detail.monthlyTotal)}/mo</dd></div>
                 <div className="flex justify-between"><dt className="text-body">Payment</dt><dd className="font-semibold">{detail.payment}</dd></div>
+                {detail.profit !== undefined && <div className="flex justify-between border-t border-line pt-1"><dt className="text-body">Profit on devices</dt><dd className={cn("font-bold tabular-nums", detail.profit < 0 ? "text-red-600" : "text-green-600")}>{formatBDT(detail.profit)}</dd></div>}
               </dl>
             </div>
             <div>
@@ -131,9 +137,16 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
                 <li className="flex gap-2.5"><Calendar className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />Preferred installation {fmtDate(detail.contact.preferredDate)}</li>
                 {detail.contact.note && <li className="rounded-lg bg-softer/80 p-3 text-xs dark:bg-navy-900/90">“{detail.contact.note}”</li>}
               </ul>
-              <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-slate-500">Move to</p>
+              <div className="mt-4 rounded-lg bg-softer/80 p-3 text-xs dark:bg-navy-900/90">
+                <p className="mb-1 flex items-center gap-1.5 font-semibold uppercase tracking-wider text-slate-500"><Receipt className="h-3.5 w-3.5" />Bill to</p>
+                <p className="font-semibold text-ink">{detail.billing.name}{detail.billing.company ? ` · ${detail.billing.company}` : ""}</p>
+                <p className="text-body">{detail.billing.address}, {detail.billing.division}{detail.billing.postcode ? ` ${detail.billing.postcode}` : ""}</p>
+                <p className="text-body">{detail.billing.phone} · {detail.billing.email}</p>
+                {detail.billing.taxId && <p className="text-body">BIN / TIN: <b className="text-ink">{detail.billing.taxId}</b></p>}
+              </div>
+              {canManage && <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-slate-500">Move to</p>}
               <div className="flex flex-wrap gap-2">
-                {STATUS_ORDER.filter((k) => k !== detail.status).map((k) => (
+                {canManage && STATUS_ORDER.filter((k) => k !== detail.status).map((k) => (
                   <button key={k} disabled={busy === detail.id} onClick={() => void changeStatus(detail, k)} className={cn("rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors hover:opacity-80 disabled:opacity-50", STATUS[k].cls)}>{STATUS[k].label}</button>
                 ))}
               </div>

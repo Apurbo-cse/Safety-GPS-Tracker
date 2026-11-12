@@ -1,4 +1,5 @@
 "use client";
+import RichText from "@/components/common/RichText";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
@@ -58,6 +59,7 @@ export default function PlanFeaturesModal() {
             </div>
           </div>
 
+          {plan.description && <RichText html={plan.description} className="mt-5 text-sm" />}
           <p className="mt-5 text-sm font-semibold text-ink">{plan.features.length} features included</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             {grouped.map((g) => (

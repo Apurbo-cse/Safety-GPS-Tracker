@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, X } from "lucide-react";
 import ProductImage from "@/components/common/ProductImage";
 import { inputCls } from "@/components/forms/Field";
-import { api, ApiError, mediaUrl } from "@/lib/api";
+import { mediaUrl } from "@/lib/api";
+import { errorMessage, useUploadImageMutation } from "@/store/apiSlice";
 import { cn } from "@/utils/format";
 
 export const MAX_IMAGES = 10;
@@ -12,7 +13,7 @@ const MAX_BYTES = 3 * 1024 * 1024;
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 /** Shrink a picture in the browser (≤ 1600 px, WebP) so uploads are fast and the shop loads quickly. */
-async function prepare(file: File): Promise<Blob> {
+export async function prepareImage(file: File): Promise<Blob> {
   if (!OK_TYPES.includes(file.type)) throw new Error(`“${file.name}” isn't a JPEG, PNG or WebP picture`);
   let bmp: ImageBitmap;
   try { bmp = await createImageBitmap(file); } catch { throw new Error(`“${file.name}” can't be read as a picture`); }
@@ -43,6 +44,7 @@ export default function ImageManager({ value, onChange, onUploaded }: { value: s
   const latest = useRef(value);
   useEffect(() => { latest.current = value; });
 
+  const [upload] = useUploadImageMutation();
   const add = async (files: File[]) => {
     setError(null);
     const room = MAX_IMAGES - latest.current.length;
@@ -52,11 +54,11 @@ export default function ImageManager({ value, onChange, onUploaded }: { value: s
     for (let i = 0; i < picked.length; i++) {
       setBusy(`Uploading ${i + 1} of ${picked.length}…`);
       try {
-        const blob = await prepare(picked[i]);
-        const up = await api.admin.uploadImage(blob, picked[i].name);
+        const blob = await prepareImage(picked[i]);
+        const up = await upload({ file: blob, name: picked[i].name }).unwrap();
         if (!latest.current.includes(up.token)) { onChange([...latest.current, up.token]); latest.current = [...latest.current, up.token]; }
         onUploaded?.(up.token);
-      } catch (e) { setError(e instanceof ApiError || e instanceof Error ? e.message : "Upload failed"); }
+      } catch (e) { setError(errorMessage(e, "Upload failed")); }
     }
     setBusy(null);
     if (input.current) input.current.value = "";

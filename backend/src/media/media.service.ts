@@ -48,7 +48,8 @@ export class MediaService {
         `SELECT 1 WHERE EXISTS (SELECT 1 FROM devices WHERE image = $1 OR images @> $2::jsonb OR description LIKE $3)
             OR EXISTS (SELECT 1 FROM plans WHERE description LIKE $3)
             OR EXISTS (SELECT 1 FROM faqs WHERE a LIKE $3)
-            OR EXISTS (SELECT 1 FROM posts WHERE cover = $1 OR content LIKE $3)`, [t, JSON.stringify([t]), like]);
+            OR EXISTS (SELECT 1 FROM posts WHERE cover = $1 OR content LIKE $3)
+            OR EXISTS (SELECT 1 FROM pages WHERE content LIKE $3)`, [t, JSON.stringify([t]), like]);
       if (!used.length) await this.repo.delete({ id: m[1] });
     }
   }

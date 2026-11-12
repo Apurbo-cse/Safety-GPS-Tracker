@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/common/Button";
 import { Field, Select, inputCls, textareaCls } from "./Field";
 import { emailSchema, mobileSchema } from "@/lib/validation";
+import { errorMessage, useSendContactMutation } from "@/store/apiSlice";
 
 const DEPARTMENTS = [
   { value: "sales", label: "Sales", desc: "Plans & quotes", icon: Briefcase },
@@ -26,6 +27,7 @@ const schema = z.object({
   fleet: z.string().min(1, "Select your fleet size"),
   subject: z.string().min(3, "Enter a subject"),
   message: z.string().min(10, "Please write at least 10 characters").max(MAX, `Maximum ${MAX} characters`),
+  website: z.string().optional(), // honeypot
 });
 type Values = z.infer<typeof schema>;
 
@@ -38,11 +40,16 @@ export default function ContactForm({ showHeader = true }: { showHeader?: boolea
   const department = useWatch({ control, name: "department" });
   const length = useWatch({ control, name: "message" })?.length ?? 0;
 
+  const [send] = useSendContactMutation();
+  const [serverError, setServerError] = useState<string | null>(null);
   const onSubmit = async (v: Values) => {
-    await new Promise((r) => setTimeout(r, 900));
-    setSent(v.name);
-    toast.success("Message sent successfully (demo)");
-    reset();
+    setServerError(null);
+    try {
+      await send({ kind: "contact", department: v.department, name: v.name, email: v.email, phone: v.mobile, fleet: v.fleet, subject: v.subject, message: v.message, website: v.website ?? "" }).unwrap();
+      setSent(v.name);
+      toast.success("Message sent — we'll get back to you soon");
+      reset();
+    } catch (e) { setServerError(errorMessage(e, "Could not send your message. Please try again or call us.")); }
   };
 
   if (sent) {
@@ -50,7 +57,7 @@ export default function ContactForm({ showHeader = true }: { showHeader?: boolea
       <div className="grid place-items-center rounded-md border border-green-200 bg-green-50 p-10 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
         <h2 className="mt-3 text-xl font-bold text-ink">Thank you, {sent}</h2>
-        <p className="mt-1 max-w-sm text-sm text-body">Your message has been recorded in this demo. No data was sent to a server; a live site would reply by phone or email.</p>
+        <p className="mt-1 max-w-sm text-sm text-body">Your message has reached our team. We will reply by phone or email as soon as we can.</p>
         <Button className="mt-5" variant="outline" onClick={() => setSent(null)}>Send another message</Button>
       </div>
     );
@@ -129,6 +136,9 @@ export default function ContactForm({ showHeader = true }: { showHeader?: boolea
 
       <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-slate-500">We usually reply within one business day.</p>
+        {/* bots fill every field; people never see this one */}
+        <input type="text" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" {...register("website")} />
+        {serverError && <p role="alert" className="rounded-lg bg-red-500/10 p-3 text-sm font-medium text-red-600">{serverError}</p>}
         <Button type="submit" size="lg" disabled={isSubmitting} className="w-full gap-2 sm:w-auto">
           {isSubmitting ? (
             <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Sending…</>

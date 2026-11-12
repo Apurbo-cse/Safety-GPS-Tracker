@@ -1,9 +1,12 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, Banknote, Package, Repeat, Users } from "lucide-react";
-import { api, type AdminStats } from "@/lib/api";
+import { AlertTriangle, ArrowRight, Banknote, Boxes, Package, PiggyBank, Repeat, Users } from "lucide-react";
+import { useCan } from "@/lib/useCan";
+import { useAppSelector } from "@/store/hooks";
+import type { AdminStats } from "@/lib/api";
+import { useAdminOrdersQuery, useAdminStatsQuery } from "@/store/apiSlice";
 import { formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, STATUS, STATUS_ORDER, fmtDateTime, useLoad } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, STATUS, STATUS_ORDER, fmtDateTime, view } from "./ui";
 
 /** 14-day bar chart (orders per day) — plain SVG, no chart library. */
 function DailyChart({ daily }: { daily: AdminStats["daily"] }) {
@@ -32,9 +35,19 @@ function DailyChart({ daily }: { daily: AdminStats["daily"] }) {
 }
 
 export default function DashboardView() {
-  const stats = useLoad(() => api.admin.stats(), []);
-  const recent = useLoad(() => api.admin.orders({ limit: 6 }), []);
+  // staff without access to orders get a welcome page instead of numbers they may not see
+  const canOrders = useCan("orders.view");
+  const name = useAppSelector((st) => st.auth.user?.name ?? "");
+  const stats = view(useAdminStatsQuery(undefined, { skip: !canOrders }));
+  const recent = view(useAdminOrdersQuery({ limit: 6 }, { skip: !canOrders }));
   const s = stats.data;
+
+  if (!canOrders) return (
+    <>
+      <PageHeader title={`Welcome${name ? `, ${name.split(" ")[0]}` : ""}`} subtitle="Use the menu on the left to get to your work." />
+      <div className={`${CARD} p-8 text-sm text-body`}>Your role doesn&apos;t include order figures. Ask the owner if you need them.</div>
+    </>
+  );
 
   return (
     <>
@@ -49,8 +62,22 @@ export default function DashboardView() {
             <StatCard icon={Banknote} label="Device sales" value={formatBDT(s.revenue)} hint="Orders not cancelled" />
             <StatCard icon={Package} label="Orders" value={String(s.orders.total)} hint={`${s.orders.byStatus.active ?? 0} active`} tone="sky" />
             <StatCard icon={Repeat} label="Monthly recurring" value={formatBDT(s.monthlyActive)} hint={`+ ${formatBDT(s.monthlyPipeline)}/mo in the pipeline`} tone="green" />
-            <StatCard icon={Users} label="Customers" value={String(s.customers)} hint={`${s.newCustomers7d} new this week`} tone="amber" />
+            {s.customers != null && <StatCard icon={Users} label="Customers" value={String(s.customers)} hint={`${s.newCustomers7d ?? 0} new this week`} tone="amber" />}
+            {s.profit != null && <StatCard icon={PiggyBank} label="Profit on devices" value={formatBDT(s.profit)} hint="Sales minus cost price" tone="green" />}
+            <StatCard icon={Boxes} label="In stock" value={`${s.inventory.units} units`} hint={s.inventory.tracked ? `${s.inventory.tracked} products tracked${s.inventory.value != null ? ` · worth ${formatBDT(s.inventory.value)}` : ""}` : "No product tracks stock yet"} tone="sky" />
           </div>
+
+          {(s.inventory.outOfStock > 0 || s.inventory.lowStock > 0) && (
+            <section className={`${CARD} mt-6 p-5 sm:p-6`}>
+              <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-ink"><AlertTriangle className="h-5 w-5 text-amber-500" />Needs restocking</h2>
+              <p className="text-xs text-slate-500">{s.inventory.outOfStock} sold out · {s.inventory.lowStock} with {s.inventory.lowThreshold} or fewer left</p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {s.inventory.lowItems.map((i) => (
+                  <li key={i.id}><Link href="/admin/products" className="flex items-center justify-between gap-3 rounded-lg bg-surface p-3 text-sm hover:text-brand-600 dark:bg-navy-950/70"><span className="truncate font-semibold text-ink">{i.name}</span><span className={`shrink-0 text-xs font-bold ${i.stock === 0 ? "text-red-600" : "text-amber-600"}`}>{i.stock === 0 ? "Sold out" : `${i.stock} left`}</span></Link></li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <section className={`${CARD} p-5 sm:p-6`}>
@@ -89,7 +116,7 @@ export default function DashboardView() {
                 <Link href={`/admin/orders?q=${o.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-surface p-3 transition-all hover:-translate-y-0.5 dark:bg-navy-950/70">
                   <span className="w-24 font-mono text-sm font-bold text-ink">{o.id}</span>
                   <span className="min-w-0 flex-1 truncate text-sm text-body">{o.customer.name} · {o.items.reduce((n, i) => n + i.qty, 0)} item(s)</span>
-                  <span className="text-sm font-bold tabular-nums text-ink">{formatBDT(o.deviceTotal)}</span>
+                  <span className="text-sm font-bold tabular-nums text-ink">{formatBDT(o.deviceTotal - o.discount)}</span>
                   <span className="hidden text-xs text-slate-500 sm:block">{fmtDateTime(o.createdAt)}</span>
                   <StatusBadge status={o.status} />
                 </Link>

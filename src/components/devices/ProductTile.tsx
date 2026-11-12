@@ -1,4 +1,5 @@
 "use client";
+import { room, stockLabel, stockState } from "@/lib/stock";
 import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -6,7 +7,7 @@ import { Check, Eye, Heart, Phone, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/common/Button";
 import DeviceVisual from "./DeviceVisual";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { deviceUrl } from "@/data/catalogue";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
@@ -37,6 +38,8 @@ export type TileProps = {
   /** add to cart; when absent a "Get Quote" button is shown */
   onAdd?: () => void;
   added?: boolean;
+  /** "Out of stock" disables ordering; "Only 3 left" is shown as a note. */
+  stockNote?: { label: string; out: boolean };
 };
 
 /**
@@ -64,7 +67,9 @@ export default function ProductTile({
   onWish,
   onAdd,
   added,
+  stockNote,
 }: TileProps) {
+  const site = useSite();
   const displayPrice = priceDisplay ?? (price ? formatBDT(price) : "Price on request");
   const displayMonthly = monthlyDisplay ?? (monthly ? `+ ${formatBDT(monthly)}/mo` : undefined);
 
@@ -167,15 +172,19 @@ export default function ProductTile({
             <p className="mt-0.5 h-4 truncate text-[11px] leading-4 text-body sm:text-xs">{displayMonthly ?? "\u00a0"}</p>
 
           </div>
+          {stockNote && !stockNote.out && stockNote.label !== "In stock" && <p className="mt-2 text-[11px] font-semibold text-amber-600">{stockNote.label}</p>}
           <div className="mt-3 flex items-center gap-1.5">
             {onAdd ? (
               <Button
                 size="sm"
                 variant={added ? "outline" : "primary"}
                 onClick={onAdd}
+                disabled={stockNote?.out}
                 className={cn("flex-1 py-1.5 text-xs font-medium", added && "border-emerald-600 text-emerald-700 dark:text-emerald-400")}
               >
-                {added ? (
+                {stockNote?.out ? (
+                  <span>Out of stock</span>
+                ) : added ? (
                   <>
                     <Check className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Added</span>
@@ -188,7 +197,7 @@ export default function ProductTile({
                 )}
               </Button>
             ) : (
-              <LinkButton href={`tel:${SITE.phone}`} size="sm" variant="outline" className="flex-1 py-1.5 text-xs font-medium">
+              <LinkButton href={`tel:${site.phone}`} size="sm" variant="outline" className="flex-1 py-1.5 text-xs font-medium">
                 <Phone className="h-3.5 w-3.5" />
                 <span>Get Quote</span>
               </LinkButton>
@@ -216,10 +225,13 @@ export default function ProductTile({
 export function DeviceTile({ d }: { d: Device }) {
   const dispatch = useAppDispatch();
   const wished = useAppSelector((s) => s.wishlist.ids.includes(d.id));
-  const added = useAppSelector((s) => s.cart.items.some((i) => i.id === `dev-${d.id}`));
+  const inCart = useAppSelector((s) => s.cart.items.find((i) => i.id === `dev-${d.id}`)?.qty ?? 0);
+  const added = inCart > 0;
+  const state = stockState(d);
 
   return (
     <ProductTile
+      stockNote={stockLabel(d) ? { label: stockLabel(d)!, out: state === "out" } : undefined}
       image={d.image}
       visual={d.visual}
       name={d.name}
@@ -243,6 +255,7 @@ export function DeviceTile({ d }: { d: Device }) {
       onAdd={
         d.price
           ? () => {
+            if (room(d, inCart) < 1) { toast.error(state === "out" ? `${d.name} is out of stock` : `Only ${d.stock} of ${d.name} available — all are in your cart`); return; }
             dispatch(addToCart({ id: `dev-${d.id}`, kind: "device", name: d.name, price: d.price!, monthly: d.monthly }));
             dispatch(setCartOpen(true));
             toast.success(`${d.name} added to cart`);

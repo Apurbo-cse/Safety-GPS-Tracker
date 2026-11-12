@@ -1,6 +1,7 @@
 import { Transform, Type } from "class-transformer";
 import { sanitizeRich } from "../common/html";
 import { HasText } from "../common/has-text";
+import { VEHICLE_TYPES } from "../common/vehicles";
 import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
 
 const MONEY = 10_000_000;
@@ -16,6 +17,7 @@ export class PlanDto {
   @IsOptional() @IsString() @Matches(/^\/(?!.*\.\.)[A-Za-z0-9/_.-]{2,230}$/, { message: "Image must be a path inside /public, e.g. /img/products/my-product.png" }) image?: string | null;
   @IsOptional() @IsString() @MaxLength(120) siteTitle?: string | null;
   @IsOptional() @IsInt() @Min(0) sourceNo?: number;
+  @IsOptional() @IsArray() @ArrayMaxSize(VEHICLE_TYPES.length) @IsIn(VEHICLE_TYPES, { each: true }) vehicles?: string[];
   /** Formatted description (HTML from the editor — cleaned on the server). */
   @IsOptional() @Transform(({ value }) => sanitizeRich(value)) @IsString() @MaxLength(60000) description?: string;
   /** Our cost (admin only). */

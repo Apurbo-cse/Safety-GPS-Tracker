@@ -16,7 +16,8 @@ import ContactForm from "@/components/forms/ContactForm";
 import { values } from "@/data/about";
 import { features } from "@/data/features";
 import { solutions } from "@/data/solutions";
-import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS, mapsUrl } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 
@@ -199,6 +200,7 @@ export function ServiceTop() {
 
 /* ================================================================== ABOUT */
 export function AboutAuto() {
+  const site = useSite();
   const { plans } = useCatalog();
   const stats: [string, string, string][] = [
     [String(features.length), "+", "Platform features"],
@@ -231,7 +233,7 @@ export function AboutAuto() {
               <p>Safety GPS Tracker provides real-time GPS vehicle tracking for private vehicles and enterprise fleets across all 64 districts in Bangladesh.</p>
               <p>Our tracking devices, mobile apps and web platform show where each vehicle is, how it is being driven and when something needs attention — with 10-second updates, remote engine lock, and instant anti-theft notifications.</p>
               <p>We offer {plans.length} tailored packages with clear device pricing and transparent monthly charges, so every customer knows exactly what they pay for with zero hidden costs.</p>
-              <p>Our corporate office is located at {SITE.address}, and our dedicated emergency hotline is open 24×7 on {SITE.phone}.</p>
+              <p>Our corporate office is located at {site.address}, and our dedicated emergency hotline is open 24×7 on {site.phone}.</p>
             </div>
           </div>
         </Container>
@@ -290,7 +292,6 @@ export function AboutAuto() {
 
 /* ================================================================ CONTACT */
 const CARD = "rounded-lg bg-softer/80 dark:bg-navy-900/90";
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.address)}`;
 
 const TEAMS = [
   { icon: Briefcase, t: "Corporate Sales", d: "Fleet proposals, volume pricing, multi-vehicle installs and custom packages.", cta: "Talk to sales", subject: "Corporate sales enquiry" },
@@ -313,6 +314,7 @@ const PROMISES = [
 
 /** Contact-page enquiry: tab switch + form card + dark help panel. */
 function ContactEnquiry() {
+  const site = useSite();
   const [tab, setTab] = useState<"products" | "fleet">("products");
   return (
     <section className="bg-surface py-12 sm:py-16">
@@ -342,11 +344,11 @@ function ContactEnquiry() {
             <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 -z-10 h-56 w-56 rounded-full bg-brand-500/25 blur-3xl" />
             <h3 className="text-xl font-black tracking-tight">Prefer to talk?</h3>
             <p className="mt-1 text-sm text-slate-300">Our team picks up day and night.</p>
-            <a href={`tel:${SITE.phone}`} className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 text-base font-bold transition-all hover:bg-brand-600 active:scale-95">
-              <PhoneCall className="h-5 w-5" />{SITE.phone}
+            <a href={`tel:${site.phone}`} className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 text-base font-bold transition-all hover:bg-brand-600 active:scale-95">
+              <PhoneCall className="h-5 w-5" />{site.phone}
             </a>
-            <a href={`mailto:${SITE.email}`} className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold backdrop-blur-md transition-all hover:bg-white/20">
-              <Mail className="h-4 w-4" /><span className="truncate">{SITE.email}</span>
+            <a href={`mailto:${site.email}`} className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold backdrop-blur-md transition-all hover:bg-white/20">
+              <Mail className="h-4 w-4" /><span className="truncate">{site.email}</span>
             </a>
             <ul className="mt-8 space-y-4">
               {PROMISES.map((p) => (
@@ -368,12 +370,13 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 export function ContactAuto() {
+  const site = useSite();
   const { faqs: FAQS } = useCatalog();
   const dispatch = useAppDispatch();
   const contactCards = [
-    { icon: Phone, title: "24/7 Hotline", subtitle: "Emergency & Support", value: SITE.phone, href: `tel:${SITE.phone}`, action: "Call now" },
-    { icon: MapPin, title: "Corporate Office", subtitle: "Head Office Dhaka", value: SITE.address, href: MAPS_URL, action: "Get directions", external: true },
-    { icon: Mail, title: "Email Queries", subtitle: "Sales & Invoicing", value: SITE.email, href: `mailto:${SITE.email}`, action: "Send email" },
+    { icon: Phone, title: "24/7 Hotline", subtitle: "Emergency & Support", value: site.phone, href: `tel:${site.phone}`, action: "Call now" },
+    { icon: MapPin, title: "Corporate Office", subtitle: "Head Office Dhaka", value: site.address, href: mapsUrl(site.address), action: "Get directions", external: true },
+    { icon: Mail, title: "Email Queries", subtitle: "Sales & Invoicing", value: site.email, href: `mailto:${site.email}`, action: "Send email" },
   ];
   const quickFaqs = FAQS.filter((f) => f.category === "Billing & Support").slice(0, 4);
 
@@ -424,7 +427,7 @@ export function ContactAuto() {
                 <p className="mt-1 text-sm leading-relaxed text-body">{t.d}</p>
                 <div className="mt-auto flex justify-center gap-2 pt-5">
                   <button onClick={() => dispatch(openDemoModal(t.subject))} className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white transition-all hover:bg-brand-600 active:scale-95">{t.cta}</button>
-                  <a href={`tel:${SITE.phone}`} aria-label={`Call ${t.t}`} className="grid h-10 w-10 place-items-center rounded-lg bg-surface text-brand-600 transition-colors hover:bg-brand-500/10 dark:bg-navy-950/70 dark:text-brand-400"><Phone className="h-4 w-4" /></a>
+                  <a href={`tel:${site.phone}`} aria-label={`Call ${t.t}`} className="grid h-10 w-10 place-items-center rounded-lg bg-surface text-brand-600 transition-colors hover:bg-brand-500/10 dark:bg-navy-950/70 dark:text-brand-400"><Phone className="h-4 w-4" /></a>
                 </div>
               </div>
             ))}
@@ -461,12 +464,12 @@ export function ContactAuto() {
             <span className="self-start"><Pill>Visit us</Pill></span>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-ink">Our Dhaka Office</h2>
             <ul className="mt-6 space-y-5 text-sm">
-              <li className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Address</b><span className="text-body">{SITE.address}</span></span></li>
-              <li className="flex gap-3"><Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Helpline</b><span className="text-body">Open 24 hours, 7 days a week</span></span></li>
-              <li className="flex gap-3"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Phone</b><a href={`tel:${SITE.phone}`} className="text-body hover:text-brand-text">{SITE.phone}</a></span></li>
-              <li className="flex gap-3"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Email</b><a href={`mailto:${SITE.email}`} className="break-all text-body hover:text-brand-text">{SITE.email}</a></span></li>
+              <li className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Address</b><span className="text-body">{site.address}</span></span></li>
+              <li className="flex gap-3"><Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Helpline</b><span className="text-body">{site.hours || "Open 24 hours, 7 days a week"}</span></span></li>
+              <li className="flex gap-3"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Phone</b><a href={`tel:${site.phone}`} className="text-body hover:text-brand-text">{site.phone}</a></span></li>
+              <li className="flex gap-3"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" /><span><b className="block text-ink">Email</b><a href={`mailto:${site.email}`} className="break-all text-body hover:text-brand-text">{site.email}</a></span></li>
             </ul>
-            <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="mt-auto inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg bg-brand-500 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-600 lg:mt-8">
+            <a href={mapsUrl(site.address)} target="_blank" rel="noopener noreferrer" className="mt-auto inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg bg-brand-500 px-5 text-sm font-semibold text-white transition-all hover:bg-brand-600 lg:mt-8">
               <Navigation className="h-4 w-4" /> Get directions
             </a>
           </div>

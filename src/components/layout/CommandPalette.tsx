@@ -6,7 +6,8 @@ import { CornerDownLeft, CreditCard, FileText, Globe, HardDrive, Layers, Mail, M
 import { announceNavigation } from "@/lib/navigate";
 import { features } from "@/data/features";
 import { useCatalog } from "@/components/providers/CatalogProvider";
-import { NAV_LINKS, SITE } from "@/lib/site";
+import { NAV_LINKS } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDemoModal, openDeviceModal, openFeatureModal, setCartOpen, setPalette, setTheme } from "@/store/slices/uiSlice";
 import { selectPlan } from "@/store/slices/pricingSlice";
@@ -16,6 +17,7 @@ import { formatBDT, cn } from "@/utils/format";
 interface Cmd { id: string; group: string; label: string; hint?: string; icon: LucideIcon; keywords?: string; run: () => void }
 
 export default function CommandPalette() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const open = useAppSelector((s) => s.ui.paletteOpen);
@@ -49,8 +51,8 @@ export default function CommandPalette() {
     const go = (href: string) => () => { announceNavigation(); router.push(href); };
     return [
       ...[...NAV_LINKS, { href: "/pay-bill", label: "Pay Bill" }, { href: "/faq", label: "FAQ" }, { href: "/login", label: "Login" }, { href: "/register", label: "Register" }].map((l): Cmd => ({ id: `p-${l.href}`, group: "Pages", label: l.label, hint: l.href, icon: Globe, run: go(l.href) })),
-      { id: "a-call", group: "Actions", label: `Call sales ${SITE.phone}`, icon: Phone, keywords: "phone contact support", run: () => { window.location.href = `tel:${SITE.phone}`; } },
-      { id: "a-mail", group: "Actions", label: `Email ${SITE.email}`, icon: Mail, run: () => { window.location.href = `mailto:${SITE.email}`; } },
+      { id: "a-call", group: "Actions", label: `Call sales ${site.phone}`, icon: Phone, keywords: "phone contact support", run: () => { window.location.href = `tel:${site.phone}`; } },
+      { id: "a-mail", group: "Actions", label: `Email ${site.email}`, icon: Mail, run: () => { window.location.href = `mailto:${site.email}`; } },
       { id: "a-demo", group: "Actions", label: "Request a demo", icon: Sparkles, run: () => dispatch(openDemoModal("Demo request (command palette)")) },
       { id: "a-cart", group: "Actions", label: "Open cart", icon: ShoppingCart, run: () => dispatch(setCartOpen(true)) },
       { id: "a-theme", group: "Actions", label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme", icon: theme === "dark" ? Sun : Moon, keywords: "dark light mode appearance", run: () => { const n = theme === "dark" ? "light" : "dark"; applyTheme(n); dispatch(setTheme(n)); } },
@@ -58,7 +60,7 @@ export default function CommandPalette() {
       ...devices.map((d): Cmd => ({ id: `d-${d.id}`, group: "Products", label: d.name, hint: d.category, icon: HardDrive, keywords: "tracker hardware", run: () => dispatch(openDeviceModal(d.id)) })),
       ...features.map((f): Cmd => ({ id: `f-${f.id}`, group: "Features", label: f.title, hint: f.category, icon: f.category === "Reports & Analytics" ? FileText : f.category === "Platform" ? Layers : CreditCard, keywords: f.description, run: () => dispatch(openFeatureModal(f.id)) })),
     ];
-  }, [dispatch, router, theme, devices, plans]);
+  }, [dispatch, router, theme, devices, plans, site.email, site.phone]);
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Container from "@/components/common/Container";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { cn } from "@/utils/format";
 
 export interface LegalSection {
@@ -13,6 +13,7 @@ export interface LegalSection {
 
 /** Shared layout for legal pages: sticky table of contents + numbered sections. */
 export default function LegalPage({ updated, intro, sections }: { updated: string; intro: React.ReactNode; sections: LegalSection[] }) {
+  const site = useSite();
   const [active, setActive] = useState(sections[0]?.id);
   useEffect(() => {
     const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)), { rootMargin: "-20% 0px -70% 0px" });
@@ -52,9 +53,9 @@ export default function LegalPage({ updated, intro, sections }: { updated: strin
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
-            { icon: Phone, label: "Helpline (24×7)", value: SITE.phone, href: `tel:${SITE.phone}` },
-            { icon: Mail, label: "Email", value: SITE.email, href: `mailto:${SITE.email}` },
-            { icon: MapPin, label: "Office", value: SITE.address },
+            { icon: Phone, label: "Helpline (24×7)", value: site.phone, href: `tel:${site.phone}` },
+            { icon: Mail, label: "Email", value: site.email, href: `mailto:${site.email}` },
+            { icon: MapPin, label: "Office", value: site.address },
           ].map((c) => {
             const inner = (<><c.icon className="h-4 w-4 text-brand-text" /><p className="mt-2 text-xs text-body">{c.label}</p><p className="mt-0.5 break-words text-sm font-semibold text-ink">{c.value}</p></>);
             return c.href

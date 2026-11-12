@@ -3,30 +3,43 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Boxes, ExternalLink, FolderTree, HelpCircle, Images, LayoutDashboard, LockKeyhole, LogIn, LogOut, Menu, Package, ShieldAlert, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { Boxes, ExternalLink, FolderTree, HelpCircle, Images, FileText, Inbox, Percent, LayoutDashboard, Settings2, LockKeyhole, LogIn, LogOut, Menu, Newspaper, Package, ShieldAlert, ShieldCheck, Tags, Users, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/common/Logo";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signOut } from "@/store/thunks";
+import { useUnreadMessagesQuery } from "@/store/apiSlice";
+import type { Permission } from "@/lib/api";
 import { cn } from "@/utils/format";
 import { CARD, Skeleton } from "./ui";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
+/** `perm`: who sees the item (and the page). Everyone on staff sees the dashboard. */
+type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean; perm?: Permission; badge?: "messages" };
 const NAV: { heading?: string; items: NavItem[] }[] = [
   { items: [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/admin/orders", label: "Orders", icon: Package },
-    { href: "/admin/customers", label: "Customers", icon: Users },
+    { href: "/admin/orders", label: "Orders", icon: Package, perm: "orders.view" },
+    { href: "/admin/customers", label: "Customers", icon: Users, perm: "customers.view" },
+    { href: "/admin/messages", label: "Messages", icon: Inbox, perm: "messages.manage", badge: "messages" },
   ] },
   { heading: "Catalogue", items: [
-    { href: "/admin/categories", label: "Categories", icon: FolderTree },
-    { href: "/admin/products", label: "Products", icon: Boxes },
-    { href: "/admin/packages", label: "Packages", icon: Tags },
-    { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
-    { href: "/admin/hero", label: "Hero slides", icon: Images },
+    { href: "/admin/categories", label: "Categories", icon: FolderTree, perm: "products.manage" },
+    { href: "/admin/products", label: "Products", icon: Boxes, perm: "products.manage" },
+    { href: "/admin/packages", label: "Packages", icon: Tags, perm: "products.manage" },
+    { href: "/admin/coupons", label: "Coupons", icon: Percent, perm: "products.manage" },
+    { href: "/admin/faqs", label: "FAQs", icon: HelpCircle, perm: "content.manage" },
+    { href: "/admin/hero", label: "Hero slides", icon: Images, perm: "content.manage" },
+    { href: "/admin/news", label: "News", icon: Newspaper, perm: "content.manage" },
+    { href: "/admin/pages", label: "Pages", icon: FileText, perm: "content.manage" },
+    { href: "/admin/site", label: "Site details", icon: Settings2, perm: "content.manage" },
+  ] },
+  { heading: "Team", items: [
+    { href: "/admin/team", label: "Staff & roles", icon: ShieldCheck, perm: "staff.manage" },
   ] },
 ];
+
+const itemFor = (pathname: string) => NAV.flatMap((g) => g.items).find((n) => !n.exact && pathname.startsWith(n.href));
 
 function Gate({ icon: Icon, title, text, children }: { icon: LucideIcon; title: string; text: string; children?: React.ReactNode }) {
   return (
@@ -43,11 +56,13 @@ function Gate({ icon: Icon, title, text, children }: { icon: LucideIcon; title: 
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const perms = useAppSelector((s) => s.auth.user?.permissions ?? []);
+  const unread = useUnreadMessagesQuery(undefined, { skip: !perms.includes("messages.manage") }).data?.new ?? 0;
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 px-5"><Logo className="h-6" /><span className="rounded bg-brand-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-300">Admin</span></div>
       <nav aria-label="Admin" className="mt-2 flex-1 space-y-5 overflow-y-auto px-3">
-        {NAV.map((g, gi) => (
+        {NAV.map((g) => ({ ...g, items: g.items.filter((n) => !n.perm || perms.includes(n.perm)) })).filter((g) => g.items.length).map((g, gi) => (
           <div key={gi}>
             {g.heading && <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{g.heading}</p>}
             <div className="space-y-1">
@@ -57,6 +72,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   <Link key={n.href} href={n.href} onClick={onNavigate} aria-current={on ? "page" : undefined}
                     className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors", on ? "bg-brand-500 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white")}>
                     <n.icon className="h-4 w-4" />{n.label}
+                    {n.badge === "messages" && unread > 0 && <span aria-label={`${unread} new`} className="ml-auto rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}
                   </Link>
                 );
               })}
@@ -77,6 +93,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const dispatch = useAppDispatch();
   const { user, ready } = useAppSelector((s) => s.auth);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   if (!ready) return <div className="min-h-screen bg-background p-8"><div className="mx-auto max-w-5xl"><Skeleton rows={5} /></div></div>;
   if (!user) return (
@@ -115,11 +132,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <p className="hidden text-sm font-semibold text-body lg:block">Safety GPS Tracker · Control panel</p>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <span className="hidden text-right sm:block"><span className="block text-sm font-semibold leading-tight text-ink">{user.name}</span><span className="block text-xs text-slate-500">Administrator</span></span>
+            <span className="hidden text-right sm:block"><span className="block text-sm font-semibold leading-tight text-ink">{user.name}</span><span className="block text-xs text-slate-500">{user.staffRoleId ? user.staffRoleId.replace(/-/g, " ") : "Owner"}</span></span>
             <button onClick={() => { void dispatch(signOut()); toast.success("Logged out"); }} aria-label="Log out" className="grid h-10 w-10 place-items-center rounded-lg text-body hover:bg-softer hover:text-ink"><LogOut className="h-4 w-4" /></button>
           </div>
         </header>
-        <main id="main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main id="main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          {(() => {
+            const need = itemFor(pathname)?.perm;
+            return need && !user.permissions.includes(need)
+              ? <div className={`${CARD} grid place-items-center p-12 text-center`}><ShieldAlert className="h-10 w-10 text-amber-500" /><p className="mt-3 text-base font-bold text-ink">You don&apos;t have access to this section</p><p className="mt-1 max-w-sm text-sm text-body">Ask the owner to give your role the permission, then reload.</p></div>
+              : children;
+          })()}
+        </main>
       </div>
     </div>
   );

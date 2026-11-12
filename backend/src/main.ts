@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import compression from "compression";
 import helmet from "helmet";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
@@ -13,6 +14,7 @@ async function bootstrap() {
 
   if (config.get("TRUST_PROXY", { infer: true })) app.set("trust proxy", 1);
   app.use(helmet());
+  app.use(compression()); // JSON compresses ~5x; the catalogue is fetched on every page build and refresh
   app.setGlobalPrefix("api/v1");
 
   const origins = config.get("FRONTEND_ORIGINS", { infer: true });

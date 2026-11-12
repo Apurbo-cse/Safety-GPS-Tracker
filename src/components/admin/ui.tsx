@@ -91,7 +91,11 @@ export function Pagination({ page, limit, total, onPage }: { page: number; limit
   );
 }
 
-export { useLoad } from "@/lib/useLoad";
+import { errorMessage } from "@/store/apiSlice";
+/** Adapts an RTK Query result to what the admin screens use: data, a message, a "refreshing" flag and a retry. */
+export function view<Q extends { data?: unknown; error?: unknown; isFetching: boolean; refetch: () => unknown }>(q: Q) {
+  return { data: (q.data ?? null) as Exclude<Q["data"], undefined> | null, error: q.error ? errorMessage(q.error, "Could not load") : null, loading: q.isFetching, reload: () => { void q.refetch(); } };
+}
 
 export const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 export const fmtDateTime = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });

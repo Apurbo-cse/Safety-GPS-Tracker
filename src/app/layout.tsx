@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/layout/Providers";
+import SiteProvider from "@/components/providers/SiteProvider";
+import { getSite } from "@/lib/site.server";
 import { SITE } from "@/lib/site";
 
 // Runs before paint so the saved theme never flashes.
@@ -33,7 +35,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#f05a22", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const site = await getSite();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -41,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <noscript><style>{"#preloader{display:none!important}"}</style></noscript>
       </head>
       <body className="min-h-screen antialiased">
-        <Providers>{children}</Providers>
+        <Providers><SiteProvider site={site}>{children}</SiteProvider></Providers>
       </body>
     </html>
   );

@@ -5,12 +5,16 @@ export interface PricingPlan {
   monthlyCharge: number;
   /** Feature keys exactly as listed on the reference price list */
   features: string[];
+  /** Formatted description (HTML). */
+  description?: string;
   highlight?: string;
   image?: string;
   /** Product title shown on the package image on the company price list */
   siteTitle?: string;
   /** Source package number on the reference price list */
   sourceNo: number;
+  /** Vehicle kinds the package suits: car, bike, truck, equip (set in the admin panel). */
+  vehicles?: string[];
 }
 
 export type FeatureCategory =
@@ -47,6 +51,10 @@ export interface Device {
   visual: "tracker" | "voice" | "video" | "relay" | "sos";
   /** Main picture (first of `images`) */
   image?: string;
+  /** Formatted description (HTML). Only on a single product's page, not in lists. */
+  description?: string;
+  /** Units on hand. Missing = not tracked (always available). 0 = out of stock. */
+  stock?: number;
   /** Gallery, main picture first. Entries are /public paths or full URLs of uploaded pictures. */
   images?: string[];
   /** Product title as shown on the company price list image */

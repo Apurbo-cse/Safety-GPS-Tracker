@@ -7,20 +7,20 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   ArrowRight, BarChart3, Bell, ChevronDown, CreditCard, HelpCircle, Info, LayoutGrid, Mail, Phone,
-  Search, Shield, ShieldCheck, ShoppingCart, Smartphone, Sparkles, Heart, UserRound, Wrench, Navigation,
-  type LucideIcon,
-} from "lucide-react";
+  Search, Shield, ShieldCheck, ShoppingCart, Smartphone, Heart, UserRound, Wrench, Navigation,
+  Newspaper, type LucideIcon } from "lucide-react";
 import Logo from "@/components/common/Logo";
 import ThemeToggle from "./ThemeToggle";
 import Container from "@/components/common/Container";
 import { DynIcon } from "@/lib/icons";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { features, featureCategories } from "@/data/features";
 import { categoryUrl, deviceUrl } from "@/data/catalogue";
 import { useCatalog } from "@/components/providers/CatalogProvider";
 import { solutions } from "@/data/solutions";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { openDemoModal, setCartOpen, setPalette } from "@/store/slices/uiSlice";
+import { useMyOrdersQuery } from "@/store/apiSlice";
+import { setCartOpen, setPalette } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
 
 /* ------------------------------------------------------------------ data */
@@ -31,7 +31,7 @@ const NAV: { label: string; menu?: MenuKey; href?: string; match: string[] }[] =
   { label: "Products", menu: "Products", match: ["/products"] },
   { label: "Solutions", menu: "Solutions", match: ["/solutions"] },
   { label: "Pricing", href: "/pricing", match: ["/pricing"] },
-  { label: "Company", menu: "Company", match: ["/about", "/contact", "/pay-bill", "/faq"] },
+  { label: "Company", menu: "Company", match: ["/about", "/news", "/contact", "/pay-bill", "/faq"] },
 ];
 
 const FEATURE_ICONS: Record<string, LucideIcon> = {
@@ -45,6 +45,7 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
 
 const COMPANY: { href: string; icon: LucideIcon; t: string; d: string }[] = [
   { href: "/about", icon: Info, t: "About us", d: "Who we are and why customers choose us." },
+  { href: "/news", icon: Newspaper, t: "News", d: "Updates and announcements from our team." },
   { href: "/contact", icon: Phone, t: "Contact & support", d: "Sales, support and billing — 24×7." },
   { href: "/pay-bill", icon: CreditCard, t: "Pay bill online", d: "bKash, Nagad, Rocket or bank transfer." },
   { href: "/faq", icon: HelpCircle, t: "Help centre", d: "Answers about tracking, devices and billing." },
@@ -76,6 +77,7 @@ const tileIcon = "grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-5
 
 /* ------------------------------------------------------------------ navbar */
 export default function Navbar() {
+  const site = useSite();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { devices, plans, catalogue } = useCatalog();
@@ -84,7 +86,8 @@ export default function Navbar() {
   const cartCount = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useAppSelector((s) => s.wishlist.ids.length);
   const user = useAppSelector((s) => s.auth.user);
-  const orderCount = useAppSelector((s) => s.orders.list.filter((o) => o.status !== "cancelled").length);
+  const { data: myOrders } = useMyOrdersQuery(undefined, { skip: !user });
+  const orderCount = (myOrders ?? []).filter((o) => o.status !== "cancelled").length;
 
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null);
@@ -141,11 +144,11 @@ export default function Navbar() {
       <div className={cn("hidden overflow-hidden bg-navy-950 text-slate-300 transition-[height] duration-300 lg:block", scrolled ? "h-0" : "h-8")}>
         <Container className="flex h-8 items-center justify-between text-[11px]">
           <div className="flex items-center gap-5">
-            <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-1.5 hover:text-white">
+            <a href={`tel:${site.phone}`} className="inline-flex items-center gap-1.5 hover:text-white">
               <span className="relative flex h-1.5 w-1.5"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-400" /><span className="relative h-1.5 w-1.5 rounded-full bg-green-400" /></span>
-              24/7 Helpline <b className="font-semibold text-white">{SITE.phone}</b>
+              24/7 Helpline <b className="font-semibold text-white">{site.phone}</b>
             </a>
-            <a href={`mailto:${SITE.email}`} className="inline-flex items-center gap-1.5 hover:text-white"><Mail className="h-3 w-3" />{SITE.email}</a>
+            <a href={`mailto:${site.email}`} className="inline-flex items-center gap-1.5 hover:text-white"><Mail className="h-3 w-3" />{site.email}</a>
           </div>
           <div className="flex items-center gap-5">
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-brand-400" />BTRC approved</span>
@@ -209,14 +212,7 @@ export default function Navbar() {
           <button type="button" onClick={() => dispatch(setCartOpen(true))} aria-label={`Cart, ${cartCount} items`} className="relative grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer dark:hover:bg-navy-900">
             <ShoppingCart className="h-4.5 w-4.5" />
             {cartCount > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{cartCount}</span>}
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch(openDemoModal("Demo request (navbar)"))}
-            className="ml-1 hidden h-9 items-center gap-1.5 rounded-full bg-brand-500 px-4 text-xs font-semibold text-white transition-all hover:bg-brand-600 active:scale-95 lg:inline-flex"
-          >
-            <Sparkles className="h-3.5 w-3.5" />Book a demo
-          </button>
+          </button> 
         </div>
       </Container>
 
@@ -262,10 +258,7 @@ export default function Navbar() {
                           <Link href="/features" onClick={close} className="inline-flex items-center gap-1.5 px-3 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400">View all features <ArrowRight className="h-3.5 w-3.5" /></Link>
                           <Link href="/mobile-app" onClick={close} className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400"><Smartphone className="h-3.5 w-3.5" />Mobile app</Link>
                         </div>
-                      </div>
-                      <Promo image="/img/hero-truck.jpg" tag="Live demo" title="See your fleet on one map" text="10-second updates, engine lock and smart alerts — on web, Android and iOS.">
-                        <button type="button" onClick={() => { close(); dispatch(openDemoModal("Demo request (features menu)")); }} className={promoBtn}><Sparkles className="h-3.5 w-3.5" />Book a demo</button>
-                      </Promo>
+                      </div> 
                     </>
                   )}
 
@@ -341,7 +334,7 @@ export default function Navbar() {
                         </div>
                       </div>
                       <Promo image="/img/hero-car.jpg" tag="24/7 helpline" title="Need help right now?" text="Our team answers day and night — emergencies, engine lock and support.">
-                        <a href={`tel:${SITE.phone}`} className={promoBtn}><Phone className="h-3.5 w-3.5" />{SITE.phone}</a>
+                        <a href={`tel:${site.phone}`} className={promoBtn}><Phone className="h-3.5 w-3.5" />{site.phone}</a>
                       </Promo>
                     </>
                   )}
@@ -350,6 +343,7 @@ export default function Navbar() {
             </Container>
           </motion.div>
         )}
+        
       </AnimatePresence>
     </header>
   );

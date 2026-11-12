@@ -8,6 +8,7 @@ import { User } from "../users/user.entity";
 import { UsersService } from "../users/users.service";
 import type { AddStaffDto, RoleDto, UpdateStaffDto } from "./staff.dto";
 import { StaffRole } from "./role.entity";
+import { EventsGateway } from "../events/events.gateway";
 import { RolesService } from "./roles.service";
 
 const view = (u: User) => ({ id: u.id, name: u.name, email: u.email, phone: u.phone, roleId: u.staffRoleId ?? OWNER_ROLE, disabled: u.disabled, createdAt: u.createdAt });
@@ -19,6 +20,7 @@ export class StaffService {
     @InjectRepository(StaffRole) private roles: Repository<StaffRole>,
     private usersSvc: UsersService,
     private cache: RolesService,
+    private events: EventsGateway,
   ) {}
 
   /* ------------------------------------------------------------- staff */
@@ -63,7 +65,9 @@ export class StaffService {
     if (dto.disabled !== undefined) u.disabled = dto.disabled;
     const stillOwner = (u.staffRoleId ?? OWNER_ROLE) === OWNER_ROLE && !u.disabled;
     if (wasOwner && !stillOwner && (await this.enabledOwners(u.id)) === 0) throw new BadRequestException("There must always be at least one active owner");
-    return view(await this.users.save(u));
+    const saved = await this.users.save(u);
+    await this.events.refreshStaff(saved.id); // live connections pick up the new role / block at once
+    return view(saved);
   }
 
   /** Removes staff access; the person stays a customer. */
@@ -74,6 +78,7 @@ export class StaffService {
     if ((u.staffRoleId ?? OWNER_ROLE) === OWNER_ROLE && !u.disabled && (await this.enabledOwners(u.id)) === 0) throw new BadRequestException("There must always be at least one active owner");
     u.role = "customer"; u.staffRoleId = null; u.disabled = false;
     await this.users.save(u);
+    await this.events.refreshStaff(u.id);
   }
 
   /** Staff-only password reset (e.g. someone forgot theirs). */
@@ -100,6 +105,7 @@ export class StaffService {
     const existing = await this.roles.findOne({ where: { id } });
     const saved = await this.roles.save(this.roles.create({ id, name: dto.name, description: dto.description ?? "", permissions: [...new Set(dto.permissions)], system: existing?.system ?? false }));
     this.cache.invalidate();
+    await this.events.refreshStaff();
     return saved;
   }
 
@@ -111,5 +117,6 @@ export class StaffService {
     if (used) throw new ConflictException(`${used} staff member${used === 1 ? " has" : "s have"} this role — give them another role first`);
     await this.roles.delete({ id });
     this.cache.invalidate();
+    await this.events.refreshStaff();
   }
 }

@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ApiSettings, ApiUser } from "@/lib/api";
 
-export interface Profile { name: string; phone: string; email: string; company: string; address: string; division: string }
+export interface Profile { name: string; phone: string; email: string; company: string; address: string; division: string; taxId: string; billingAddress: string; billingDivision: string; billingPostcode: string }
 export type Settings = ApiSettings;
 export type AlertKey = keyof Settings["alerts"];
 export type Channel = keyof Settings["channels"];
@@ -13,7 +13,7 @@ export const defaultSettings: Settings = {
   channels: { push: true, sms: true, email: false },
   speedLimit: 80, language: "en", units: "km", twoFactor: false, marketing: false,
 };
-const emptyProfile: Profile = { name: "", phone: "", email: "", company: "", address: "", division: "Dhaka" };
+const emptyProfile: Profile = { name: "", phone: "", email: "", company: "", address: "", division: "Dhaka", taxId: "", billingAddress: "", billingDivision: "Dhaka", billingPostcode: "" };
 const initialState: AccountState = { profile: emptyProfile, settings: defaultSettings, loaded: false };
 
 /** Profile and settings live in the database; this is the signed-in user's copy. */
@@ -23,7 +23,7 @@ const accountSlice = createSlice({
   reducers: {
     hydrateAccount(s, a: PayloadAction<ApiUser>) {
       const u = a.payload;
-      s.profile = { name: u.name, phone: u.phone ?? "", email: u.email, company: u.company, address: u.address, division: u.division };
+      s.profile = { name: u.name, phone: u.phone ?? "", email: u.email, company: u.company, address: u.address, division: u.division, taxId: u.taxId ?? "", billingAddress: u.billingAddress ?? "", billingDivision: u.billingDivision ?? "Dhaka", billingPostcode: u.billingPostcode ?? "" };
       s.settings = u.settings;
       s.loaded = true;
     },

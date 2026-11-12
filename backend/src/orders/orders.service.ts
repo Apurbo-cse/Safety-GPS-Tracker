@@ -7,7 +7,10 @@ import { Device, Plan } from "../catalog/catalog.entities";
 import { normalizePhone } from "../common/phone";
 import type { User } from "../users/user.entity";
 import { Order, OrderItem, type OrderStatus } from "./order.entities";
-import type { AdminOrdersQuery, CreateOrderDto } from "./orders.dto";
+import { checkCoupon, CouponError, normalizeCode } from "./coupon";
+import { Coupon } from "./coupon.entity";
+import { EventsGateway } from "../events/events.gateway";
+import type { AdminOrdersQuery, CreateOrderDto, QuoteDto } from "./orders.dto";
 import { parseRef, priceCart, PricingError } from "./pricing";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 32 symbols, no 0/O/1/I — 256 % 32 === 0 so no modulo bias
@@ -21,6 +24,8 @@ export const toOrderView = (o: Order) => ({
   status: o.status,
   payment: o.payment,
   deviceTotal: o.deviceTotal,
+  discount: o.discount,
+  couponCode: o.couponCode ?? undefined,
   monthlyTotal: o.monthlyTotal,
   items: (o.items ?? []).map((i) => ({ id: i.itemRef, kind: i.kind, name: i.name, price: i.unitPrice, monthly: i.monthly || undefined, qty: i.qty })),
   billing: { name: o.billingName, company: o.billingCompany || undefined, taxId: o.billingTaxId || undefined, address: o.billingAddress, division: o.billingDivision, postcode: o.billingPostcode || undefined, phone: o.billingPhone, email: o.billingEmail },
@@ -36,23 +41,41 @@ export class OrdersService {
     @InjectRepository(Order) private orders: Repository<Order>,
     @InjectRepository(Plan) private plans: Repository<Plan>,
     @InjectRepository(Device) private devices: Repository<Device>,
+    @InjectRepository(Coupon) private coupons: Repository<Coupon>,
+    private events: EventsGateway,
   ) {}
 
-  async create(user: User, dto: CreateOrderDto) {
-    this.checkDate(dto.preferredDate);
-
-    const refs = [...new Set(dto.items.map((i) => parseRef(i.id)).filter((r): r is NonNullable<typeof r> => !!r))];
+  /** Price a cart from the catalogue and apply a coupon if one is given. Used by both the quote and the order, so they always agree. */
+  private async priceWithCoupon(items: { id: string; qty: number }[], couponInput?: string) {
+    const refs = [...new Set(items.map((i) => parseRef(i.id)).filter((r): r is NonNullable<typeof r> => !!r))];
     const [plans, devices] = await Promise.all([
       this.plans.find({ where: { id: In(refs.filter((r) => r.kind === "plan").map((r) => r.ref)) } }),
       this.devices.find({ where: { id: In(refs.filter((r) => r.kind === "device").map((r) => r.ref)) } }),
     ]);
-    let priced: ReturnType<typeof priceCart>;
     try {
-      priced = priceCart(dto.items, new Map(plans.map((p) => [p.id, p])), new Map(devices.map((d) => [d.id, d])));
+      const priced = priceCart(items, new Map(plans.map((p) => [p.id, p])), new Map(devices.map((d) => [d.id, d])));
+      let discount = 0; let couponCode: string | null = null;
+      if (couponInput?.trim()) {
+        const coupon = await this.coupons.findOne({ where: { code: normalizeCode(couponInput) } });
+        discount = checkCoupon(coupon, priced.deviceTotal);
+        couponCode = coupon!.code;
+      }
+      return { ...priced, discount, couponCode };
     } catch (e) {
-      if (e instanceof PricingError) throw new BadRequestException(e.message);
+      if (e instanceof PricingError || e instanceof CouponError) throw new BadRequestException(e.message);
       throw e;
     }
+  }
+
+  /** What the cart costs right now, and what the coupon takes off — nothing is reserved or changed. */
+  async quote(dto: QuoteDto) {
+    const p = await this.priceWithCoupon(dto.items, dto.coupon);
+    return { deviceTotal: p.deviceTotal, monthlyTotal: p.monthlyTotal, discount: p.discount, couponCode: p.couponCode ?? undefined, payNow: p.deviceTotal - p.discount };
+  }
+
+  async create(user: User, dto: CreateOrderDto) {
+    this.checkDate(dto.preferredDate);
+    const priced = await this.priceWithCoupon(dto.items, dto.coupon);
 
     // no billing block = bill the person who is ordering, at the installation address
     const b = dto.billing;
@@ -65,10 +88,11 @@ export class OrdersService {
         // stock is taken in the same transaction as the order, so two buyers can never both get the last unit
         return await this.orders.manager.transaction(async (m) => {
           await this.takeStock(m, priced.items);
+          if (priced.couponCode) await this.takeCoupon(m, priced.couponCode);
           const repo = m.getRepository(Order);
           const order = repo.create({
             id: newOrderId(), userId: user.id, status: "received", payment: dto.payment,
-            deviceTotal: priced.deviceTotal, monthlyTotal: priced.monthlyTotal,
+            deviceTotal: priced.deviceTotal, monthlyTotal: priced.monthlyTotal, discount: priced.discount, couponCode: priced.couponCode,
             contactName: dto.name, contactPhone: normalizePhone(dto.phone)!, contactEmail: dto.email,
             address: dto.address, division: dto.division, vehicleReg: dto.vehicleReg, vehicleType: dto.vehicleType,
             preferredDate: dto.preferredDate, note: dto.note || null,
@@ -77,6 +101,10 @@ export class OrdersService {
             items: priced.items.map((i) => Object.assign(new OrderItem(), i)),
           });
           return toOrderView(await repo.save(order));
+        }).then((view) => {
+          // after the order is safely stored: tell staff who can see orders, live
+          this.events.toPermission("orders.view", "order:created", { id: view.id, customer: dto.name, payNow: view.deviceTotal - view.discount, items: view.items.reduce((n, i) => n + i.qty, 0), createdAt: view.createdAt });
+          return view;
         });
       } catch (e) { if (!isUniqueViolation(e)) throw e; /* id collision → try another */ }
     }
@@ -97,6 +125,19 @@ export class OrdersService {
     }
   }
 
+  /** Count one more use of the coupon — atomic, so a code limited to N uses can never be used N+1 times. `reopening` skips the checks (the order already had its discount). */
+  private async takeCoupon(m: EntityManager, code: string, reopening = false) {
+    const res = reopening
+      ? await m.query(`UPDATE coupons SET used = used + 1 WHERE code = $1`, [code])
+      : await m.query(`UPDATE coupons SET used = used + 1 WHERE code = $1 AND active AND (max_uses IS NULL OR used < max_uses) AND (expires_at IS NULL OR expires_at > now()) RETURNING code`, [code]);
+    const hit = Array.isArray(res) ? (Array.isArray(res[0]) ? res[0].length : res.length) : 0;
+    if (!reopening && !hit) throw new ConflictException("This coupon was just used up or has expired — please remove it and try again");
+  }
+
+  private async returnCoupon(m: EntityManager, code: string) {
+    await m.query(`UPDATE coupons SET used = GREATEST(used - 1, 0) WHERE code = $1`, [code]);
+  }
+
   /** Give stock back (order cancelled). */
   private async returnStock(m: EntityManager, items: { itemRef: string; kind: string; qty: number }[]) {
     for (const i of items) {
@@ -113,10 +154,15 @@ export class OrdersService {
       const order = await repo.findOne({ where: owner ? { id, userId: owner } : { id }, relations: { items: true } });
       if (!order) throw new NotFoundException("Order not found");
       if (owner && order.status !== "received") throw new ConflictException("Only orders that haven't been confirmed yet can be cancelled — please call support");
-      if (order.status !== "cancelled" && status === "cancelled") await this.returnStock(m, order.items);
-      if (order.status === "cancelled" && status !== "cancelled") await this.takeStock(m, order.items, true);
+      if (order.status !== "cancelled" && status === "cancelled") { await this.returnStock(m, order.items); if (order.couponCode) await this.returnCoupon(m, order.couponCode); }
+      if (order.status === "cancelled" && status !== "cancelled") { await this.takeStock(m, order.items, true); if (order.couponCode) await this.takeCoupon(m, order.couponCode, true); }
       order.status = status;
       return repo.save(order);
+    }).then((saved) => {
+      // the customer sees the new status without refreshing, and other staff see the board change
+      this.events.toUser(saved.userId, "order:updated", { id: saved.id, status: saved.status });
+      this.events.toPermission("orders.view", "order:updated", { id: saved.id, status: saved.status });
+      return saved;
     });
   }
 
@@ -164,7 +210,7 @@ export class OrdersService {
       counts: Object.fromEntries(counts.map((c) => [c.status, c.n])),
       orders: rows.map((o) => {
         const v = toOrderView(o);
-        const finance = withCost ? { items: v.items.map((it, n) => ({ ...it, cost: o.items[n].unitCost })), profit: o.items.reduce((s, it) => s + (it.unitPrice - it.unitCost) * it.qty, 0) } : {};
+        const finance = withCost ? { items: v.items.map((it, n) => ({ ...it, cost: o.items[n].unitCost })), profit: o.items.reduce((s, it) => s + (it.unitPrice - it.unitCost) * it.qty, 0) - o.discount } : {};
         return { ...v, ...finance, customer: { id: o.user.id, name: o.user.name, email: o.user.email } };
       }),
     };

@@ -4,12 +4,13 @@ import pricing from "./slices/pricingSlice";
 import cart from "./slices/cartSlice";
 import ui from "./slices/uiSlice";
 import wishlist from "./slices/wishlistSlice";
-import orders from "./slices/ordersSlice";
+import { baseApi } from "./apiSlice";
 import account from "./slices/accountSlice";
 
 export const makeStore = () =>
   configureStore({
-    reducer: { auth, pricing, cart, ui, wishlist, orders, account },
+    reducer: { auth, pricing, cart, ui, wishlist, account, [baseApi.reducerPath]: baseApi.reducer },
+    middleware: (getDefault) => getDefault().concat(baseApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

@@ -7,12 +7,9 @@ import { ArrowRight, ArrowUp, ArrowUpRight, CheckCircle2, Headset, Mail, MapPin,
 import Logo from "@/components/common/Logo";
 import Container from "@/components/common/Container";
 import AppStoreBadges from "@/components/common/AppStoreBadges";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
+import { mapsUrl, type SiteInfo } from "@/lib/site";
 import { phoneRegex } from "@/lib/validation";
-
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  "Meem Tower, 104 Shukrabad Main Road, Dhaka, Bangladesh"
-)}`;
 
 const ROUTE = "M0 30 C 160 30, 220 8, 380 10 S 620 44, 820 26 S 1080 4, 1240 18 S 1400 34, 1440 30";
 
@@ -32,10 +29,10 @@ const COMPANY_LINKS = [
   { label: "Terms of Service", href: "/terms" },
 ];
 
-const CONTACTS: { icon: LucideIcon; label: string; value: string; href: string; external?: boolean; live?: boolean }[] = [
+const contactsOf = (SITE: SiteInfo): { icon: LucideIcon; label: string; value: string; href: string; external?: boolean; live?: boolean }[] => [
   { icon: Phone, label: "24/7 helpline", value: SITE.phone, href: `tel:${SITE.phone}`, live: true },
   { icon: Mail, label: "Email us", value: SITE.email, href: `mailto:${SITE.email}` },
-  { icon: MapPin, label: "Visit our office", value: SITE.address, href: MAPS_URL, external: true },
+  { icon: MapPin, label: "Visit our office", value: SITE.address, href: mapsUrl(SITE.address), external: true },
 ];
 
 function LinkColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
@@ -99,6 +96,8 @@ function CallbackForm() {
 }
 
 export default function FooterClassic() {
+  const site = useSite();
+  const CONTACTS = contactsOf(site);
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (

@@ -7,7 +7,8 @@ import Container from "@/components/common/Container";
 import HeroTrackCard, { type TrackInfo } from "./HeroTrackCard";
 import { LinkButton } from "@/components/common/Button";
 import { plans } from "@/data/pricing";
-import { SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { formatBDT } from "@/utils/format";
 
 interface Slide {
@@ -57,6 +58,7 @@ const cheapest = [...plans].sort((a, b) => a.devicePrice - b.devicePrice || a.mo
 const lowestMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
 
 export default function Hero() {
+  const site = useSite();
   return (
     <section className="hero-swiper relative bg-navy-950 text-white" aria-roledescription="carousel" aria-label="Featured">
       <Swiper
@@ -121,7 +123,7 @@ export default function Hero() {
             </span>
           </span>
           <span>Apps: <b className="font-semibold text-slate-200">Android · iOS · Web</b></span>
-          <span>Helpline: <a href={`tel:${SITE.phone}`} className="font-semibold text-slate-200 hover:text-white">{SITE.phone}</a> (24×7)</span>
+          <span>Helpline: <a href={`tel:${site.phone}`} className="font-semibold text-slate-200 hover:text-white">{site.phone}</a> (24×7)</span>
         </div>
       </div>
       <button className="hero-prev absolute left-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-brand-600 md:grid" aria-label="Previous slide"><ChevronLeft className="h-5 w-5" /></button>

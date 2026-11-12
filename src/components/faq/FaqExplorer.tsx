@@ -1,4 +1,5 @@
 "use client";
+import RichText, { isHtml, stripHtml } from "@/components/common/RichText";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,7 +10,7 @@ import {
 import Container from "@/components/common/Container";
 import { useCatalog } from "@/components/providers/CatalogProvider";
 import type { FaqCategoryName } from "@/data/faqs";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { cn } from "@/utils/format";
 
 const ICONS: Record<FaqCategoryName, LucideIcon> = {
@@ -30,6 +31,7 @@ function Highlight({ text, q }: { text: string; q: string }) {
 }
 
 export default function FaqExplorer() {
+  const site = useSite();
   const { faqs: FAQS, faqCategories } = useCatalog();
   const FAQ_CATEGORIES = faqCategories as readonly FaqCategoryName[];
   const [query, setQuery] = useState("");
@@ -48,7 +50,7 @@ export default function FaqExplorer() {
 
   const q = query.trim().toLowerCase();
   const results = useMemo(
-    () => FAQS.filter((f) => (cat === "All" || f.category === cat) && (!q || `${f.q} ${f.a} ${f.tag}`.toLowerCase().includes(q))),
+    () => FAQS.filter((f) => (cat === "All" || f.category === cat) && (!q || `${f.q} ${stripHtml(f.a)} ${f.tag}`.toLowerCase().includes(q))),
     [cat, q, FAQS],
   );
   const groups = FAQ_CATEGORIES.map((c) => ({ c, items: results.filter((f) => f.category === c) })).filter((g) => g.items.length);
@@ -115,7 +117,7 @@ export default function FaqExplorer() {
                 Helpline open 24/7
               </p>
               <p className="mt-2 text-sm font-bold">Can&apos;t find an answer?</p>
-              <a href={`tel:${SITE.phone}`} className="gloss-btn mt-3 flex items-center justify-center gap-1.5 rounded-md py-2 text-sm font-semibold"><Phone className="h-4 w-4" />{SITE.phone}</a>
+              <a href={`tel:${site.phone}`} className="gloss-btn mt-3 flex items-center justify-center gap-1.5 rounded-md py-2 text-sm font-semibold"><Phone className="h-4 w-4" />{site.phone}</a>
               <Link href="/contact" className="mt-2 flex items-center justify-center gap-1.5 rounded-md border border-white/20 py-2 text-sm font-semibold hover:bg-white/10"><Mail className="h-4 w-4" />Contact form</Link>
             </div>
           </div>
@@ -197,7 +199,7 @@ export default function FaqExplorer() {
                                   className="overflow-hidden"
                                 >
                                   <div className="border-t border-line px-4 pb-4 pt-3 text-sm leading-relaxed text-body">
-                                    <p><Highlight text={f.a} q={q} /></p>
+                                    {isHtml(f.a) ? <RichText html={f.a} /> : <p><Highlight text={f.a} q={q} /></p>}
                                     <button onClick={() => copyLink(f.id)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-brand-text">
                                       <Link2 className="h-3.5 w-3.5" />Copy link to this answer
                                     </button>
@@ -222,7 +224,7 @@ export default function FaqExplorer() {
               <p className="text-xs text-slate-400">Our helpline is open 24/7.</p>
             </div>
             <div className="flex gap-2">
-              <a href={`tel:${SITE.phone}`} className="gloss-btn flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold"><Phone className="h-4 w-4" />Call</a>
+              <a href={`tel:${site.phone}`} className="gloss-btn flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold"><Phone className="h-4 w-4" />Call</a>
               <Link href="/contact" className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-white/20 px-3 py-2 text-sm font-semibold hover:bg-white/10"><Mail className="h-4 w-4" />Contact</Link>
             </div>
           </div>

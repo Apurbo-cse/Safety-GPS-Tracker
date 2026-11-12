@@ -13,7 +13,7 @@ import { phoneRegex } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signIn } from "@/store/thunks";
 import { safeNext } from "@/lib/redirect";
-import { ApiError } from "@/lib/api";
+import { errorMessage } from "@/store/apiSlice";
 
 const schema = z.object({
   identifier: z.string().min(1, "Enter your email or mobile number").refine((v) => z.string().email().safeParse(v).success || phoneRegex.test(v), "Enter a valid email or mobile number"),
@@ -36,7 +36,7 @@ export default function LoginForm() {
       announceNavigation();
       router.push(next === "/" && user.role === "admin" ? "/admin" : next);
     } catch (e) {
-      setError("password", { message: e instanceof ApiError ? e.message : "Could not sign in. Please try again." });
+      setError("password", { message: errorMessage(e, "Could not sign in. Please try again.") });
     }
   };
 

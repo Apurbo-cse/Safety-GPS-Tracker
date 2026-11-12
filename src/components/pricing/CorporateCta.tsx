@@ -2,12 +2,13 @@
 import Image from "next/image";
 import { ArrowRight, Phone } from "lucide-react";
 import Container from "@/components/common/Container";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 
 /** Dark photo CTA band — same look as the Features page closing band. */
 export default function CorporateCta() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   return (
     <section className="relative isolate overflow-hidden bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] text-white">
@@ -26,8 +27,8 @@ export default function CorporateCta() {
           >
             Request a proposal <ArrowRight className="h-4 w-4" />
           </button>
-          <a href={`tel:${SITE.phone}`} className="inline-flex h-11 items-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20">
-            <Phone className="h-4 w-4" />{SITE.phone}
+          <a href={`tel:${site.phone}`} className="inline-flex h-11 items-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20">
+            <Phone className="h-4 w-4" />{site.phone}
           </a>
         </div>
       </Container>

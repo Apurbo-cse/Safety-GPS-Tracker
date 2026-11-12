@@ -9,8 +9,8 @@ import PageHero from "@/components/common/PageHero";
 import { DeviceTile } from "./ProductTile";
 import { useCatalog } from "@/components/providers/CatalogProvider";
 import { categoryUrl } from "@/data/catalogue";
-import { api, type Paged, type ProductsQuery } from "@/lib/api";
-import { useLoad } from "@/lib/useLoad";
+import { type Paged, type ProductsQuery } from "@/lib/api";
+import { errorMessage, useProductsQuery } from "@/store/apiSlice";
 import type { Device } from "@/types";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDeviceModal } from "@/store/slices/uiSlice";
@@ -70,7 +70,8 @@ export default function DeviceShop({ category, subcategory, initial }: { categor
   }), [cat, sub, applied, MAX_PRICE, avail, sort, wishOnly, wishIds, page, pageSize]);
   // the page the server already rendered is reused until the visitor changes something
   const isInitialView = !!initial && page === 1 && pageSize === initial.limit && !query.maxPrice && !avail.priced && !avail.call && sort === "default" && !wishOnly;
-  const loaded = useLoad(() => (isInitialView ? Promise.resolve(initial!) : api.products(query)), [query, isInitialView]);
+  const rq = useProductsQuery(query, { skip: isInitialView });
+  const loaded = { data: rq.data ?? null, error: rq.error ? errorMessage(rq.error, "Couldn't load products") : null, loading: rq.isFetching, reload: () => { void rq.refetch(); } };
   const result = isInitialView ? initial! : loaded.data;
   const loading = !isInitialView && loaded.loading;
   const shown = result?.items ?? [];

@@ -19,7 +19,8 @@ import { features } from "@/data/features";
 import { plans } from "@/data/pricing";
 import { solutions } from "@/data/solutions";
 import { FAQS } from "@/data/faqs";
-import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
@@ -37,6 +38,7 @@ function Title({ a, b, c, className, center = true }: { a: string; b: string; c?
 
 /* ------------------------------------------------------------------ 1. hero */
 export function HeroLight() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   return (
     <section className="relative overflow-hidden bg-soft">
@@ -46,7 +48,7 @@ export function HeroLight() {
         <div>
           <span className="inline-flex items-center gap-2 rounded-md border border-dashed border-brand-400 bg-surface px-3 py-1.5 text-xs font-semibold text-ink">
             <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-600 text-white"><Headset className="h-3.5 w-3.5" /></span>
-            24/7 helpline · {SITE.phone}
+            24/7 helpline · {site.phone}
           </span>
           <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">
             Real-time GPS Tracking &amp; <span className="text-brand-600">Fleet Management</span>
@@ -55,7 +57,7 @@ export function HeroLight() {
             Track your vehicles live, lock the engine from your phone and get alerts — with tracking devices and apps made for Bangladesh&apos;s roads.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href={`tel:${SITE.phone}`} className="inline-flex h-10 items-center gap-2 rounded-md border border-brand-600 bg-surface px-4 text-sm font-semibold text-brand-text transition-colors hover:bg-brand-50">
+            <a href={`tel:${site.phone}`} className="inline-flex h-10 items-center gap-2 rounded-md border border-brand-600 bg-surface px-4 text-sm font-semibold text-brand-text transition-colors hover:bg-brand-50">
               <Phone className="h-4 w-4" />Contact Sales
             </a>
             <button onClick={() => dispatch(openDemoModal("Book a demo"))} className="gloss-btn inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold text-white">
@@ -315,6 +317,7 @@ export function FaqTwoCol() {
 
 /* ----------------------------------------------------------- 11. contact */
 export function ContactBlock() {
+  const site = useSite();
   return (
     <section className="bg-soft py-14 sm:py-20">
       <Container>
@@ -324,9 +327,9 @@ export function ContactBlock() {
             <div aria-hidden className="absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-white/5" />
             <h3 className="text-lg font-bold">Get in touch</h3>
             <ul className="relative mt-6 space-y-6 text-sm">
-              <li className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">Office</b><span className="text-slate-300">{SITE.address}</span></span></li>
-              <li className="flex gap-3"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">24/7 helpline</b><a href={`tel:${SITE.phone}`} className="text-slate-300 hover:text-white">{SITE.phone}</a></span></li>
-              <li className="flex gap-3"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">Email</b><a href={`mailto:${SITE.email}`} className="text-slate-300 hover:text-white">{SITE.email}</a></span></li>
+              <li className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">Office</b><span className="text-slate-300">{site.address}</span></span></li>
+              <li className="flex gap-3"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">24/7 helpline</b><a href={`tel:${site.phone}`} className="text-slate-300 hover:text-white">{site.phone}</a></span></li>
+              <li className="flex gap-3"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" /><span><b className="block">Email</b><a href={`mailto:${site.email}`} className="text-slate-300 hover:text-white">{site.email}</a></span></li>
             </ul>
           </div>
         </div>

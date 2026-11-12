@@ -6,7 +6,7 @@ import { ArrowUp, Mail, MapPin, Phone, ShieldCheck, ChevronRight } from "lucide-
 import Logo from "@/components/common/Logo";
 import Container from "@/components/common/Container";
 import { AppleAppStoreBadge, GooglePlayStoreBadge } from "@/components/common/AppStoreBadges";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 
 const PRODUCT_LINKS = [
   { label: "Car GPS Trackers", href: "/products/category/gps-tracking-devices/car-trackers" },
@@ -23,10 +23,12 @@ const QUICK_LINKS = [
   { label: "Pay Bill Online", href: "/pay-bill" },
   { label: "Frequently Asked Questions", href: "/faq" },
   { label: "About Our Company", href: "/about" },
+  { label: "News & Updates", href: "/news" },
   { label: "Contact & Support", href: "/contact" },
 ];
 
 export default function Footer() {
+  const site = useSite();
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -43,8 +45,8 @@ export default function Footer() {
             </span>
             <p className="text-xs font-medium text-slate-300 sm:text-sm">
               <span className="font-bold text-white">24/7 Live Monitoring Support:</span> Call our emergency dispatch team anytime at{" "}
-              <a href={`tel:${SITE.phone}`} className="font-bold text-brand-400 hover:text-brand-300 hover:underline">
-                {SITE.phone}
+              <a href={`tel:${site.phone}`} className="font-bold text-brand-400 hover:text-brand-300 hover:underline">
+                {site.phone}
               </a>
             </p>
           </div>
@@ -72,23 +74,23 @@ export default function Footer() {
           </p>
 
           <div className="mt-6 space-y-3 text-xs sm:text-sm text-slate-300">
-            <a href={`tel:${SITE.phone}`} className="flex items-center gap-3 transition-colors hover:text-white">
+            <a href={`tel:${site.phone}`} className="flex items-center gap-3 transition-colors hover:text-white">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/10 text-brand-400">
                 <Phone className="h-4 w-4" />
               </span>
-              <span>{SITE.phone} (24/7 Helpline)</span>
+              <span>{site.phone} (24/7 Helpline)</span>
             </a>
-            <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 transition-colors hover:text-white">
+            <a href={`mailto:${site.email}`} className="flex items-center gap-3 transition-colors hover:text-white">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/10 text-cyan-400">
                 <Mail className="h-4 w-4" />
               </span>
-              <span>{SITE.email}</span>
+              <span>{site.email}</span>
             </a>
             <div className="flex items-start gap-3">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/10 text-amber-400 mt-0.5">
                 <MapPin className="h-4 w-4" />
               </span>
-              <span className="leading-snug">{SITE.address}</span>
+              <span className="leading-snug">{site.address}</span>
             </div>
           </div>
         </div>
@@ -178,15 +180,24 @@ export default function Footer() {
       {/* Bottom Copyright & Legal Strip */}
       <div className="border-t border-white/10 bg-[#040c14] py-4 text-xs text-slate-400">
         <Container className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <p>© {new Date().getFullYear()} Safety GPS Tracker. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span>•</span>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            {site.pages.map((p) => (<span key={p.id} className="contents"><span>•</span><Link href={`/page/${p.id}`} className="hover:text-white transition-colors">{p.title}</Link></span>))}
             <span>•</span>
             <Link href="/contact" className="hover:text-white transition-colors">Support</Link>
           </div>
+
+          {(site.facebook || site.youtube || site.linkedin || site.instagram) && (
+            <div className="flex items-center gap-3">
+              {([[site.facebook, "Facebook"], [site.youtube, "YouTube"], [site.linkedin, "LinkedIn"], [site.instagram, "Instagram"]] as const).filter(([u]) => u).map(([u, label]) => (
+                <a key={label} href={u} target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">{label}</a>
+              ))}
+            </div>
+          )}
 
           <button
             onClick={scrollToTop}

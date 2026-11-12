@@ -1,7 +1,8 @@
+"use client";
 import { Clock, MapPin, Phone, ShieldCheck } from "lucide-react";
 import Container from "@/components/common/Container";
 import { LinkButton } from "@/components/common/Button";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 
 const PERKS = [
   { icon: ShieldCheck, t: "Engine lock & alerts" },
@@ -10,6 +11,7 @@ const PERKS = [
 ];
 
 export default function ContactCta({ title = "Ready to track your vehicles?", className = "" }: { title?: string; className?: string }) {
+  const site = useSite();
   return (
     <section className={`pb-8 sm:pb-20 ${className}`}>
       <Container>
@@ -32,7 +34,7 @@ export default function ContactCta({ title = "Ready to track your vehicles?", cl
               </ul>
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-              <LinkButton href={`tel:${SITE.phone}`} variant="light" size="sm" className="flex-1 sm:flex-initial"><Phone className="h-4 w-4" />{SITE.phone}</LinkButton>
+              <LinkButton href={`tel:${site.phone}`} variant="light" size="sm" className="flex-1 sm:flex-initial"><Phone className="h-4 w-4" />{site.phone}</LinkButton>
               <LinkButton href="/contact" variant="outline" size="sm" className="flex-1 sm:flex-initial !border-white/30 !bg-white/10 !text-white backdrop-blur hover:!bg-white/20">Contact us</LinkButton>
             </div>
           </div>

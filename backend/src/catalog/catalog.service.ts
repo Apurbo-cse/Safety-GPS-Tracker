@@ -79,7 +79,7 @@ export class CatalogService {
   /** `keepCost`: the editor can't see cost prices, so a save from them must not wipe the stored one. */
   async upsertPlan(id: string, dto: PlanDto, keepCost = false) {
     const prev = await this.plans.findOne({ where: { id } });
-    const saved = await this.plans.save(this.plans.create({ sort: 0, active: true, highlight: null, image: null, siteTitle: null, sourceNo: 0, description: "", ...dto, cost: keepCost ? prev?.cost ?? null : dto.cost ?? null, id }));
+    const saved = await this.plans.save(this.plans.create({ sort: 0, active: true, highlight: null, image: null, siteTitle: null, sourceNo: 0, description: "", vehicles: prev?.vehicles ?? [], ...dto, cost: keepCost ? prev?.cost ?? null : dto.cost ?? null, id }));
     const kept = new Set(mediaTokensIn(saved.description));
     await this.media.deleteOrphans(mediaTokensIn(prev?.description).filter((t) => !kept.has(t)));
     return saved;

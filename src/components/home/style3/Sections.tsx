@@ -26,7 +26,8 @@ import { useCatalog } from "@/components/providers/CatalogProvider";
 import type { HeroAccent, HeroIcon, HeroSlide as HeroSlideT, HeroTelematics } from "@/data/hero";
 import { categoryUrl } from "@/data/catalogue";
 import DeviceVisual from "@/components/devices/DeviceVisual";
-import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
@@ -61,7 +62,7 @@ function InteractiveTelematicsCard({ t }: { t: HeroTelematics }) {
   };
 
   return (
-    <div className="w-full max-w-[360px] overflow-hidden rounded-xl bg-[#0c2033]/80 text-white shadow-2xl shadow-black/40 backdrop-blur-xl">
+    <div className="w-full max-w-[360px] overflow-hidden rounded-md bg-[#0c2033]/80 text-white ring-1 ring-white/10 backdrop-blur-xl">
       {/* Top telemetry bar */}
       <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 bg-white/[0.04]">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -189,9 +190,9 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
                   <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">{s.text}</p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     {s.ctaHref.startsWith("https://")
-                      ? <a href={s.ctaHref} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></a>
-                      : <Link href={s.ctaHref} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></Link>}
-                    <button onClick={() => dispatch(openDemoModal("Hero live demo"))} className="inline-flex h-11 items-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">
+                      ? <a href={s.ctaHref} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></a>
+                      : <Link href={s.ctaHref} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></Link>}
+                    <button onClick={() => dispatch(openDemoModal("Hero live demo"))} className="inline-flex h-11 items-center gap-2 rounded-md bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">
                       <CalendarCheck className="h-4 w-4 text-brand-300" />Book a demo
                     </button>
                   </div>
@@ -253,17 +254,19 @@ export function ProductWheel() {
   });
 
   return (
-    <section className="bg-soft py-12 sm:py-16">
-      <Container className="grid items-center gap-10 lg:grid-cols-2">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50/70 to-white dark:from-navy-950 dark:via-navy-900/40 dark:to-navy-950 py-16 sm:py-24 border-b border-line/40">
+      <div aria-hidden className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 -z-0 h-96 w-96 rounded-full bg-brand-500/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute left-0 bottom-0 -z-0 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
+      <Container className="relative z-10 grid items-center gap-10 lg:grid-cols-2">
         <div>
           <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">All in one platform</span>
           <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-ink sm:text-5xl">We&apos;re Here To Keep Your Vehicles Safe</h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-body">One platform for cars, bikes, trucks and whole fleets — live tracking, alerts and remote engine control.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <button onClick={() => dispatch(openDemoModal("Book a schedule"))} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">
+            <button onClick={() => dispatch(openDemoModal("Book a schedule"))} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">
               <CalendarCheck className="h-4 w-4" />Book a schedule
             </button>
-            <Link href="/products" className="inline-flex h-11 items-center gap-2 rounded-lg bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90">
+            <Link href="/products" className="inline-flex h-11 items-center gap-2 rounded-md bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90">
               Explore products <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -326,57 +329,61 @@ export function ProductWheel() {
 }
 
 /* ============================================================ 3. software */
-const Pill = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">{children}</span>
+const Pill = ({ children, dark }: { children: React.ReactNode; dark?: boolean }) => (
+  <span className={cn(
+    "inline-block rounded-full px-3 py-1 text-xs font-semibold",
+    dark ? "bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30" : "bg-brand-500/10 text-brand-600 dark:text-brand-400"
+  )}>
+    {children}
+  </span>
 );
 
-function PointGrid({ items }: { items: { icon: LucideIcon; t: string }[] }) {
-  return (
-    <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-      {items.map((it) => (
-        <li key={it.t} className="group flex items-center gap-3 rounded-lg bg-softer/80 p-3 transition-all hover:-translate-y-0.5 dark:bg-navy-900/90">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><it.icon className="h-4 w-4" /></span>
-          <span className="text-sm font-medium text-ink">{it.t}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-const primaryBtn = "inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600";
-const softBtn = "inline-flex h-11 items-center gap-2 rounded-lg bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90";
+const primaryBtn = "inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600";
+const softBtn = "inline-flex h-11 items-center gap-2 rounded-md bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90";
 
 export function SoftwareBlock() {
   const dispatch = useAppDispatch();
   return (
-    <section className="bg-surface py-12 sm:py-16">
-      <Container className="grid items-center gap-10 lg:grid-cols-2">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#0c1e31] via-[#102740] to-[#0c1e31] py-16 sm:py-24 text-white border-y border-white/10">
+      {/* High-tech telemetry glow & pattern */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-500/15 via-transparent to-transparent opacity-60" />
+      <div aria-hidden className="pointer-events-none absolute -right-20 top-1/3 -z-0 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -left-20 bottom-10 -z-0 h-80 w-80 rounded-full bg-sky-500/15 blur-3xl" />
+
+      <Container className="relative z-10 grid items-center gap-10 lg:grid-cols-2">
         <div>
-          <Pill>Web platform</Pill>
-          <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl">GPS Tracking Software</h2>
-          <p className="mt-3 max-w-lg text-sm leading-relaxed text-body">One console for your whole fleet — cut idle time, wasted trips and running costs.</p>
-          <PointGrid items={[
-            { icon: MapPin, t: "Live map, 10-second updates" },
-            { icon: Route, t: "Route history playback" },
-            { icon: Fence, t: "Geo-fence & speed alerts" },
-            { icon: BarChart3, t: "Daily mileage reports" },
-          ]} />
+          <Pill dark>Web platform</Pill>
+          <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl">GPS Tracking Software</h2>
+          <p className="mt-3 max-w-lg text-sm leading-relaxed text-slate-300">One console for your whole fleet — cut idle time, wasted trips and running costs.</p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              { icon: MapPin, t: "Live map, 10-second updates" },
+              { icon: Route, t: "Route history playback" },
+              { icon: Fence, t: "Geo-fence & speed alerts" },
+              { icon: BarChart3, t: "Daily mileage reports" },
+            ].map((it) => (
+              <li key={it.t} className="group flex items-center gap-3 rounded-md bg-white/[0.07] p-3 text-white ring-1 ring-white/10 transition-all hover:bg-white/[0.12] hover:-translate-y-0.5">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-brand-500/20 text-brand-400 transition-colors group-hover:bg-brand-500 group-hover:text-white"><it.icon className="h-4 w-4" /></span>
+                <span className="text-sm font-medium text-white">{it.t}</span>
+              </li>
+            ))}
+          </ul>
           <div className="mt-7 flex flex-wrap gap-3">
             <button onClick={() => dispatch(openDemoModal("Schedule a demo (software)"))} className={primaryBtn}><CalendarCheck className="h-4 w-4" />Schedule a demo</button>
-            <Link href="/features" className={softBtn}>See how it works <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/features" className="inline-flex h-11 items-center gap-2 rounded-md border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">See how it works <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
 
         <div className="relative mx-auto w-full max-w-[560px]">
-          <div aria-hidden className="absolute inset-[8%] -z-0 rounded-[2rem] bg-gradient-to-br from-brand-500/15 via-softer to-sky-500/10 blur-2xl dark:via-navy-900" />
+          <div aria-hidden className="absolute inset-[8%] -z-0 rounded-2xl bg-gradient-to-br from-brand-500/25 via-sky-500/15 to-transparent blur-2xl" />
           <Image src="/img/platform.png" alt="Safety GPS Tracker web platform" width={1200} height={1137} sizes="(min-width:1024px) 560px, 100vw" className="relative h-auto w-full" />
-          <div className="absolute left-0 top-[12%] flex items-center gap-2 rounded-xl bg-surface/95 px-3 py-2 shadow-xl shadow-black/10 backdrop-blur dark:bg-navy-950/95 sm:-left-4">
+          <div className="absolute left-0 top-[12%] flex items-center gap-2 rounded-md bg-[#0c2033]/90 px-3 py-2 ring-1 ring-white/15 backdrop-blur sm:-left-4">
             <span className="relative flex h-2 w-2"><span className="animate-ping-slow absolute inset-0 rounded-full bg-green-500" /><span className="relative h-2 w-2 rounded-full bg-green-500" /></span>
-            <span className="text-xs font-semibold text-ink">Live · 10s updates</span>
+            <span className="text-xs font-semibold text-white">Live · 10s updates</span>
           </div>
-          <div className="absolute bottom-[14%] right-0 rounded-xl bg-surface/95 px-3 py-2 shadow-xl shadow-black/10 backdrop-blur dark:bg-navy-950/95 sm:-right-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Today</p>
-            <p className="text-sm font-black text-ink">214 km <span className="text-xs font-semibold text-green-600">· 6 trips</span></p>
+          <div className="absolute bottom-[14%] right-0 rounded-md bg-[#0c2033]/90 px-3 py-2 ring-1 ring-white/15 backdrop-blur sm:-right-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Today</p>
+            <p className="text-sm font-black text-white">214 km <span className="text-xs font-semibold text-emerald-400">· 6 trips</span></p>
           </div>
         </div>
       </Container>
@@ -388,8 +395,10 @@ export function SoftwareBlock() {
 export function AppBlock() {
   const dispatch = useAppDispatch();
   return (
-    <section className="bg-soft py-12 sm:py-16">
-      <Container className="grid items-center gap-10 lg:grid-cols-2">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50/50 to-white dark:from-navy-950 dark:via-navy-900/40 dark:to-navy-950 py-16 sm:py-24 border-b border-line/40">
+      <div aria-hidden className="pointer-events-none absolute -left-20 top-1/2 -translate-y-1/2 -z-0 h-96 w-96 rounded-full bg-emerald-500/5 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute right-10 top-10 -z-0 h-80 w-80 rounded-full bg-brand-500/5 blur-3xl" />
+      <Container className="relative z-10 grid items-center gap-10 lg:grid-cols-2">
         {/* app visual (rendered artwork: public/img/app/app-showcase.png) */}
         <div className="relative order-last mx-auto w-full max-w-[500px] lg:order-first">
           <Image src="/img/app/app-showcase.png" alt="Safety GPS Tracker mobile app showing a live map, engine lock and alerts" width={1580} height={1700} sizes="(min-width:1024px) 520px, 100vw" className="h-auto w-full" />
@@ -399,12 +408,19 @@ export function AppBlock() {
           <Pill>Android · iOS</Pill>
           <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl">GPS Tracking Mobile App</h2>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-body">Track, get alerts and control every vehicle right from your phone.</p>
-          <PointGrid items={[
-            { icon: Lock, t: "Engine lock from your phone" },
-            { icon: Bell, t: "Instant push alerts" },
-            { icon: MapPin, t: "Live location sharing" },
-            { icon: User, t: "Driver details" },
-          ]} />
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              { icon: Lock, t: "Engine lock from your phone" },
+              { icon: Bell, t: "Instant push alerts" },
+              { icon: MapPin, t: "Live location sharing" },
+              { icon: User, t: "Driver details" },
+            ].map((it) => (
+              <li key={it.t} className="group flex items-center gap-3 rounded-md bg-white dark:bg-navy-900/90 p-3 ring-1 ring-line/50 transition-all hover:-translate-y-0.5">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><it.icon className="h-4 w-4" /></span>
+                <span className="text-sm font-medium text-ink">{it.t}</span>
+              </li>
+            ))}
+          </ul>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link href="/mobile-app" className={primaryBtn}><Smartphone className="h-4 w-4" />Explore the app</Link>
             <button onClick={() => dispatch(openDemoModal("Schedule a demo (app)"))} className={softBtn}>Schedule a demo</button>
@@ -445,8 +461,9 @@ export function CategoryGrid() {
   const { devices, catalogue } = useCatalog();
   const cover = (cat: string) => devices.find((d) => d.category === cat && d.image) ?? devices.find((d) => d.category === cat);
   return (
-    <section className="bg-surface py-14 sm:py-20">
-      <Container>
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-50 dark:from-navy-950 dark:via-navy-900/60 dark:to-navy-950 py-16 sm:py-24 border-b border-line/40">
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -z-0 h-64 w-[600px] rounded-full bg-brand-500/5 blur-3xl" />
+      <Container className="relative z-10">
         <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Shop by category</span>
         <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Our Product&apos;s Category</h2>
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -454,16 +471,16 @@ export function CategoryGrid() {
             const d = cover(c.name);
             const count = c.count;
             return (
-              <Link key={c.slug} href={categoryUrl(c.name)} className="group overflow-hidden rounded-lg bg-softer/80 text-left transition-all hover:-translate-y-1 dark:bg-navy-900/90">
-                <span className="relative block aspect-[4/3] overflow-hidden">
-                  {d?.image ? <ProductImage src={d.image} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-contain transition-transform duration-500 group-hover:scale-105" /> : d ? <DeviceVisual kind={d.visual} className="h-full w-full" /> : null}
+              <Link key={c.slug} href={categoryUrl(c.name)} className="group overflow-hidden rounded-md bg-white text-left ring-1 ring-line/50 transition-all hover:-translate-y-1 dark:bg-navy-900/90">
+                <span className="relative block aspect-[4/3] overflow-hidden bg-slate-50 dark:bg-navy-950/50">
+                  {d?.image ? <ProductImage src={d.image} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-contain p-2" /> : d ? <DeviceVisual kind={d.visual} className="h-full w-full" /> : null}
                 </span>
                 <span className="flex items-center justify-between gap-2 p-3 sm:p-4">
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-ink sm:text-[15px]">{c.name}</span>
                     <span className="block text-xs text-slate-500">{count} product{count === 1 ? "" : "s"}</span>
                   </span>
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:bg-navy-950/70 dark:text-brand-400"><ArrowRight className="h-4 w-4" /></span>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-softer text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:bg-navy-950/70 dark:text-brand-400"><ArrowRight className="h-4 w-4" /></span>
                 </span>
               </Link>
             );
@@ -487,8 +504,9 @@ export function DeviceCatalogue() {
   const node = catalogue.find((c) => c.name === tab)!;
   const list = devices.filter((d) => d.category === tab);
   return (
-    <section id="gps-tracker" className="scroll-mt-20 bg-soft py-14 sm:py-20">
-      <Container>
+    <section id="gps-tracker" className="relative overflow-hidden scroll-mt-20 bg-gradient-to-b from-white via-slate-50/50 to-white dark:from-navy-950 dark:via-navy-900/30 dark:to-navy-950 py-16 sm:py-24">
+      <div aria-hidden className="pointer-events-none absolute right-0 top-1/3 -z-0 h-96 w-96 rounded-full bg-sky-500/5 blur-3xl" />
+      <Container className="relative z-10">
         <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Shop products</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">GPS Trackers &amp; Hardware</h2></div>
         <Tabs tabs={names} tab={tab} setTab={setPicked} />
         <AnimatePresence mode="wait">
@@ -498,7 +516,7 @@ export function DeviceCatalogue() {
         </AnimatePresence>
         {list.length > PER_TAB && (
           <div className="mt-8 text-center">
-            <Link href={categoryUrl(node.name)} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">View all {list.length} {node.name} <ArrowRight className="h-4 w-4" /></Link>
+            <Link href={categoryUrl(node.name)} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">View all {list.length} {node.name} <ArrowRight className="h-4 w-4" /></Link>
           </div>
         )}
       </Container>
@@ -511,8 +529,9 @@ export function OtherProducts() {
   const { plans } = useCatalog();
   if (!plans.length) return null;
   return (
-    <section id="other-products" className="scroll-mt-20 bg-surface py-14 sm:py-20">
-      <Container>
+    <section id="other-products" className="relative overflow-hidden scroll-mt-20 bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70 dark:from-navy-950 dark:via-navy-900/70 dark:to-navy-950 py-16 sm:py-24 border-y border-line/40">
+      <div aria-hidden className="pointer-events-none absolute left-0 bottom-10 -z-0 h-80 w-80 rounded-full bg-brand-500/5 blur-3xl" />
+      <Container className="relative z-10">
         <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Packages</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Service Packages</h2><p className="mx-auto mt-3 max-w-xl text-sm text-body">Pay once for the device, then a simple monthly charge for tracking, apps and support.</p></div>
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {plans.map((p) => <PlanTile key={p.id} p={p} />)}
@@ -524,6 +543,7 @@ export function OtherProducts() {
 
 /* ============================================================== 7. why */
 export function WhyChecklist() {
+  const site = useSite();
   const { plans } = useCatalog();
   const dispatch = useAppDispatch();
   const telecom = TELECOM_PARTNER_LOGOS.slice(0, 3).map((p) => p.name).join(", ");
@@ -533,7 +553,7 @@ export function WhyChecklist() {
     { icon: MapPin, t: "10-second live tracking", d: "Every vehicle refreshes on the map about every 10 seconds." },
     { icon: Lock, t: "Remote engine lock", d: "Stop an unauthorised trip by locking the engine from the app." },
     { icon: Globe, t: "Strong network coverage", d: `Devices connect over ${telecom}.` },
-    { icon: Phone, t: "24/7 human helpline", d: `Real people answer on ${SITE.phone}, day and night.` },
+    { icon: Phone, t: "24/7 human helpline", d: `Real people answer on ${site.phone}, day and night.` },
   ];
   const stats: [string, string][] = [
     ["10s", "Location updates"],
@@ -542,7 +562,7 @@ export function WhyChecklist() {
     ["24×7", "Helpline"],
   ];
   return (
-    <section className="bg-soft py-12 sm:py-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white dark:from-navy-950 dark:via-navy-900/40 dark:to-navy-950 py-16 sm:py-24">
       <Container className="grid items-stretch gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Why Safety GPS</span>
@@ -552,8 +572,8 @@ export function WhyChecklist() {
           </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {cards.map((c) => (
-              <div key={c.t} className="group rounded-lg bg-softer/80 p-5 transition-all hover:-translate-y-1 dark:bg-navy-900/90">
-                <span className="grid h-11 w-11 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
+              <div key={c.t} className="group rounded-md bg-slate-100/80 p-5 ring-1 ring-line/30 transition-all hover:-translate-y-1 dark:bg-navy-900/90">
+                <span className="grid h-11 w-11 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
                 <h3 className="mt-3 text-base font-bold text-ink">{c.t}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-body">{c.d}</p>
               </div>
@@ -561,25 +581,25 @@ export function WhyChecklist() {
           </div>
         </div>
 
-        <aside className="relative isolate flex flex-col overflow-hidden rounded-lg bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] p-6 text-white sm:p-8">
+        <aside className="relative isolate flex flex-col overflow-hidden rounded-md bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] p-6 text-white sm:p-8">
           <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-40" />
           <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 -z-10 h-56 w-56 rounded-full bg-brand-500/25 blur-3xl" />
           <div className="relative mx-auto grid h-36 w-36 place-items-center">
             {[0, 1, 2].map((k) => <span key={k} aria-hidden className="ring-pulse absolute inset-0 rounded-full bg-brand-500/20" style={{ animationDelay: `${k}s` }} />)}
-            <span className="relative grid h-24 w-24 place-items-center rounded-full bg-brand-500 shadow-xl shadow-brand-500/40"><ShieldCheck className="h-12 w-12" strokeWidth={1.6} /></span>
+            <span className="relative grid h-24 w-24 place-items-center rounded-full bg-brand-500"><ShieldCheck className="h-12 w-12" strokeWidth={1.6} /></span>
           </div>
           <p className="mt-4 text-center text-sm font-semibold text-brand-300">BTRC approved · 64 districts</p>
           <dl className="mt-6 grid grid-cols-2 gap-3">
             {stats.map(([v, l]) => (
-              <div key={l} className="rounded-lg bg-white/[0.06] p-3 text-center backdrop-blur-sm">
+              <div key={l} className="rounded-md bg-white/[0.06] p-3 text-center backdrop-blur-sm">
                 <dd className="text-2xl font-black tracking-tight">{v}</dd>
                 <dt className="mt-0.5 text-[11px] uppercase tracking-wider text-slate-300">{l}</dt>
               </div>
             ))}
           </dl>
           <div className="mt-auto flex flex-wrap gap-2 pt-6">
-            <Link href="/pricing" className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-500 px-4 text-sm font-semibold transition-colors hover:bg-brand-600">Compare packages <ArrowRight className="h-4 w-4" /></Link>
-            <button onClick={() => dispatch(openDemoModal("Demo request (why choose)"))} className="inline-flex h-10 flex-1 items-center justify-center rounded-lg bg-white/10 px-4 text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20">Book a demo</button>
+            <Link href="/pricing" className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md bg-brand-500 px-4 text-sm font-semibold transition-colors hover:bg-brand-600">Compare packages <ArrowRight className="h-4 w-4" /></Link>
+            <button onClick={() => dispatch(openDemoModal("Demo request (why choose)"))} className="inline-flex h-10 flex-1 items-center justify-center rounded-md bg-white/10 px-4 text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20">Book a demo</button>
           </div>
         </aside>
       </Container>
@@ -590,7 +610,7 @@ export function WhyChecklist() {
 /* ========================================================== 8. partners */
 function LogoTile({ p }: { p: { name: string; logo: string } }) {
   return (
-    <li title={p.name} className="group grid h-20 place-items-center rounded-lg bg-surface px-4 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-navy-950/70">
+    <li title={p.name} className="group grid h-20 place-items-center rounded-md bg-slate-50 px-4 ring-1 ring-line/20 transition-all hover:-translate-y-0.5 dark:bg-navy-950/70">
       <Image src={clean(p.logo)} alt={p.name} width={140} height={50} className="h-auto max-h-9 w-auto max-w-full object-contain opacity-70 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0" />
     </li>
   );
@@ -603,8 +623,9 @@ export function PartnerBorderGrid() {
     { icon: Globe, t: "Network partners", d: "Mobile networks that carry your vehicle's data.", items: TELECOM_PARTNER_LOGOS, cols: "grid-cols-2" },
   ];
   return (
-    <section className="bg-surface py-12 sm:py-16">
-      <Container>
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/80 dark:from-navy-950 dark:via-navy-900/70 dark:to-navy-950 py-16 sm:py-24 border-y border-line/40">
+      <div aria-hidden className="pointer-events-none absolute right-0 top-10 -z-0 h-72 w-72 rounded-full bg-brand-500/5 blur-3xl" />
+      <Container className="relative z-10">
         <div className="text-center">
           <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Ecosystem · {all.length} partners</span>
           <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Our Device &amp; Network Partners</h2>
@@ -613,14 +634,14 @@ export function PartnerBorderGrid() {
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.5fr_1fr]">
           {groups.map((g) => (
-            <div key={g.t} className="rounded-lg bg-softer/80 p-5 dark:bg-navy-900/90 sm:p-6">
+            <div key={g.t} className="rounded-md bg-white p-5 ring-1 ring-line/40 dark:bg-navy-900/90 sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400"><g.icon className="h-5 w-5" /></span>
+                <span className="grid h-10 w-10 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400"><g.icon className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base font-bold text-ink">{g.t}</h3>
                   <p className="text-xs text-body">{g.d}</p>
                 </div>
-                <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink dark:bg-navy-950/70">{g.items.length}</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-ink dark:bg-navy-950/70">{g.items.length}</span>
               </div>
               <ul className={cn("mt-5 grid gap-3", g.cols)}>
                 {g.items.map((p) => <LogoTile key={p.name} p={p} />)}
@@ -649,7 +670,7 @@ export function FaqGrid() {
   const [open, setOpen] = useState<string | null>(null);
   const cols = [items.filter((_, i) => i % 2 === 0), items.filter((_, i) => i % 2 === 1)];
   return (
-    <section className="bg-surface pb-14 sm:pb-20">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50/60 to-slate-100/40 dark:from-navy-950 dark:via-navy-900/30 dark:to-navy-950 py-16 sm:py-24">
       <Container>
         <div className="flex items-center gap-4">
           <span className="h-px flex-1 bg-line" />
@@ -663,7 +684,7 @@ export function FaqGrid() {
               {col.map((f) => {
                 const on = open === f.id;
                 return (
-                  <div key={f.id} className="border border-line bg-surface shadow-sm">
+                  <div key={f.id} className="rounded-md bg-white ring-1 ring-line/50 dark:bg-navy-900/90 overflow-hidden transition-all">
                     <button onClick={() => setOpen(on ? null : f.id)} aria-expanded={on} className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-semibold text-ink">
                       {f.q}<ChevronDown className={cn("h-5 w-5 shrink-0 text-slate-400 transition-transform", on && "rotate-180")} />
                     </button>
@@ -687,28 +708,29 @@ export function FaqGrid() {
 
 /* =========================================================== 10. enquiry */
 export function EnquiryBlock() {
+  const site = useSite();
   const [tab, setTab] = useState<"products" | "fleet">("products");
   return (
-    <section className="bg-surface pb-16 sm:pb-24">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/80 via-slate-50 to-white dark:from-navy-950 dark:via-navy-900/60 dark:to-navy-950 pb-16 sm:pb-24 pt-8">
       <Container>
-        <div className="flex flex-wrap gap-3 sm:ml-[8%]">
+        <div className="flex flex-wrap gap-2.5 sm:ml-[8%]">
           {([["products", "Inquiry for products"], ["fleet", "Inquiry for corporate fleet"]] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} className={cn("h-11 rounded-md px-5 text-xs font-semibold uppercase tracking-wide shadow-md transition-colors", tab === k ? "bg-brand-600 text-white" : "bg-navy-900 text-white hover:bg-navy-800")}>{l}</button>
+            <button key={k} onClick={() => setTab(k)} className={cn("h-10 rounded-md px-4 text-xs font-semibold uppercase tracking-wide transition-colors", tab === k ? "bg-brand-500 text-white font-bold" : "bg-softer text-body hover:text-ink dark:bg-navy-900 dark:text-slate-300")}>{l}</button>
           ))}
         </div>
-        <div className="mt-2 grid overflow-hidden rounded-md shadow-xl lg:grid-cols-[1.6fr_1fr]">
-          <div className="bg-surface p-4 sm:p-6 [&>form]:border-0 [&>form]:p-0 [&>form]:shadow-none">
+        <div className="mt-3 grid overflow-hidden rounded-md ring-1 ring-line/40 lg:grid-cols-[1.6fr_1fr]">
+          <div className="bg-white p-4 sm:p-6 dark:bg-navy-900/90 [&>form]:border-0 [&>form]:p-0 [&>form]:shadow-none">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-brand-text">{tab === "products" ? "Ask about devices and packages" : "Tell us about your fleet"}</p>
             <ContactForm key={tab} />
           </div>
-          <div className="relative overflow-hidden bg-[#3d3b52] p-6 text-white sm:p-8">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] p-6 text-white sm:p-8">
             <div aria-hidden className="absolute -right-10 top-1/3 h-32 w-32 rounded-full bg-white/5" />
             <div aria-hidden className="absolute -bottom-24 -left-10 h-64 w-[140%] -rotate-12 bg-white/5" />
             <h3 className="relative text-lg font-bold">Get in Touch</h3>
             <ul className="relative mt-6 space-y-6 text-sm">
-              <li><MapPin className="h-7 w-7 text-brand-400" /><b className="mt-2 block">Head Office</b><span className="mt-1 block text-slate-300">{SITE.address}</span></li>
-              <li><Phone className="h-7 w-7 text-brand-400" /><b className="mt-2 block">24/7 Helpline</b><a href={`tel:${SITE.phone}`} className="mt-1 block text-slate-300 hover:text-white">{SITE.phone}</a></li>
-              <li><Mail className="h-7 w-7 text-brand-400" /><b className="mt-2 block">Email</b><a href={`mailto:${SITE.email}`} className="mt-1 block text-slate-300 hover:text-white">{SITE.email}</a></li>
+              <li><MapPin className="h-7 w-7 text-brand-400" /><b className="mt-2 block">Head Office</b><span className="mt-1 block text-slate-300">{site.address}</span></li>
+              <li><Phone className="h-7 w-7 text-brand-400" /><b className="mt-2 block">24/7 Helpline</b><a href={`tel:${site.phone}`} className="mt-1 block text-slate-300 hover:text-white">{site.phone}</a></li>
+              <li><Mail className="h-7 w-7 text-brand-400" /><b className="mt-2 block">Email</b><a href={`mailto:${site.email}`} className="mt-1 block text-slate-300 hover:text-white">{site.email}</a></li>
             </ul>
           </div>
         </div>

@@ -7,6 +7,9 @@ export interface AuthUser {
   phone: string | null;
   role: "customer" | "admin";
   vehicleType: string | null;
+  staffRoleId: string | null;
+  /** What this person may do in the admin panel (empty for customers). */
+  permissions: string[];
 }
 interface AuthState {
   user: AuthUser | null;

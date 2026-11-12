@@ -8,7 +8,8 @@ import QRCode from "qrcode";
 import { CheckCircle2, PhoneCall, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { mobileSchema } from "@/lib/validation";
-import { PLAY_STORE_URL, SITE } from "@/lib/site";
+import { PLAY_STORE_URL } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 
 const schema = z.object({ name: z.string().min(2, "Enter your name"), mobile: mobileSchema });
 type V = z.infer<typeof schema>;
@@ -17,6 +18,7 @@ const field = "w-full rounded-md border border-white/15 bg-white/[0.06] px-3.5 p
 
 /** Inline "request a call back" form (frontend demo — nothing is sent). */
 export function CallbackCard() {
+  const site = useSite();
   const [doneFor, setDoneFor] = useState<string | null>(null);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<V>({ resolver: zodResolver(schema) });
   const submit = async (v: V) => {
@@ -29,7 +31,7 @@ export function CallbackCard() {
     <div className="rounded-md border border-white/10 bg-white/[0.04] p-5   backdrop-blur">
       <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-brand-600/20 text-brand-400"><PhoneCall className="h-5 w-5" /></span>
-        <div><h3 className="text-base font-semibold text-white">Request a call back</h3><p className="text-xs text-slate-400">Leave your number and our team will call you. Or call {SITE.phone} any time — helpline is 24×7.</p></div>
+        <div><h3 className="text-base font-semibold text-white">Request a call back</h3><p className="text-xs text-slate-400">Leave your number and our team will call you. Or call {site.phone} any time — helpline is 24×7.</p></div>
       </div>
       {doneFor ? (
         <div className="mt-4 flex items-center gap-3 rounded-md border border-green-500/30 bg-green-500/10 p-3.5 text-sm text-green-300" role="status">

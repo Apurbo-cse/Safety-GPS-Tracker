@@ -1,3 +1,4 @@
+import { stripHtml } from "@/components/common/RichText";
 import PageHero from "@/components/common/PageHero";
 import FaqExplorer from "@/components/faq/FaqExplorer";
 import ContactCta from "@/components/home/ContactCta";
@@ -19,7 +20,7 @@ export default async function FaqPage() {
     mainEntity: FAQS.map((f) => ({
       "@type": "Question",
       name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
+      acceptedAnswer: { "@type": "Answer", text: stripHtml(f.a) },
     })),
   };
   return (

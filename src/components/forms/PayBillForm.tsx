@@ -12,7 +12,7 @@ import { Button } from "@/components/common/Button";
 import { Field, inputCls } from "./Field";
 import { mobileSchema } from "@/lib/validation";
 import { useCatalog } from "@/components/providers/CatalogProvider";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { formatBDT, cn } from "@/utils/format";
 
 const METHODS = ["bKash", "Nagad", "Rocket", "Bank Transfer"] as const;
@@ -47,6 +47,7 @@ function MethodBadge({ m, size = "h-8 w-8" }: { m: Method; size?: string }) {
 }
 
 export default function PayBillForm() {
+  const site = useSite();
   const { plans } = useCatalog();
   // quick-pay amounts: each distinct monthly charge, plus 3 and 6 months of the lowest
   const QUICK = useMemo(() => {
@@ -222,7 +223,7 @@ export default function PayBillForm() {
             <div className="flex justify-between"><dt className="text-body">Service charge</dt><dd className="font-semibold text-green-600">{formatBDT(0)}</dd></div>
           </dl>
           <p className="flex items-center gap-1.5 border-t border-line px-4 py-2 text-xs text-slate-500"><ShieldCheck className="h-3.5 w-3.5 text-green-600" />Demo · nothing is charged</p>
-          <a href={`tel:${SITE.phone}`} className="flex items-center gap-1.5 border-t border-line px-4 py-2 text-xs font-semibold text-brand-text hover:bg-soft"><Headset className="h-3.5 w-3.5" />Billing help: {SITE.phone}</a>
+          <a href={`tel:${site.phone}`} className="flex items-center gap-1.5 border-t border-line px-4 py-2 text-xs font-semibold text-brand-text hover:bg-soft"><Headset className="h-3.5 w-3.5" />Billing help: {site.phone}</a>
         </div>
 
       </aside>

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColumn } from "typeorm";
 
 abstract class Base {
   @Column({ type: "int", default: 0 })
@@ -50,8 +50,14 @@ export class Plan extends Base {
   /** What the device costs us — admin only, never sent to the website. */
   @Column({ type: "int", nullable: true })
   cost: number | null;
+
+  /** Vehicle kinds this package suits (see common/vehicles.ts) — drives the "Find my plan" quiz. */
+  @Column({ type: "jsonb", default: () => "'[]'::jsonb" })
+  vehicles: string[];
 }
 
+@Index("IDX_devices_category_sub", ["category", "subcategory"])
+@Index("IDX_devices_active_sort", ["active", "sort"])
 @Entity("devices")
 export class Device extends Base {
   @PrimaryColumn({ type: "varchar", length: 60 })

@@ -16,6 +16,9 @@ import { CatalogService } from "./catalog/catalog.service";
 import { validateEnv, type Env } from "./config/env";
 import { HealthController } from "./health/health.controller";
 import { MediaController } from "./media/media.controller";
+import { ContentController } from "./content/content.controller";
+import { Page, SiteContent } from "./content/content.entities";
+import { ContentService } from "./content/content.service";
 import { Post } from "./posts/post.entity";
 import { PostsController } from "./posts/posts.controller";
 import { PostsService } from "./posts/posts.service";
@@ -27,6 +30,12 @@ import { MediaFile } from "./media/media.entity";
 import { MediaService } from "./media/media.service";
 import { ProductsController } from "./catalog/products.controller";
 import { Order, OrderItem } from "./orders/order.entities";
+import { Coupon } from "./orders/coupon.entity";
+import { ContactController } from "./contact/contact.controller";
+import { ContactMessage } from "./contact/contact.entity";
+import { ContactService } from "./contact/contact.service";
+import { EventsGateway } from "./events/events.gateway";
+import { CouponsService } from "./orders/coupons.service";
 import { OrdersController } from "./orders/orders.controller";
 import { OrdersService } from "./orders/orders.service";
 import { User } from "./users/user.entity";
@@ -49,7 +58,7 @@ import { UsersService } from "./users/users.service";
         migrations: [join(__dirname, "database", "migrations", "*.{js,ts}")],
       }),
     }),
-    TypeOrmModule.forFeature([User, Plan, Device, Faq, Category, HeroSlide, MediaFile, Post, StaffRole, Order, OrderItem]),
+    TypeOrmModule.forFeature([User, Plan, Device, Faq, Category, HeroSlide, MediaFile, Post, StaffRole, Order, OrderItem, SiteContent, Page, Coupon, ContactMessage]),
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
@@ -61,9 +70,9 @@ import { UsersService } from "./users/users.service";
     }),
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 60_000, limit: 120 }] }),
   ],
-  controllers: [StaffController, PostsController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, AdminController, HealthController],
+  controllers: [StaffController, PostsController, ContentController, ContactController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, AdminController, HealthController],
   providers: [
-    UsersService, AuthService, CatalogService, OrdersService, AdminService, MediaService, RolesService, StaffService, PostsService,
+    UsersService, AuthService, CatalogService, OrdersService, AdminService, MediaService, RolesService, StaffService, PostsService, ContentService, CouponsService, ContactService, EventsGateway,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

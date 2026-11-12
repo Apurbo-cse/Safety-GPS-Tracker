@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Cpu, Eye, Mail, MapPin, Phone, Radio, Target } from "lucide-react";
@@ -13,10 +14,10 @@ import { features } from "@/data/features";
 import { solutions } from "@/data/solutions";
 import { plans } from "@/data/pricing";
 import { journey, services, techFlow, values } from "@/data/about";
-import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS, mapsUrl } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 
 
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.address)}`;
 
 // every number here is counted from the site's own data
 const STATS = [
@@ -29,6 +30,7 @@ const STATS = [
 ];
 
 export default function AboutClassic() {
+  const site = useSite();
   return (
     <>
       <PageHero art="pickup" eyebrow="About us" title="Real-time GPS vehicle tracking solution" description="Safety GPS Tracker provides GPS tracking software that helps customers monitor accurate locations of their vehicles and fleets.">
@@ -192,9 +194,9 @@ export default function AboutClassic() {
           </div>
           <div className="grid gap-px bg-line sm:grid-cols-3 lg:col-span-2">
             {[
-              { icon: MapPin, label: "Address", value: SITE.address, href: MAPS_URL, ext: true },
-              { icon: Phone, label: "Helpline", value: SITE.phone, href: `tel:${SITE.phone}` },
-              { icon: Mail, label: "Email", value: SITE.email, href: `mailto:${SITE.email}` },
+              { icon: MapPin, label: "Address", value: site.address, href: mapsUrl(site.address), ext: true },
+              { icon: Phone, label: "Helpline", value: site.phone, href: `tel:${site.phone}` },
+              { icon: Mail, label: "Email", value: site.email, href: `mailto:${site.email}` },
             ].map((c) => (
               <a key={c.label} href={c.href} {...(c.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="group bg-surface p-5 transition-colors hover:bg-soft">
                 <span className="grid h-9 w-9 place-items-center rounded-md bg-brand-500/10 text-brand-text transition-colors group-hover:bg-brand-600 group-hover:text-white"><c.icon className="h-4 w-4" /></span>

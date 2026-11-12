@@ -4,13 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Building2, ChevronRight, Cpu, CreditCard, HelpCircle, Home, Info, LayoutGrid, LogIn, LogOut, Mail, Package, Phone, Settings, Tag, UserPlus, UserRound, X, type LucideIcon,
-} from "lucide-react";
+  Building2, ChevronRight, Cpu, CreditCard, HelpCircle, Home, Info, LayoutGrid, LogIn, LogOut, Mail, Package, Phone, Settings, Tag, UserPlus, UserRound, X, Newspaper, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/common/Logo";
 import { announceNavigation } from "@/lib/navigate";
 import ThemeToggle from "./ThemeToggle";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setMobileNav } from "@/store/slices/uiSlice";
 import { signOut } from "@/store/thunks";
@@ -23,6 +22,7 @@ const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/products", label: "Products", icon: Cpu },
   { href: "/solutions", label: "Solutions", icon: Building2 },
   { href: "/about", label: "About Us", icon: Info },
+  { href: "/news", label: "News", icon: Newspaper },
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/faq", label: "FAQ", icon: HelpCircle },
   { href: "/pay-bill", label: "Pay Bill", icon: CreditCard },
@@ -33,6 +33,7 @@ const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
 
 /** Left-side app drawer opened from the "More" tab / menu button on phones and tablets. */
 export default function MoreSheet() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -119,9 +120,9 @@ export default function MoreSheet() {
 
             {/* ---------- footer ---------- */}
             <div className="border-t border-line p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-              <a href={`tel:${SITE.phone}`} className="gloss-btn flex items-center justify-center gap-2 rounded-md py-2.5 text-sm font-bold text-white active:scale-[.98]">
+              <a href={`tel:${site.phone}`} className="gloss-btn flex items-center justify-center gap-2 rounded-md py-2.5 text-sm font-bold text-white active:scale-[.98]">
                 <span className="relative grid h-5 w-5 place-items-center"><span className="animate-ping-slow absolute inset-0 rounded-full bg-white/40" /><Phone className="relative h-4 w-4" /></span>
-                Call {SITE.phone}
+                Call {site.phone}
               </a>
             </div>
           </motion.div>

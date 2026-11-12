@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEmail, IsIn, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEmail, IsISO8601, IsIn, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
 import { IsBdMobile } from "../common/bd-mobile";
 import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod } from "./order.entities";
 
@@ -41,6 +41,25 @@ export class CreateOrderDto {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "preferredDate must be YYYY-MM-DD" }) preferredDate: string;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(300) note?: string;
   @IsOptional() @ValidateNested() @Type(() => BillingDto) billing?: BillingDto;
+  /** Discount code (case-insensitive). */
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(30) coupon?: string;
+}
+
+/** Price a cart (and an optional coupon) without placing an order — the checkout page's "Apply" button. */
+export class QuoteDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(20) @ValidateNested({ each: true }) @Type(() => CartLineDto)
+  items: CartLineDto[];
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(30) coupon?: string;
+}
+
+export class CouponDto {
+  @IsIn(["percent", "fixed"]) kind: "percent" | "fixed";
+  @IsInt() @Min(1) @Max(10_000_000) value: number;
+  @IsOptional() @IsInt() @Min(0) @Max(10_000_000) minTotal?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(1_000_000) maxUses?: number | null;
+  @IsOptional() @IsISO8601() expiresAt?: string | null;
+  @IsBoolean() active: boolean;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(120) note?: string;
 }
 
 export class UpdateStatusDto {

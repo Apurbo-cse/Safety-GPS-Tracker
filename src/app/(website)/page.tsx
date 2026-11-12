@@ -22,7 +22,8 @@ export default function HomePage() {
       <OtherProducts />
       <WhyChecklist />
       <PartnerBorderGrid />
-      <FaqGrid /> 
+      <FaqGrid />
+      <EnquiryBlock />
     </>
   );
 }

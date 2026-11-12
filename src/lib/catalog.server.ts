@@ -81,11 +81,12 @@ export const getShopPage = cache(async (category?: string, sub?: string): Promis
  */
 export const getProduct = cache(async (id: string): Promise<Device | null> => {
   const known = (await getCatalog()).devices.find((d) => d.id === id);
-  if (known || !API) return known ?? null;
+  if (!API) return known ?? null;
   try {
-    const res = await fetch(`${API}/products?${new URLSearchParams({ ids: id, limit: "1" })}`, { cache: "no-store", signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
-    const json = (await res.json()) as Paged<Device>;
-    return json.items?.[0] ?? null;
-  } catch { return null; }
+    // the single-product endpoint also carries the long description, which the catalogue list leaves out
+    const res = await fetch(`${API}/products/${encodeURIComponent(id)}`, known ? { next: { revalidate: REVALIDATE_SECONDS }, signal: AbortSignal.timeout(5000) } : { cache: "no-store", signal: AbortSignal.timeout(5000) });
+    if (res.status === 404) return null;
+    if (!res.ok) return known ?? null;
+    return (await res.json()) as Device;
+  } catch { return known ?? null; }
 });

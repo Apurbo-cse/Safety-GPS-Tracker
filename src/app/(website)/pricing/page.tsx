@@ -10,12 +10,18 @@ import CostTimeline from "@/components/pricing/CostTimeline";
 import PackageComparison from "@/components/pricing/PackageComparison";
 import { LinkButton } from "@/components/common/Button";
 import CorporateCta from "@/components/pricing/CorporateCta";
-import { pricingFaqs } from "@/data/pricing";
 import { getCatalog } from "@/lib/catalog.server";
 import { formatBDT } from "@/utils/format";
 import { pageMeta } from "@/lib/metadata";
 
-export const metadata = pageMeta("GPS Tracking Pricing & Packages", "Compare Safety GPS Tracker packages: device price from ৳4,000 and monthly charges from ৳300.", "/pricing");
+const PRICING_FAQ_CATEGORY = "Pricing & Packages";
+
+/** The description quotes today's lowest prices from the catalogue instead of a fixed sentence. */
+export async function generateMetadata() {
+  const { plans } = await getCatalog();
+  const prices = plans.length ? ` Device price from ${formatBDT(Math.min(...plans.map((p) => p.devicePrice)))} and monthly charges from ${formatBDT(Math.min(...plans.map((p) => p.monthlyCharge)))}.` : "";
+  return pageMeta("GPS Tracking Pricing & Packages", `Compare ${plans.length || ""} Safety GPS Tracker packages.${prices}`.replace("Compare  ", "Compare "), "/pricing");
+}
 
 const how = [
   { icon: Wallet, t: "Pay for the device once", d: "The device price covers the tracking hardware and installation-ready setup." },
@@ -25,7 +31,8 @@ const how = [
 
 
 export default async function PricingPage() {
-  const { plans } = await getCatalog();
+  const { plans, faqs } = await getCatalog();
+  const pricingFaqs = faqs.filter((f) => f.category === PRICING_FAQ_CATEGORY).map((f) => ({ q: f.q, a: f.a }));
   const minDevice = plans.length ? Math.min(...plans.map((p) => p.devicePrice)) : 0;
   const minMonthly = plans.length ? Math.min(...plans.map((p) => p.monthlyCharge)) : 0;
   const stats: [string, string, string][] = [
@@ -91,12 +98,14 @@ export default async function PricingPage() {
       <CostTimeline />
       <PackageComparison />
 
-      <section id="faq" className="scroll-mt-32 bg-surface py-12 sm:py-16">
-        <Container className="max-w-3xl">
-          <SectionHeading eyebrow="Pricing FAQ" title="Questions About Pricing" />
-          <Accordion items={pricingFaqs} />
-        </Container>
-      </section>
+      {pricingFaqs.length > 0 && (
+        <section id="faq" className="scroll-mt-32 bg-surface py-12 sm:py-16">
+          <Container className="max-w-3xl">
+            <SectionHeading eyebrow="Pricing FAQ" title="Questions About Pricing" />
+            <Accordion items={pricingFaqs} />
+          </Container>
+        </section>
+      )}
 
       <CorporateCta />
     </>

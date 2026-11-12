@@ -9,11 +9,13 @@ import DeviceVisual from "./DeviceVisual";
 import { DeviceTile } from "./ProductTile";
 import { useCatalog } from "@/components/providers/CatalogProvider";
 import { categoryUrl } from "@/data/catalogue";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart, setQty } from "@/store/slices/cartSlice";
 import { setCartOpen } from "@/store/slices/uiSlice";
 import { toggleWishlist } from "@/store/slices/wishlistSlice";
+import RichText, { isHtml } from "@/components/common/RichText";
+import { room, stockLabel, stockState } from "@/lib/stock";
 import { cn, formatBDT } from "@/utils/format";
 import type { Device } from "@/types";
 
@@ -21,6 +23,7 @@ type Tab = "description" | "specs" | "package";
 
 /** Full product page: gallery, buy box, details tabs and related products. */
 export default function ProductDetail({ id, device }: { id: string; device?: Device }) {
+  const site = useSite();
   const { devices, plans } = useCatalog();
   const d = device ?? devices.find((x) => x.id === id)!;
   const dispatch = useAppDispatch();
@@ -35,13 +38,16 @@ export default function ProductDetail({ id, device }: { id: string; device?: Dev
   const shots: ({ kind: "image"; src: string } | { kind: "art" })[] = pics.length ? pics.map((src) => ({ kind: "image" as const, src })) : [{ kind: "art" as const }];
   const related = devices.filter((x) => x.id !== d.id && x.category === d.category).concat(devices.filter((x) => x.id !== d.id && x.category !== d.category)).slice(0, 4);
 
+  const state = stockState(d);
+  const left = room(d, inCart?.qty ?? 0);   // units that can still be added
+  const qtyShown = Math.min(qty, Math.max(1, left));
   const add = (openCart: boolean) => {
-    if (!d.price) return;
+    if (!d.price || left < 1) return;
     const cid = `dev-${d.id}`;
     dispatch(addToCart({ id: cid, kind: "device", name: d.name, price: d.price, monthly: d.monthly }));
-    dispatch(setQty({ id: cid, qty: (inCart?.qty ?? 0) + qty }));
+    dispatch(setQty({ id: cid, qty: (inCart?.qty ?? 0) + qtyShown }));
     if (openCart) dispatch(setCartOpen(true));
-    toast.success(`${qty} × ${d.name} added to cart`);
+    toast.success(`${qtyShown} × ${d.name} added to cart`);
   };
 
   return (
@@ -91,25 +97,30 @@ export default function ProductDetail({ id, device }: { id: string; device?: Dev
               <span className="text-3xl font-bold text-brand-text">{d.price ? formatBDT(d.price) : "Call for Price"}</span>
               {d.monthly ? <span className="text-sm text-body">+ {formatBDT(d.monthly)}/month service</span> : null}
               <span className="w-full text-xs text-slate-500">{d.priceNote}</span>
+              {stockLabel(d) && (
+                <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", state === "out" ? "bg-red-500/10 text-red-600" : state === "low" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-green-500/10 text-green-600")}>
+                  <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", state === "out" ? "bg-red-500" : state === "low" ? "bg-amber-500" : "bg-green-500")} />{stockLabel(d)}
+                </span>
+              )}
             </div>
 
             {d.price ? (
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <div className="inline-flex h-11 items-center rounded border border-line-strong">
                   <button onClick={() => setQ((n) => Math.max(1, n - 1))} aria-label="Decrease quantity" className="grid h-full w-10 place-items-center hover:bg-softer"><Minus className="h-4 w-4" /></button>
-                  <span className="w-10 text-center text-sm font-bold tabular-nums text-ink" aria-live="polite">{qty}</span>
-                  <button onClick={() => setQ((n) => Math.min(50, n + 1))} aria-label="Increase quantity" className="grid h-full w-10 place-items-center hover:bg-softer"><Plus className="h-4 w-4" /></button>
+                  <span className="w-10 text-center text-sm font-bold tabular-nums text-ink" aria-live="polite">{qtyShown}</span>
+                  <button onClick={() => setQ((n) => Math.min(Math.max(1, left), n + 1))} disabled={qtyShown >= left} aria-label="Increase quantity" className="grid h-full w-10 place-items-center hover:bg-softer disabled:opacity-40"><Plus className="h-4 w-4" /></button>
                 </div>
-                <button onClick={() => add(false)} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-brand-600 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700 sm:flex-none">
-                  <ShoppingCart className="h-4 w-4" />Add to cart
+                <button onClick={() => add(false)} disabled={left < 1} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-brand-600 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700 sm:flex-none">
+                  <ShoppingCart className="h-4 w-4" />{left < 1 ? (state === "out" ? "Out of stock" : "All in your cart") : "Add to cart"}
                 </button>
-                <button onClick={() => add(true)} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-navy-900 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-navy-800 sm:flex-none">
+                <button onClick={() => add(true)} disabled={left < 1} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-navy-900 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-navy-800 sm:flex-none">
                   <Zap className="h-4 w-4" />Buy now
                 </button>
               </div>
             ) : (
-              <a href={`tel:${SITE.phone}`} className="mt-5 inline-flex h-11 items-center gap-2 rounded bg-brand-600 px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700">
-                <Phone className="h-4 w-4" />Call {SITE.phone} for price
+              <a href={`tel:${site.phone}`} className="mt-5 inline-flex h-11 items-center gap-2 rounded bg-brand-600 px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700">
+                <Phone className="h-4 w-4" />Call {site.phone} for price
               </a>
             )}
             {inCart && <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-green-600"><Check className="h-3.5 w-3.5" />{inCart.qty} in your cart</p>}
@@ -144,7 +155,7 @@ export default function ProductDetail({ id, device }: { id: string; device?: Dev
           <div className="py-6 text-sm leading-relaxed text-body">
             {tab === "description" && (
               <div className="max-w-3xl">
-                <p>{d.summary}</p>
+                {d.description && isHtml(d.description) ? <RichText html={d.description} /> : <p>{d.description || d.summary}</p>}
                 <h3 className="mt-5 font-semibold text-ink">Key features</h3>
                 <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">{d.features.map((f) => <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />{f}</li>)}</ul>
               </div>
@@ -161,7 +172,7 @@ export default function ProductDetail({ id, device }: { id: string; device?: Dev
                     <p>This device is supplied with the <b className="text-ink">{plan.name}</b> package: <b className="text-ink">{formatBDT(plan.devicePrice)}</b> device price + <b className="text-ink">{formatBDT(plan.monthlyCharge)}/month</b> for the tracking service, including {plan.features.length} listed features.</p>
                     <Link href="/pricing" className="mt-3 inline-flex font-semibold text-brand-text hover:underline">Compare all packages →</Link>
                   </>
-                ) : <p>Pricing for this item is not published. Call {SITE.phone} and the sales team will quote it with your package.</p>}
+                ) : <p>Pricing for this item is not published. Call {site.phone} and the sales team will quote it with your package.</p>}
               </div>
             )}
           </div>

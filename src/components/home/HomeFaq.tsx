@@ -11,32 +11,24 @@ import {
   X,
 } from "lucide-react";
 import Container from "@/components/common/Container";
-import { SITE } from "@/lib/site";
-import { FAQS as ALL_FAQS } from "@/data/faqs";
+import { useSite } from "@/components/providers/SiteProvider";
+import { useCatalog } from "@/components/providers/CatalogProvider";
+import RichText, { isHtml, stripHtml } from "@/components/common/RichText";
 import { cn } from "@/utils/format";
 
-type FaqCategory =
-  | "All"
-  | "Tracking & GPS"
-  | "Security & Relay"
-  | "Hardware & Sensors"
-  | "Billing & Support";
+type FaqCategory = string;
 
-// Home shows the core questions; the full list lives on /faq
-const FAQS = ALL_FAQS.filter((f) => f.category !== "Pricing & Packages").slice(0, 8);
-
-const CATEGORIES: FaqCategory[] = [
-  "All",
-  "Tracking & GPS",
-  "Security & Relay",
-  "Hardware & Sensors",
-  "Billing & Support",
-];
+// Home shows the core questions; the full list (and the pricing ones) live on their own pages
+const HOME_FAQS = 8;
 
 export default function HomeFaq() {
+  const site = useSite();
+  const { faqs: ALL_FAQS } = useCatalog();
+  const FAQS = useMemo(() => ALL_FAQS.filter((f) => f.category !== "Pricing & Packages").slice(0, HOME_FAQS), [ALL_FAQS]);
+  const CATEGORIES: FaqCategory[] = useMemo(() => ["All", ...new Set(FAQS.map((f) => f.category))], [FAQS]);
   const [activeCat, setActiveCat] = useState<FaqCategory>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [openId, setOpenId] = useState<string | null>("faq-1");
+  const [openId, setOpenId] = useState<string | null | undefined>(undefined); // undefined: the first question starts open
 
   const filteredFaqs = useMemo(() => {
     return FAQS.filter((f) => {
@@ -44,11 +36,11 @@ export default function HomeFaq() {
       const matchSearch =
         searchQuery.trim() === "" ||
         f.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        f.a.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stripHtml(f.a).toLowerCase().includes(searchQuery.toLowerCase()) ||
         f.tag.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [activeCat, searchQuery]);
+  }, [activeCat, searchQuery, FAQS]);
 
   return (
     <section className="relative overflow-hidden bg-sec-warm py-16 sm:py-24" id="faq">
@@ -126,11 +118,11 @@ export default function HomeFaq() {
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <a
-                  href={`tel:${SITE.phone}`}
+                  href={`tel:${site.phone}`}
                   className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3.5 py-2 text-xs font-bold text-white transition-all hover:bg-brand-500 active:scale-95"
                 >
                   <Phone className="h-3.5 w-3.5" />
-                  <span>Call {SITE.phone}</span>
+                  <span>Call {site.phone}</span>
                 </a>
                 <Link
                   href="/contact"
@@ -198,7 +190,7 @@ export default function HomeFaq() {
             ) : (
               <div className="space-y-3">
                 {filteredFaqs.map((faq, index) => {
-                  const isOpen = openId === faq.id;
+                  const isOpen = (openId === undefined ? FAQS[0]?.id : openId) === faq.id;
                   const itemNumber = (index + 1).toString().padStart(2, "0");
 
                   return (
@@ -265,7 +257,7 @@ export default function HomeFaq() {
                             className="overflow-hidden"
                           >
                             <div className="border-t border-line/60 bg-soft/30 px-5 py-4 pl-12 text-xs sm:text-sm leading-relaxed text-body">
-                              <p>{faq.a}</p>
+                              {isHtml(faq.a) ? <RichText html={faq.a} /> : <p>{faq.a}</p>}
                             </div>
                           </motion.div>
                         )}

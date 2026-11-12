@@ -1,4 +1,5 @@
 "use client";
+import { stockState } from "@/lib/stock";
 import ProductImage from "@/components/common/ProductImage";
 import { Check } from "lucide-react";
 import Modal from "@/components/common/Modal";
@@ -44,7 +45,8 @@ export default function DeviceModal() {
                 <p className="text-xl font-bold text-ink">{d.price ? formatBDT(d.price) : "Request quote"}</p>
                 <p className="text-xs text-slate-500">{d.priceNote}</p>
               </div>
-              {d.price && (
+              {d.price && stockState(d) === "out" && <span className="rounded-full bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-600">Out of stock</span>}
+              {d.price && stockState(d) !== "out" && (
                 <Button onClick={() => { dispatch(addToCart({ id: `dev-${d.id}`, kind: "device", name: d.name, price: d.price!, monthly: d.monthly })); dispatch(openDeviceModal(null)); dispatch(setCartOpen(true)); toast.success(`${d.name} added to cart`); }}>Add to cart</Button>
               )}
               <Button variant="outline" onClick={() => { dispatch(openDeviceModal(null)); dispatch(openDemoModal(`Quote request: ${d.name}`)); }}>Request Quote</Button>

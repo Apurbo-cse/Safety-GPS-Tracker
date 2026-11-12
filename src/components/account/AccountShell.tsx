@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signOut } from "@/store/thunks";
+import { useMyOrdersQuery } from "@/store/apiSlice";
 import { cn } from "@/utils/format";
 
 export const CARD = "rounded-lg bg-softer/80 dark:bg-navy-900/90";
@@ -67,7 +68,7 @@ export default function AccountShell({ title, subtitle, what, children }: { titl
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const name = useDisplayName();
-  const orders = useAppSelector((s) => s.orders.list.length);
+  const orders = useMyOrdersQuery(undefined, { skip: !user }).data?.length ?? 0;
   const ready = useAppSelector((s) => s.auth.ready);
   const isAdmin = user?.role === "admin";
 

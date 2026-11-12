@@ -9,8 +9,7 @@ import { Building2, CreditCard, Heart, Mail, MapPin, Package, Phone, Save, Setti
 import { Field, Select, inputCls } from "@/components/forms/Field";
 import { phoneRegex } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { saveProfile } from "@/store/thunks";
-import { ApiError } from "@/lib/api";
+import { errorMessage, useMyOrdersQuery, useUpdateProfileMutation } from "@/store/apiSlice";
 import { setCartOpen } from "@/store/slices/uiSlice";
 import { formatBDT } from "@/utils/format";
 import AccountShell, { CARD, Pill, useDisplayName } from "./AccountShell";
@@ -23,6 +22,10 @@ const schema = z.object({
   company: z.string().max(80),
   address: z.string().max(160),
   division: z.string(),
+  taxId: z.string().trim().regex(/^[A-Za-z0-9-]{0,30}$/, "Letters, digits and dashes only"),
+  billingAddress: z.string().max(240),
+  billingDivision: z.string(),
+  billingPostcode: z.string().trim().regex(/^\d{0,10}$/, "Digits only"),
 });
 type Values = z.infer<typeof schema>;
 
@@ -30,7 +33,8 @@ export default function ProfileView() {
   const dispatch = useAppDispatch();
   const profile = useAppSelector((s) => s.account.profile);
   const user = useAppSelector((s) => s.auth.user);
-  const orders = useAppSelector((s) => s.orders.list);
+  const orders = useMyOrdersQuery(undefined, { skip: !user }).data ?? [];
+  const [updateProfile] = useUpdateProfileMutation();
   const wish = useAppSelector((s) => s.wishlist.ids.length);
   const cart = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
   const name = useDisplayName();
@@ -42,16 +46,16 @@ export default function ProfileView() {
 
   const onSubmit = async (v: Values) => {
     try {
-      await dispatch(saveProfile({ name: v.name, phone: v.phone, email: v.email, company: v.company, address: v.address, division: v.division }));
+      await updateProfile({ name: v.name, phone: v.phone, email: v.email, company: v.company, address: v.address, division: v.division, taxId: v.taxId, billingAddress: v.billingAddress, billingDivision: v.billingDivision, billingPostcode: v.billingPostcode }).unwrap();
       toast.success("Profile saved");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not save your profile";
-      if (e instanceof ApiError && e.status === 409) setError("email", { message: msg }); else toast.error(msg);
+      const msg = errorMessage(e, "Could not save your profile");
+      if ((e as { status?: number }).status === 409) setError("email", { message: msg }); else toast.error(msg);
     }
   };
 
   const active = orders.filter((o) => o.status !== "cancelled");
-  const spent = active.reduce((n, o) => n + o.deviceTotal, 0);
+  const spent = active.reduce((n, o) => n + o.deviceTotal - o.discount, 0);
   const stats: { icon: LucideIcon; v: string; l: string; href?: string; onClick?: () => void }[] = [
     { icon: Package, v: String(active.length), l: "Active orders", href: "/orders" },
     { icon: CreditCard, v: formatBDT(spent), l: "Devices ordered" },
@@ -87,6 +91,14 @@ export default function ProfileView() {
           <Field label="Company (optional)" icon={Building2}><input {...register("company")} autoComplete="organization" className={inputCls} /></Field>
           <Field label="Address" icon={MapPin}><input {...register("address")} autoComplete="street-address" placeholder="House, road, area" className={inputCls} /></Field>
           <Field label="Division"><Select {...register("division")}>{DIVISIONS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
+        </div>
+
+        <div className="mb-4 mt-8"><Pill>Invoices</Pill><h3 className="mt-2 text-lg font-black tracking-tight text-ink">Billing details</h3><p className="text-xs text-slate-500">Where invoices are sent. Leave the address empty to bill the address above.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="BIN / TIN (optional)" error={errors.taxId?.message}><input {...register("taxId")} className={inputCls} placeholder="Tax or BIN number" aria-invalid={!!errors.taxId} /></Field>
+          <Field label="Postcode (optional)" error={errors.billingPostcode?.message}><input {...register("billingPostcode")} inputMode="numeric" className={inputCls} placeholder="1207" aria-invalid={!!errors.billingPostcode} /></Field>
+          <Field label="Billing address" icon={MapPin}><input {...register("billingAddress")} placeholder="House, road, area" className={inputCls} /></Field>
+          <Field label="Billing division"><Select {...register("billingDivision")}>{DIVISIONS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <button type="submit" disabled={!isDirty || isSubmitting} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"><Save className="h-4 w-4" />Save changes</button>

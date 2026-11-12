@@ -15,8 +15,8 @@ import ThemeToggle from "@/components/layout/ThemeToggle";
 import { passwordSchema } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { resetSettings, toggleAlert, toggleChannel, updateSettings, type AlertKey, type Channel } from "@/store/slices/accountSlice";
-import { deleteAccount, saveSettings } from "@/store/thunks";
-import { api, ApiError } from "@/lib/api";
+import { deleteAccount } from "@/store/thunks";
+import { errorMessage, useChangePasswordMutation, useUpdateSettingsMutation } from "@/store/apiSlice";
 import AccountShell, { CARD, Pill, Toggle } from "./AccountShell";
 
 const ALERTS: { key: AlertKey; icon: LucideIcon; t: string; d: string }[] = [
@@ -73,6 +73,8 @@ export default function SettingsView() {
   const loaded = useAppSelector((st) => st.account.loaded);
   const anyChannel = Object.values(s.channels).some(Boolean);
 
+  const [pushSettings] = useUpdateSettingsMutation();
+  const [changePassword] = useChangePasswordMutation();
   // ---- autosave: any change is sent to the server after a short pause
   const lastSaved = useRef<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -83,23 +85,23 @@ export default function SettingsView() {
     if (json === lastSaved.current) return;
     setSaveState("saving");
     const t = setTimeout(() => {
-      dispatch(saveSettings(s))
+      pushSettings(s).unwrap()
         .then(() => { lastSaved.current = json; setSaveState("saved"); })
-        .catch((e) => { setSaveState("error"); toast.error(e instanceof ApiError ? e.message : "Couldn't save your settings"); });
+        .catch((e) => { setSaveState("error"); toast.error(errorMessage(e, "Couldn't save your settings")); });
     }, 700);
     return () => clearTimeout(t);
-  }, [s, loaded, dispatch]);
+  }, [s, loaded, pushSettings]);
 
   const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<Pw>({ resolver: zodResolver(pwSchema) });
   const changePw = async (v: Pw) => {
-    try { await api.changePassword({ current: v.current, next: v.next }); reset(); toast.success("Password updated"); }
-    catch (e) { setError(e instanceof ApiError && e.status === 401 ? "current" : "next", { message: e instanceof ApiError ? e.message : "Could not update the password" }); }
+    try { await changePassword({ current: v.current, next: v.next }).unwrap(); reset(); toast.success("Password updated"); }
+    catch (e) { setError((e as { status?: number }).status === 401 ? "current" : "next", { message: errorMessage(e, "Could not update the password") }); }
   };
 
   const removeAccount = async () => {
     if (!window.confirm("Delete your account permanently? Your profile, settings and order history will be removed. This can't be undone.")) return;
     try { await dispatch(deleteAccount()); toast.success("Your account was deleted"); router.push("/"); }
-    catch (e) { toast.error(e instanceof ApiError ? e.message : "Could not delete the account"); }
+    catch (e) { toast.error(errorMessage(e, "Could not delete the account")); }
   };
 
   return (

@@ -1,14 +1,15 @@
+"use client";
 import { Mail, Phone } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import Container from "@/components/common/Container";
 
-const items = [
-  { label: "Corporate Sales", value: SITE.phone },
-  { label: "Sales", value: SITE.phone },
-  { label: "Support", value: SITE.phone },
-];
-
 export default function TopBar() {
+  const site = useSite();
+  const items = [
+    { label: "Corporate Sales", value: site.phone },
+    { label: "Sales", value: site.phone },
+    { label: "Support", value: site.phone },
+  ];
   return (
     <div className="hidden bg-navy-950 text-xs text-slate-300 md:block">
       <Container className="flex h-9 items-center justify-between">
@@ -20,8 +21,8 @@ export default function TopBar() {
             </a>
           ))}
         </div>
-        <a href={`mailto:${SITE.email}`} className="flex items-center gap-1.5 hover:text-white">
-          <Mail className="h-3 w-3 text-brand-400" /> {SITE.email}
+        <a href={`mailto:${site.email}`} className="flex items-center gap-1.5 hover:text-white">
+          <Mail className="h-3 w-3 text-brand-400" /> {site.email}
         </a>
       </Container>
     </div>

@@ -1,8 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
-import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
+import { IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min } from "class-validator";
 import { Transform, Type } from "class-transformer";
+
+/** Optional date range (YYYY-MM-DD, Dhaka time) for the orders spreadsheet. */
+export class ExportRange {
+  @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "from must be YYYY-MM-DD" }) from?: string;
+  @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "to must be YYYY-MM-DD" }) to?: string;
+}
 
 export class CustomersQuery {
   @IsOptional() @Transform(({ value }) => (typeof value === "string" ? value.trim() : value)) @IsString() @MaxLength(80) q?: string;
@@ -25,11 +31,11 @@ export class AdminService {
   async stats(can: { finance: boolean; customers: boolean }) {
     const [byStatus, daily, customers, inv, low, profit] = await Promise.all([
       this.db.query<{ status: string; n: number; device: number; monthly: number }[]>(
-        `SELECT status, COUNT(*)::int AS n, COALESCE(SUM(device_total),0)::int AS device, COALESCE(SUM(monthly_total),0)::int AS monthly FROM orders GROUP BY status`),
+        `SELECT status, COUNT(*)::int AS n, COALESCE(SUM(device_total - discount),0)::int AS device, COALESCE(SUM(monthly_total),0)::int AS monthly FROM orders GROUP BY status`),
       this.db.query<{ date: string; orders: number; revenue: number }[]>(
         `SELECT to_char(d::date, 'YYYY-MM-DD') AS date,
                 COUNT(o.id)::int AS orders,
-                COALESCE(SUM(o.device_total) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS revenue
+                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS revenue
            FROM generate_series((now() AT TIME ZONE 'Asia/Dhaka')::date - 13, (now() AT TIME ZONE 'Asia/Dhaka')::date, interval '1 day') d
            LEFT JOIN orders o ON (o.created_at AT TIME ZONE 'Asia/Dhaka')::date = d::date
           GROUP BY d ORDER BY d`),
@@ -39,7 +45,7 @@ export class AdminService {
                 COUNT(*) FILTER (WHERE stock > 0 AND stock <= ${LOW_STOCK})::int AS low, COUNT(*) FILTER (WHERE stock = 0)::int AS out,
                 COALESCE(SUM(stock * cost),0)::int AS value FROM devices WHERE active`),
       this.db.query<{ id: string; name: string; stock: number }[]>(`SELECT id, name, stock FROM devices WHERE stock IS NOT NULL AND stock <= ${LOW_STOCK} ORDER BY stock ASC, name ASC LIMIT 6`),
-      can.finance ? this.db.query<{ profit: number }[]>(`SELECT COALESCE(SUM((oi.unit_price - oi.unit_cost) * oi.qty),0)::int AS profit FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status <> 'cancelled'`) : Promise.resolve(null),
+      can.finance ? this.db.query<{ profit: number }[]>(`SELECT (COALESCE(SUM((oi.unit_price - oi.unit_cost) * oi.qty),0) - COALESCE((SELECT SUM(discount) FROM orders WHERE status <> 'cancelled'),0))::int AS profit FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status <> 'cancelled'`) : Promise.resolve(null),
     ]);
     const get = (s: string) => byStatus.find((r) => r.status === s);
     const open = byStatus.filter((r) => r.status !== "cancelled");
@@ -59,6 +65,40 @@ export class AdminService {
     };
   }
 
+  /** Orders for a spreadsheet (newest first, optional date range in Dhaka time). `withCost` adds profit — finance only. */
+  async exportOrders(range: ExportRange, withCost: boolean) {
+    const args: string[] = []; const where: string[] = [];
+    const dhakaDate = "(o.created_at AT TIME ZONE 'Asia/Dhaka')::date";
+    if (range.from) { args.push(range.from); where.push(`${dhakaDate} >= $${args.length}::date`); }
+    if (range.to) { args.push(range.to); where.push(`${dhakaDate} <= $${args.length}::date`); }
+    const profit = withCost ? ", (COALESCE((SELECT SUM((oi.unit_price - oi.unit_cost) * oi.qty) FROM order_items oi WHERE oi.order_id = o.id), 0) - o.discount) AS profit" : "";
+    const rows = await this.db.query<Record<string, string | number | null>[]>(
+      `SELECT o.id, to_char(o.created_at AT TIME ZONE 'Asia/Dhaka', 'YYYY-MM-DD HH24:MI') AS date, o.status, o.payment,
+              o.contact_name AS name, o.contact_phone AS phone, o.contact_email AS email, o.division,
+              (SELECT string_agg(oi.name || ' x' || oi.qty, '; ' ORDER BY oi.name) FROM order_items oi WHERE oi.order_id = o.id) AS items,
+              o.device_total AS devices, o.discount, o.coupon_code AS coupon, (o.device_total - o.discount) AS net, o.monthly_total AS monthly,
+              o.billing_name AS billing_name, o.billing_company AS company, o.billing_tax_id AS tax_id${profit}
+         FROM orders o ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY o.created_at DESC LIMIT 20000`, args);
+    const cols = ["id", "date", "status", "payment", "name", "phone", "email", "division", "items", "devices", "discount", "coupon", "net", "monthly", "billing_name", "company", "tax_id", ...(withCost ? ["profit"] : [])];
+    return { headers: cols, rows: rows.map((r) => cols.map((c) => r[c])) };
+  }
+
+  async exportCustomers() {
+    const rows = await this.db.query<Record<string, string | number | null>[]>(
+      `SELECT u.name, u.email, u.phone, u.division, u.company, to_char(u.created_at AT TIME ZONE 'Asia/Dhaka', 'YYYY-MM-DD') AS joined,
+              COUNT(o.id)::int AS orders, COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS spent
+         FROM users u LEFT JOIN orders o ON o.user_id = u.id WHERE u.role = 'customer' GROUP BY u.id ORDER BY u.created_at DESC LIMIT 20000`);
+    const cols = ["name", "email", "phone", "division", "company", "joined", "orders", "spent"];
+    return { headers: cols, rows: rows.map((r) => cols.map((c) => r[c])) };
+  }
+
+  async exportProducts(withCost: boolean) {
+    const rows = await this.db.query<Record<string, string | number | boolean | null>[]>(
+      `SELECT id, name, category, subcategory, price, monthly, stock, active${withCost ? ", cost" : ""} FROM devices ORDER BY category, subcategory, sort, name`);
+    const cols = ["id", "name", "category", "subcategory", "price", "monthly", "stock", "active", ...(withCost ? ["cost"] : [])];
+    return { headers: cols, rows: rows.map((r) => cols.map((c) => r[c])) };
+  }
+
   async customers(q: CustomersQuery) {
     const page = q.page ?? 1, limit = q.limit ?? 20;
     const term = q.q ? `%${escapeLike(q.q)}%` : null;
@@ -68,7 +108,7 @@ export class AdminService {
       this.db.query(
         `SELECT u.id, u.name, u.email, u.phone, u.role, u.division, u.created_at AS "createdAt",
                 COUNT(o.id)::int AS orders,
-                COALESCE(SUM(o.device_total) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS spent
+                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS spent
            FROM users u LEFT JOIN orders o ON o.user_id = u.id
            ${where}
           GROUP BY u.id ORDER BY u.created_at DESC

@@ -1,19 +1,21 @@
+"use client";
 import { Banknote, Briefcase, Headset, Mail, MapPin } from "lucide-react";
 import PageHero from "@/components/common/PageHero";
 import Container from "@/components/common/Container";
 import LocationMap from "@/components/common/LocationMap";
 import ContactForm from "@/components/forms/ContactForm";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 
 
-const rows = [
-  { icon: Briefcase, label: "Corporate Sales", value: SITE.phone, href: `tel:${SITE.phone}` },
-  { icon: Headset, label: "Support", value: SITE.phone, href: `tel:${SITE.phone}` },
-  { icon: Banknote, label: "Billing", value: SITE.phone, href: `tel:${SITE.phone}` },
-  { icon: Mail, label: "Email", value: SITE.email, href: `mailto:${SITE.email}` },
-];
 
 export default function ContactClassic() {
+  const site = useSite();
+  const rows = [
+    { icon: Briefcase, label: "Corporate Sales", value: site.phone, href: `tel:${site.phone}` },
+    { icon: Headset, label: "Support", value: site.phone, href: `tel:${site.phone}` },
+    { icon: Banknote, label: "Billing", value: site.phone, href: `tel:${site.phone}` },
+    { icon: Mail, label: "Email", value: site.email, href: `mailto:${site.email}` },
+  ];
   return (
     <>
       <PageHero art="cng" eyebrow="Contact" title="Talk to Safety GPS Tracker" description="Sales questions, support requests or billing queries — reach the right team." />
@@ -30,7 +32,7 @@ export default function ContactClassic() {
             ))}
             <li className="flex items-start gap-4 rounded-md glass border border-line p-4">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-brand-50 text-brand-text"><MapPin className="h-5 w-5" /></span>
-              <span><span className="block text-xs text-slate-500">Office</span><span className="text-sm font-bold text-ink">{SITE.address}</span></span>
+              <span><span className="block text-xs text-slate-500">Office</span><span className="text-sm font-bold text-ink">{site.address}</span></span>
             </li>
           </ul>
         </div>

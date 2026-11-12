@@ -19,13 +19,13 @@ const hasVoice = (p: PricingPlan) => p.features.some((f) => f === "Car Inside Vo
 const hasVideo = (p: PricingPlan) => p.features.includes("Live Video & Voice Monitoring");
 const year = (p: PricingPlan) => p.devicePrice + p.monthlyCharge * 12;
 
-/** Vehicle → packages whose price-list product image is for that kind of vehicle. */
-const VEHICLES: { id: string; label: string; hint: string; icon: LucideIcon; match: string[] }[] = [
-  { id: "car", label: "Car", hint: "Private or office car", icon: Car, match: ["premium-voice", "standard-gps", "gps-1", "voice-gps-2"] },
-  { id: "bike", label: "Motorcycle", hint: "Bike or rider", icon: Bike, match: ["gps-2"] },
-  { id: "truck", label: "Truck", hint: "Commercial vehicle", icon: Truck, match: ["voice-gps"] },
-  { id: "equip", label: "Equipment", hint: "Excavator, machinery", icon: HardHat, match: ["gps-3"] },
-  { id: "other", label: "Not sure", hint: "Show me everything", icon: HelpCircle, match: [] },
+/** Vehicle kinds; which packages suit each one is set per package in the admin panel (Packages → "Suits vehicles"). */
+const VEHICLES: { id: string; label: string; hint: string; icon: LucideIcon }[] = [
+  { id: "car", label: "Car", hint: "Private or office car", icon: Car },
+  { id: "bike", label: "Motorcycle", hint: "Bike or rider", icon: Bike },
+  { id: "truck", label: "Truck", hint: "Commercial vehicle", icon: Truck },
+  { id: "equip", label: "Equipment", hint: "Excavator, machinery", icon: HardHat },
+  { id: "other", label: "Not sure", hint: "Show me everything", icon: HelpCircle },
 ];
 const MONITORING = [
   { id: "voice", label: "Voice monitoring", hint: "Listen to the cabin", test: (p: PricingPlan) => hasVoice(p) },
@@ -59,7 +59,7 @@ export default function PlanFinder() {
     const m = MONITORING.find((x) => x.id === monitor)!;
     const pr = PRIORITY.find((x) => x.id === priority)!;
     const pool = plans.filter(m.test);
-    const ranked = pool.map((p) => ({ p, v: v.match.includes(p.id) })).sort((a, b) => Number(b.v) - Number(a.v) || pr.get(a.p) - pr.get(b.p) || year(a.p) - year(b.p));
+    const ranked = pool.map((p) => ({ p, v: !!p.vehicles?.includes(v.id) })).sort((a, b) => Number(b.v) - Number(a.v) || pr.get(a.p) - pr.get(b.p) || year(a.p) - year(b.p));
     const best = ranked[0];
     if (!best) return null;
     const lowest = Math.min(...pool.map(pr.get));

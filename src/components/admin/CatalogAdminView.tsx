@@ -1,15 +1,20 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { ChevronRight, FolderTree, HelpCircle, Images, Pencil, Plus, Tags, Trash2, Package } from "lucide-react";
 import Modal from "@/components/common/Modal";
 import ImageManager from "./ImageManager";
+import RichEditor, { tokensIn } from "./RichEditor";
+import { useUploadCleanup } from "./useUploadCleanup";
+import { useCan } from "@/lib/useCan";
+import ExportButton from "./ExportButton";
 import { inputCls, textareaCls } from "@/components/forms/Field";
-import { api, ApiError, mediaUrl, type AdminCatalog, type AdminCategory, type AdminDevice, type AdminFaq, type AdminHeroSlide, type AdminPlan } from "@/lib/api";
+import { mediaUrl, type AdminCatalog, type AdminCategory, type AdminDevice, type AdminFaq, type AdminHeroSlide, type AdminPlan } from "@/lib/api";
+import { errorMessage, useAdminCatalogQuery, useAdminProductsQuery, useDeleteCatalogItemMutation, useSaveCatalogItemMutation } from "@/store/apiSlice";
 import { slug } from "@/utils/format";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, Switch, useLoad } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, Switch, view } from "./ui";
 import ProductImage from "@/components/common/ProductImage";
 
 export type Kind = "plans" | "devices" | "faqs" | "categories" | "hero";
@@ -58,16 +63,17 @@ type FormProps<T> = { initial: T | null; categories: string[]; catTree: AdminCat
 function useSave<T extends Item>(kind: Kind, isNew: boolean, onSaved: () => void) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveItem] = useSaveCatalogItemMutation();
   const run = async (id: string, build: () => object) => {
     setError(null);
     try {
       if (!/^[a-z0-9][a-z0-9-]{1,79}$/.test(id)) throw new Error("The id must be 2–80 characters: lower-case letters, numbers and dashes");
       const body = build();
       setSaving(true);
-      if (kind === "plans") await api.admin.putPlan(id, body); else if (kind === "devices") await api.admin.putDevice(id, body); else if (kind === "categories") await api.admin.putCategory(id, body); else if (kind === "hero") await api.admin.putSlide(id, body); else await api.admin.putFaq(id, body);
+      await saveItem({ kind, id, body, isNew }).unwrap();
       toast.success(isNew ? "Added" : "Saved");
       onSaved();
-    } catch (e) { setError(e instanceof ApiError || e instanceof Error ? e.message : "Could not save"); } finally { setSaving(false); }
+    } catch (e) { setError(errorMessage(e, "Could not save")); } finally { setSaving(false); }
   };
   void (null as unknown as T);
   return { saving, error, run };
@@ -88,10 +94,16 @@ function FormFooter({ saving, error, onCancel }: { saving: boolean; error: strin
 function PlanForm({ initial, onSaved, onCancel }: FormProps<AdminPlan>) {
   const isNew = !initial;
   const [v, setV] = useState({ id: initial?.id ?? "", name: initial?.name ?? "", devicePrice: String(initial?.devicePrice ?? ""), monthlyCharge: String(initial?.monthlyCharge ?? ""), highlight: initial?.highlight ?? "", siteTitle: initial?.siteTitle ?? "", image: initial?.image ?? "", features: (initial?.features ?? []).join("\n"), sourceNo: String(initial?.sourceNo ?? 0), sort: String(initial?.sort ?? 0), active: initial?.active ?? true });
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [cost, setCost] = useState(initial?.cost == null ? "" : String(initial.cost));
+  const canCost = useCan("finance.view");
+  const cleanup = useUploadCleanup(tokensIn(initial?.description ?? ""), () => tokensIn(description));
+  const [vehicles, setVehicles] = useState<string[]>(initial?.vehicles ?? []);
+  const toggleVehicle = (id: string) => setVehicles((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
-  const { saving, error, run } = useSave("plans", isNew, onSaved);
+  const { saving, error, run } = useSave("plans", isNew, () => { cleanup.markSaved(); onSaved(); });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void run(v.id, () => ({ name: v.name.trim(), devicePrice: toInt("Device price", v.devicePrice, { required: true }), monthlyCharge: toInt("Monthly charge", v.monthlyCharge, { required: true }), features: lines(v.features), highlight: v.highlight.trim() || undefined, siteTitle: v.siteTitle.trim() || undefined, image: v.image.trim() || undefined, sourceNo: toInt("Source no.", v.sourceNo) ?? 0, sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
+    <form onSubmit={(e) => { e.preventDefault(); void run(v.id, () => ({ name: v.name.trim(), devicePrice: toInt("Device price", v.devicePrice, { required: true }), monthlyCharge: toInt("Monthly charge", v.monthlyCharge, { required: true }), features: lines(v.features), highlight: v.highlight.trim() || undefined, siteTitle: v.siteTitle.trim() || undefined, image: v.image.trim() || undefined, sourceNo: toInt("Source no.", v.sourceNo) ?? 0, vehicles, description, ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}), sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
       {isNew && <F label="Id (URL name)" hint="Lower-case, e.g. gps-4. Can't be changed later."><input className={inputCls} value={v.id} onChange={set("id")} onBlur={() => !v.id && setV((s) => ({ ...s, id: slug(s.name) }))} /></F>}
       <F label="Name" wide={!isNew}><input className={inputCls} value={v.name} onChange={set("name")} required /></F>
       <F label="Device price (৳)"><input className={inputCls} inputMode="numeric" value={v.devicePrice} onChange={set("devicePrice")} required /></F>
@@ -100,6 +112,22 @@ function PlanForm({ initial, onSaved, onCancel }: FormProps<AdminPlan>) {
       <F label="Product title on image (optional)"><input className={inputCls} value={v.siteTitle} onChange={set("siteTitle")} /></F>
       <F label="Image path (optional)" hint="A file in /public, e.g. /img/packages/gps-1.png"><input className={inputCls} value={v.image} onChange={set("image")} /></F>
       <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
+      {canCost && <F label="Cost (৳)" hint="What the device costs us — only people with finance access see this."><input className={inputCls} inputMode="numeric" value={cost} onChange={(e) => setCost(e.target.value)} /></F>}
+      <div className="sm:col-span-2">
+        <span className="mb-1.5 block text-sm font-medium text-body-strong">Description</span>
+        <RichEditor value={initial?.description ?? ""} onChange={setDescription} onUploaded={cleanup.track} height={220} placeholder="What this package is good for…" />
+      </div>
+      <fieldset className="sm:col-span-2">
+        <legend className="mb-1.5 text-sm font-medium text-body-strong">Suits these vehicles</legend>
+        <div className="flex flex-wrap gap-2">
+          {([["car", "Car"], ["bike", "Motorcycle"], ["truck", "Truck"], ["equip", "Equipment"]] as const).map(([id, label]) => (
+            <label key={id} className={cn("flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium", vehicles.includes(id) ? "bg-brand-500/15 text-brand-700 dark:text-brand-300" : "bg-surface text-body dark:bg-navy-950")}>
+              <input type="checkbox" className="h-4 w-4 accent-brand-600" checked={vehicles.includes(id)} onChange={() => toggleVehicle(id)} />{label}
+            </label>
+          ))}
+        </div>
+        <span className="mt-1 block text-xs text-slate-500">The “Find my plan” quiz on the pricing page recommends this package first for these vehicles.</span>
+      </fieldset>
       <F label="Features" hint="One per line — these are what the comparison table lists." wide><textarea className={`${textareaCls} min-h-40`} value={v.features} onChange={set("features")} /></F>
       <label className="flex items-center gap-3 sm:col-span-2"><Switch on={v.active} onChange={() => setV((s) => ({ ...s, active: !s.active }))} label="Visible on the website" /><span className="text-sm font-medium text-ink">Visible on the website</span></label>
       <FormFooter saving={saving} error={error} onCancel={onCancel} />
@@ -112,20 +140,19 @@ function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormProps<Ad
   const isNew = !initial;
   const startImages = initial?.images?.length ? initial.images : initial?.image ? [initial.image] : [];
   const [images, setImages] = useState<string[]>(startImages);
-  // Pictures uploaded while this form was open but not kept on the product (removed, or the form was cancelled) are discarded on the server.
-  const uploaded = useRef(new Set<string>());
-  const live = useRef({ images: startImages, startImages, saved: false });
-  useEffect(() => { live.current.images = images; });
-  useEffect(() => () => {
-    const keep = live.current.saved ? live.current.images : live.current.startImages;
-    for (const t of uploaded.current) if (!keep.includes(t)) void api.admin.discardImage(t).catch(() => { /* best effort */ });
-  }, []);
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [cost, setCost] = useState(initial?.cost == null ? "" : String(initial.cost));
+  const [stock, setStock] = useState(initial?.stock == null ? "" : String(initial.stock));
+  // only staff who may see finance can read or change what a device costs us
+  const canCost = useCan("finance.view");
+  const cleanup = useUploadCleanup([...startImages, ...tokensIn(initial?.description ?? "")], () => [...images, ...tokensIn(description)]);
   const [v, setV] = useState({ id: initial?.id ?? "", name: initial?.name ?? "", category: initial?.category ?? tops[0]?.name ?? "", subcategory: initial?.subcategory ?? "", visual: initial?.visual ?? "tracker", price: initial?.price == null ? "" : String(initial.price), monthly: initial?.monthly == null ? "" : String(initial.monthly), planId: initial?.planId ?? "", siteTitle: initial?.siteTitle ?? "", summary: initial?.summary ?? "", priceNote: initial?.priceNote ?? "", features: (initial?.features ?? []).join("\n"), specs: (initial?.specs ?? []).map((s) => `${s.label}: ${s.value}`).join("\n"), sort: String(initial?.sort ?? 0), active: initial?.active ?? true });
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
-  const { saving, error, run } = useSave("devices", isNew, () => { live.current.saved = true; onSaved(); });
+  const { saving, error, run } = useSave("devices", isNew, () => { cleanup.markSaved(); onSaved(); });
   const build = () => ({
     name: v.name.trim(), category: v.category.trim(), subcategory: v.subcategory.trim(), visual: v.visual, summary: v.summary.trim(),
-    images, siteTitle: v.siteTitle.trim() || undefined,
+    images, siteTitle: v.siteTitle.trim() || undefined, description,
+    stock: toInt("Stock", stock) ?? null, ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}),
     price: toInt("Price", v.price) ?? null, monthly: toInt("Monthly charge", v.monthly) ?? null, planId: v.planId || null, priceNote: v.priceNote.trim(),
     features: lines(v.features),
     specs: lines(v.specs).map((l) => { const i = l.indexOf(":"); if (i < 1) throw new Error(`Specification "${l}" needs the form  Label: value`); return { label: l.slice(0, i).trim(), value: l.slice(i + 1).trim() }; }),
@@ -151,11 +178,17 @@ function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormProps<Ad
       <F label="Monthly charge (৳)"><input className={inputCls} inputMode="numeric" value={v.monthly} onChange={set("monthly")} /></F>
       <F label="Linked package"><select className={inputCls} value={v.planId} onChange={set("planId")}><option value="">None</option>{plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></F>
       <F label="Artwork style" hint="Used when there is no image file."><select className={inputCls} value={v.visual} onChange={set("visual")}>{["tracker", "voice", "video", "relay", "sos"].map((x) => <option key={x}>{x}</option>)}</select></F>
-      <ImageManager value={images} onChange={setImages} onUploaded={(t) => uploaded.current.add(t)} />
+      <ImageManager value={images} onChange={setImages} onUploaded={cleanup.track} />
       <F label="Title on picture (optional)"><input className={inputCls} value={v.siteTitle} onChange={set("siteTitle")} /></F>
       <F label="Summary" wide><textarea className={`${textareaCls} min-h-20`} value={v.summary} onChange={set("summary")} required /></F>
+      <F label="Stock" hint="Units in stock. Leave empty if you don't track stock — then it is always available."><input className={inputCls} inputMode="numeric" value={stock} onChange={(e) => setStock(e.target.value)} /></F>
+      {canCost && <F label="Cost (৳)" hint="What the device costs us — only people with finance access see this. Used for profit."><input className={inputCls} inputMode="numeric" value={cost} onChange={(e) => setCost(e.target.value)} /></F>}
       <F label="Price note"><input className={inputCls} value={v.priceNote} onChange={set("priceNote")} /></F>
       <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
+      <div className="sm:col-span-2">
+        <span className="mb-1.5 block text-sm font-medium text-body-strong">Description</span>
+        <RichEditor value={initial?.description ?? ""} onChange={setDescription} onUploaded={cleanup.track} placeholder="Describe the product — headings, lists, pictures, tables…" />
+      </div>
       <F label="Features" hint="One per line." wide><textarea className={`${textareaCls} min-h-28`} value={v.features} onChange={set("features")} /></F>
       <F label="Specifications" hint="One per line as  Label: value" wide><textarea className={`${textareaCls} min-h-28`} value={v.specs} onChange={set("specs")} /></F>
       <label className="flex items-center gap-3 sm:col-span-2"><Switch on={v.active} onChange={() => setV((s) => ({ ...s, active: !s.active }))} label="Visible on the website" /><span className="text-sm font-medium text-ink">Visible on the website</span></label>
@@ -235,12 +268,16 @@ function HeroForm({ initial, onSaved, onCancel }: { initial: AdminHeroSlide | nu
 function FaqForm({ initial, categories, onSaved, onCancel }: FormProps<AdminFaq>) {
   const isNew = !initial;
   const [v, setV] = useState({ id: initial?.id ?? "", category: initial?.category ?? categories[0] ?? "", q: initial?.q ?? "", a: initial?.a ?? "", tag: initial?.tag ?? "", sort: String(initial?.sort ?? 0), active: initial?.active ?? true });
+  const cleanup = useUploadCleanup(tokensIn(initial?.a ?? ""), () => tokensIn(v.a));
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
-  const { saving, error, run } = useSave("faqs", isNew, onSaved);
+  const { saving, error, run } = useSave("faqs", isNew, () => { cleanup.markSaved(); onSaved(); });
   return (
     <form onSubmit={(e) => { e.preventDefault(); void run(v.id, () => ({ category: v.category.trim(), q: v.q.trim(), a: v.a.trim(), tag: v.tag.trim() || undefined, sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
       <F label="Question" wide><input className={inputCls} value={v.q} onChange={(e) => { set("q")(e); }} onBlur={() => isNew && !v.id && setV((s) => ({ ...s, id: slug(s.q).slice(0, 60) }))} required /></F>
-      <F label="Answer" wide><textarea className={`${textareaCls} min-h-32`} value={v.a} onChange={set("a")} required /></F>
+      <div className="sm:col-span-2">
+        <span className="mb-1.5 block text-sm font-medium text-body-strong">Answer</span>
+        <RichEditor value={initial?.a ?? ""} onChange={(html) => setV((s) => ({ ...s, a: html }))} onUploaded={cleanup.track} height={220} placeholder="Write the answer…" />
+      </div>
       <F label="Category"><input className={inputCls} list="faq-cat-list" value={v.category} onChange={set("category")} required /><datalist id="faq-cat-list">{categories.map((c) => <option key={c} value={c} />)}</datalist></F>
       <F label="Tag (optional)"><input className={inputCls} value={v.tag} onChange={set("tag")} /></F>
       {isNew && <F label="Id (URL name)" hint="Also the link to this question, e.g. /faq#my-question"><input className={inputCls} value={v.id} onChange={set("id")} /></F>}
@@ -309,29 +346,32 @@ export default function CatalogAdminView({ kind: tab }: { kind: Kind }) {
   const [busy, setBusy] = useState<string | null>(null);
   // the product list is paged by the server; the other tabs are short and load whole
   const slim = tab === "devices";
-  const { data, error, reload: reloadCatalog } = useLoad(() => api.admin.catalog({ slim }), [slim]);
+  const catalog = view(useAdminCatalogQuery({ slim }));
+  const { data, error, reload: reloadCatalog } = catalog;
+  const [saveItem] = useSaveCatalogItemMutation();
+  const [deleteItem] = useDeleteCatalogItemMutation();
   const [page, setPage] = useState(1);
   const [term, setTerm] = useState("");
   const [q, setQ] = useState("");
   const [catFilter, setCatFilter] = useState("");
   const [status, setStatus] = useState<"all" | "visible" | "hidden">("all");
   useEffect(() => { const t = setTimeout(() => { setQ(term.trim()); setPage(1); }, 350); return () => clearTimeout(t); }, [term]);
-  const products = useLoad(() => (slim ? api.admin.products({ q: q || undefined, category: catFilter || undefined, status, page, limit: PRODUCTS_PER_PAGE }) : Promise.resolve(null)), [slim, q, catFilter, status, page]);
+  const products = view(useAdminProductsQuery({ q: q || undefined, category: catFilter || undefined, status, page, limit: PRODUCTS_PER_PAGE }, { skip: !slim }));
   const reload = () => { reloadCatalog(); products.reload(); };
 
   const toggleActive = async (kind: Kind, it: Item) => {
+    // the switch flips at once; it flips back if the server refuses
     setBusy(it.id);
     try {
-      const body = { ...payload(it), active: !it.active };
-      if (kind === "plans") await api.admin.putPlan(it.id, body); else if (kind === "devices") await api.admin.putDevice(it.id, body); else if (kind === "categories") await api.admin.putCategory(it.id, body); else if (kind === "hero") await api.admin.putSlide(it.id, body); else await api.admin.putFaq(it.id, body);
-      toast.success(it.active ? "Hidden from the website" : "Visible on the website"); reload();
-    } catch (e) { toast.error(e instanceof ApiError ? e.message : "Could not update"); } finally { setBusy(null); }
+      await saveItem({ kind, id: it.id, body: { ...payload(it), active: !it.active }, isNew: false }).unwrap();
+      toast.success(it.active ? "Hidden from the website" : "Visible on the website");
+    } catch (e) { toast.error(errorMessage(e, "Could not update")); } finally { setBusy(null); }
   };
   const remove = async (kind: Kind, it: Item, label: string) => {
     if (!window.confirm(`Delete “${label}” permanently? Hiding it instead keeps it for later.`)) return;
     setBusy(it.id);
-    try { if (kind === "plans") await api.admin.delPlan(it.id); else if (kind === "devices") await api.admin.delDevice(it.id); else if (kind === "categories") await api.admin.delCategory(it.id); else if (kind === "hero") await api.admin.delSlide(it.id); else await api.admin.delFaq(it.id); toast.success("Deleted"); reload(); }
-    catch (e) { toast.error(e instanceof ApiError ? e.message : "Could not delete"); } finally { setBusy(null); }
+    try { await deleteItem({ kind, id: it.id }).unwrap(); toast.success("Deleted"); }
+    catch (e) { toast.error(errorMessage(e, "Could not delete")); } finally { setBusy(null); }
   };
 
   const cat: AdminCatalog | null = data;
@@ -346,14 +386,17 @@ export default function CatalogAdminView({ kind: tab }: { kind: Kind }) {
   const faqCategories = [...new Set((cat?.faqs ?? []).map((f) => f.category))];
   const current = TABS.find((t) => t.id === tab)!;
   const closeEdit = () => setEditing(null);
-  const saved = () => { setEditing(null); reload(); };
+  const saved = () => setEditing(null); // the lists already show the change (see store/apiSlice.ts)
   const deviceFilters = tab === "devices";
   const loadError = error ?? (deviceFilters ? products.error : null);
 
   return (
     <>
       <PageHeader title={PAGE[tab].title} subtitle={`${PAGE[tab].subtitle} Changes appear on the website within a minute.`}
-        actions={<button onClick={() => setEditing({ kind: tab, item: null })} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Plus className="h-4 w-4" />{current.add}</button>} />
+        actions={<>
+          {tab === "devices" && <ExportButton kind="products" />}
+          <button onClick={() => setEditing({ kind: tab, item: null })} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Plus className="h-4 w-4" />{current.add}</button>
+        </>} />
 
       {deviceFilters && (
         <div className="mb-4 flex flex-wrap items-center gap-3">

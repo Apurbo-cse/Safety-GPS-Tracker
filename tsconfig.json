@@ -40,7 +40,9 @@
     ".next-turbo/types/**/*.ts",
     ".next-turbo/dev/types/**/*.ts",
     ".next-down/types/**/*.ts",
-    ".next-down/dev/types/**/*.ts"
+    ".next-down/dev/types/**/*.ts",
+    ".next-verify/types/**/*.ts",
+    ".next-verify/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,3 +1,4 @@
+import { DEFAULT_PLAN_VEHICLES } from "../common/vehicles";
 import "reflect-metadata";
 import "dotenv/config";
 import { normalizePhone } from "../common/phone";
@@ -30,7 +31,7 @@ async function main() {
   } else {
     await plans.save(catalog.plans.map((p) => plans.create({
       id: p.id, name: p.name, devicePrice: p.devicePrice, monthlyCharge: p.monthlyCharge, features: p.features,
-      highlight: ("highlight" in p ? p.highlight : null) ?? null, image: p.image ?? null, siteTitle: p.siteTitle ?? null, sourceNo: p.sourceNo, sort: p.sort, active: true,
+      highlight: ("highlight" in p ? p.highlight : null) ?? null, image: p.image ?? null, siteTitle: p.siteTitle ?? null, sourceNo: p.sourceNo, sort: p.sort, active: true, vehicles: DEFAULT_PLAN_VEHICLES[p.id] ?? [],
     })));
     // categories first: products must point at categories that exist
     const slugOf = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

@@ -1,12 +1,23 @@
+/** Company details as the website ships them. The live values come from the admin panel (Site details) via getSite() / useSite(); this is the fallback. */
 export const SITE = {
   name: "Safety GPS Tracker",
   tagline: "Real-time GPS vehicle tracking solution",
   phone: "01713546487",
   email: "info@imprssivebd.com",
   address: "Meem Tower, 4th Floor, 104 Shukrabad Main Road, Dhaka, Bangladesh",
-  url: "https://safetygpstracker.example",
+  hours: "Sat–Thu, 9:00 AM – 8:00 PM · 24×7 helpline",
+  facebook: "",
+  youtube: "",
+  linkedin: "",
+  instagram: "",
+  url: "https://safetygpstracker.com.bd",
   referenceUrl: "https://safetygpstracker.com.bd/",
+  /** Extra text pages (e.g. Refund policy) the admin has published, for the footer. */
+  pages: [] as { id: string; title: string }[],
 };
+export type SiteInfo = typeof SITE;
+
+export const mapsUrl = (address: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -15,6 +26,7 @@ export const NAV_LINKS = [
   { href: "/products", label: "Products" },
   { href: "/solutions", label: "Solutions" },
   { href: "/about", label: "About Us" },
+  { href: "/news", label: "News" },
   { href: "/contact", label: "Contact" },
 ];
 

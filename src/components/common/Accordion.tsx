@@ -1,4 +1,5 @@
 "use client";
+import RichText, { isHtml } from "@/components/common/RichText";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
@@ -50,7 +51,7 @@ export default function Accordion({ items }: { items: FaqItem[] }) {
                   className="overflow-hidden"
                 >
                   <p className="px-5 pb-4 text-xs leading-relaxed text-body sm:text-sm">
-                    {it.a}
+                    {isHtml(it.a) ? <RichText html={it.a} /> : it.a}
                   </p>
                 </motion.div>
               )}

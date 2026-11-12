@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { defaultSettings, type UserSettings } from "./settings";
 
 export type Role = "customer" | "admin";
@@ -27,6 +27,7 @@ export class User {
   role: Role;
 
   /** For staff (role "admin"): which StaffRole they have. null = owner (the original admin accounts). */
+  @Index("IDX_users_staff_role")
   @Column({ name: "staff_role_id", type: "varchar", length: 40, nullable: true })
   staffRoleId: string | null;
 

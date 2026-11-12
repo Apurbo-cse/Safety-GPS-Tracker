@@ -12,7 +12,7 @@ import { emailSchema, mobileSchema, passwordSchema } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signUp } from "@/store/thunks";
 import { safeNext } from "@/lib/redirect";
-import { ApiError } from "@/lib/api";
+import { errorMessage } from "@/store/apiSlice";
 
 const VEHICLES = ["Private Car", "Motorcycle", "Truck / Logistics", "Bus / Public Transport", "Construction Equipment", "CNG Auto-Rickshaw", "Ship / Cargo", "Business Fleet"];
 const schema = z.object({
@@ -39,8 +39,8 @@ export default function RegisterForm() {
       announceNavigation();
       router.push(next);
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not create the account. Please try again.";
-      setError(e instanceof ApiError && e.status === 409 ? "email" : "root", { message: msg });
+      const msg = errorMessage(e, "Could not create the account. Please try again.");
+      setError((e as { status?: number }).status === 409 ? "email" : "root", { message: msg });
     }
   };
 

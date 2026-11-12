@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Put, Query } from "@nestjs/common";
 import { AdminProductsQuery, CategoryDto, DeviceDto, FaqDto, HeroSlideDto, PlanDto } from "../catalog/catalog.dto";
 import { CatalogService } from "../catalog/catalog.service";
 import { AnyPermission, CurrentUser, Permissions, Roles } from "../common/decorators";
@@ -7,9 +7,16 @@ import { AdminOrdersQuery, UpdateStatusDto } from "../orders/orders.dto";
 import { OrdersService } from "../orders/orders.service";
 import { AdminPostsQuery, PostDto } from "../posts/posts.dto";
 import { PostsService } from "../posts/posts.service";
+import { PageDto, SiteDto } from "../content/content.dto";
+import { ContentService } from "../content/content.service";
+import { CouponDto } from "../orders/orders.dto";
+import { CouponsService } from "../orders/coupons.service";
+import { MessagesQuery, UpdateMessageDto } from "../contact/contact.dto";
+import { ContactService } from "../contact/contact.service";
 import { RolesService } from "../staff/roles.service";
 import type { User } from "../users/user.entity";
-import { AdminService, CustomersQuery } from "./admin.service";
+import { toCsv } from "../common/csv";
+import { AdminService, CustomersQuery, ExportRange } from "./admin.service";
 
 /** Staff cost prices are only for people with "finance.view". */
 const hideCost = <T extends { cost?: number | null }>(rows: T[]) => rows.map(({ cost: _c, ...rest }) => { void _c; return rest; });
@@ -20,7 +27,7 @@ const hideCost = <T extends { cost?: number | null }>(rows: T[]) => rows.map(({ 
  */
 @Roles("admin") @Controller("admin")
 export class AdminController {
-  constructor(private orders: OrdersService, private catalog: CatalogService, private admin: AdminService, private posts: PostsService, private roles: RolesService) {}
+  constructor(private orders: OrdersService, private catalog: CatalogService, private admin: AdminService, private posts: PostsService, private roles: RolesService, private content: ContentService, private coupons: CouponsService, private contact: ContactService) {}
 
   private async finance(user: User) { return (await this.roles.permissionsFor(user)).includes("finance.view"); }
 
@@ -32,6 +39,17 @@ export class AdminController {
   }
 
   @Permissions("customers.view") @Get("customers") customers(@Query() q: CustomersQuery) { return this.admin.customers(q); }
+
+  /* ------------------------------------------------------------- exports */
+  /** Spreadsheets (CSV). Cost and profit columns appear only for staff with finance access. */
+  @Permissions("orders.view") @Get("export/orders.csv") @Header("Content-Type", "text/csv; charset=utf-8") @Header("Content-Disposition", 'attachment; filename="orders.csv"')
+  async exportOrders(@CurrentUser() me: User, @Query() q: ExportRange) { const r = await this.admin.exportOrders(q, await this.finance(me)); return toCsv(r.headers, r.rows); }
+
+  @Permissions("customers.view") @Get("export/customers.csv") @Header("Content-Type", "text/csv; charset=utf-8") @Header("Content-Disposition", 'attachment; filename="customers.csv"')
+  async exportCustomers() { const r = await this.admin.exportCustomers(); return toCsv(r.headers, r.rows); }
+
+  @Permissions("products.manage") @Get("export/products.csv") @Header("Content-Type", "text/csv; charset=utf-8") @Header("Content-Disposition", 'attachment; filename="products.csv"')
+  async exportProducts(@CurrentUser() me: User) { const r = await this.admin.exportProducts(await this.finance(me)); return toCsv(r.headers, r.rows); }
 
   /* ------------------------------------------------------------- orders */
   @Permissions("orders.view") @Get("orders")
@@ -73,6 +91,23 @@ export class AdminController {
   @Permissions("content.manage") @HttpCode(204) @Delete("catalog/hero/:id") delSlide(@Param("id", SlugPipe) id: string) { return this.catalog.remove("slides", id); }
 
   /* --------------------------------------------------------------- news */
+  @Permissions("messages.manage") @Get("messages") listMessages(@Query() q: MessagesQuery) { return this.contact.list(q); }
+  @Permissions("messages.manage") @Get("messages/unread") unreadMessages() { return this.contact.unread(); }
+  @Permissions("messages.manage") @Patch("messages/:id") setMessage(@Param("id") id: string, @Body() dto: UpdateMessageDto) { return this.contact.setStatus(id, dto.status); }
+  @Permissions("messages.manage") @HttpCode(204) @Delete("messages/:id") delMessage(@Param("id") id: string) { return this.contact.remove(id); }
+
+  @Permissions("products.manage") @Get("coupons") listCoupons() { return this.coupons.list(); }
+  @Permissions("products.manage") @Put("coupons/:code") putCoupon(@Param("code") code: string, @Body() dto: CouponDto) { return this.coupons.upsert(code, dto); }
+  @Permissions("products.manage") @HttpCode(204) @Delete("coupons/:code") delCoupon(@Param("code") code: string) { return this.coupons.remove(code); }
+
+  @Permissions("content.manage") @Get("site") getSite() { return this.content.details(); }
+  @Permissions("content.manage") @Put("site") putSite(@Body() dto: SiteDto) { return this.content.saveDetails(dto); }
+
+  @Permissions("content.manage") @Get("pages") listPages() { return this.content.adminPages(); }
+  @Permissions("content.manage") @Get("pages/:id") getPage(@Param("id", SlugPipe) id: string) { return this.content.adminPage(id); }
+  @Permissions("content.manage") @Put("pages/:id") putPage(@Param("id", SlugPipe) id: string, @Body() dto: PageDto) { return this.content.upsertPage(id, dto); }
+  @Permissions("content.manage") @HttpCode(204) @Delete("pages/:id") delPage(@Param("id", SlugPipe) id: string) { return this.content.removePage(id); }
+
   @Permissions("content.manage") @Get("posts") listPosts(@Query() q: AdminPostsQuery) { return this.posts.adminList(q); }
   @Permissions("content.manage") @Get("posts/:id") getPost(@Param("id", SlugPipe) id: string) { return this.posts.adminGet(id); }
   @Permissions("content.manage") @Put("posts/:id") putPost(@Param("id", SlugPipe) id: string, @Body() dto: PostDto) { return this.posts.upsert(id, dto); }

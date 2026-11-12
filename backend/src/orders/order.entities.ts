@@ -6,6 +6,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const PAYMENT_METHODS = ["bKash", "Nagad", "Rocket", "Card", "Cash on installation"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
+@Index("IDX_orders_created_at", ["createdAt"])
 @Entity("orders")
 export class Order {
   /** Human-friendly reference, e.g. SGT-7K2QXM. */
@@ -32,6 +33,13 @@ export class Order {
 
   @Column({ name: "monthly_total", type: "int" })
   monthlyTotal: number;
+
+  /** Taken off `deviceTotal` by the coupon (0 when none). What the customer pays now is deviceTotal − discount. */
+  @Column({ type: "int", default: 0 })
+  discount: number;
+
+  @Column({ name: "coupon_code", type: "varchar", length: 30, nullable: true })
+  couponCode: string | null;
 
   @Column({ name: "contact_name", type: "varchar", length: 120 })
   contactName: string;

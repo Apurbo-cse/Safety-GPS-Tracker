@@ -1,23 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
   ArrowRight, Banknote, Calendar, Car, CheckCircle2, ChevronRight, CreditCard, Home, Lock, Mail, MapPin, Minus,
-  Package, Phone, Plus, ShieldCheck, ShoppingCart, Smartphone, Trash2, UserRound, Wrench,
+  Building2, Package, Phone, Plus, Receipt, ShieldCheck, ShoppingCart, Smartphone, Trash2, UserRound, Wrench,
 } from "lucide-react";
 import Container from "@/components/common/Container";
 import { Field, Select, inputCls, textareaCls } from "@/components/forms/Field";
 import { emailSchema, mobileSchema } from "@/lib/validation";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { removeFromCart, setQty } from "@/store/slices/cartSlice";
 import type { Order, PaymentMethod } from "@/store/slices/ordersSlice";
-import { saveProfile, submitOrder } from "@/store/thunks";
-import { ApiError } from "@/lib/api";
+import { errorMessage, useCreateOrderMutation, useQuoteOrderMutation, useUpdateProfileMutation } from "@/store/apiSlice";
+import { clearCart } from "@/store/slices/cartSlice";
 import { cn, formatBDT } from "@/utils/format";
 import { CARD, GateSkeleton, LoginGate, Pill } from "./AccountShell";
 
@@ -44,8 +44,38 @@ const schema = z.object({
   payment: z.enum(["bKash", "Nagad", "Rocket", "Card", "Cash on installation"]),
   agree: z.literal(true, { message: "Please accept the terms to continue" }),
   saveProfile: z.boolean(),
+  // billing: the invoice goes to the person ordering unless another party pays
+  sameBilling: z.boolean(),
+  company: z.string().trim().max(120).optional(),
+  taxId: z.string().trim().regex(/^[A-Za-z0-9-]{0,30}$/, "Letters, digits and dashes only").optional(),
+  billingName: z.string().trim().optional(),
+  billingAddress: z.string().trim().optional(),
+  billingDivision: z.enum(DIVISIONS),
+  billingPostcode: z.string().trim().regex(/^\d{0,10}$/, "Digits only").optional(),
+  billingPhone: z.string().trim().optional(),
+  billingEmail: z.string().trim().optional(),
 });
+
 type In = z.input<typeof schema>;
+
+/** The billing party's fields only count when "same as above" is off. Checked here (not in the schema) so every problem shows in one pass. */
+const billingProblems = (v: In): Partial<Record<keyof In, { type: string; message: string }>> => {
+  if (v.sameBilling) return {};
+  const out: Partial<Record<keyof In, { type: string; message: string }>> = {};
+  const need = (k: keyof In, ok: boolean, message: string) => { if (!ok) out[k] = { type: "custom", message }; };
+  need("billingName", (v.billingName ?? "").trim().length >= 2, "Enter the name on the invoice");
+  need("billingAddress", (v.billingAddress ?? "").trim().length >= 6, "Enter the billing address");
+  need("billingPhone", mobileSchema.safeParse((v.billingPhone ?? "").trim()).success, "Enter a valid mobile number");
+  need("billingEmail", emailSchema.safeParse((v.billingEmail ?? "").trim()).success, "Enter a valid email");
+  return out;
+};
+const baseResolver = zodResolver(schema);
+const resolver: Resolver<In, unknown, Out> = async (values, context, options) => {
+  const r = await baseResolver(values, context, options);
+  const extra = billingProblems(values);
+  if (!Object.keys(extra).length) return r;
+  return { values: {}, errors: { ...("errors" in r ? r.errors : {}), ...extra } } as ReturnType<typeof baseResolver> extends Promise<infer R> ? R : never;
+};
 type Out = z.output<typeof schema>;
 
 const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); };
@@ -63,6 +93,7 @@ function Section({ n, icon: Icon, title, children }: { n: number; icon: typeof C
 }
 
 export default function CheckoutView() {
+  const site = useSite();
   const dispatch = useAppDispatch();
   const items = useAppSelector((s) => s.cart.items);
   const profile = useAppSelector((s) => s.account.profile);
@@ -88,30 +119,66 @@ export default function CheckoutView() {
     payment: "bKash",
     agree: false as unknown as true,
     saveProfile: true,
+    sameBilling: !profile.billingAddress,
+    company: profile.company,
+    taxId: profile.taxId,
+    billingName: profile.name || user?.name || "",
+    billingAddress: profile.billingAddress,
+    billingDivision: (DIVISIONS as readonly string[]).includes(profile.billingDivision) ? (profile.billingDivision as In["billingDivision"]) : "Dhaka",
+    billingPostcode: profile.billingPostcode,
+    billingPhone: profile.phone,
+    billingEmail: profile.email,
   });
 
-  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting, isDirty } } = useForm<In, unknown, Out>({ resolver: zodResolver(schema), defaultValues: defaults() });
+  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting, isDirty } } = useForm<In, unknown, Out>({ resolver, defaultValues: defaults() });
   const payment = useWatch({ control, name: "payment" });
+  const sameBilling = useWatch({ control, name: "sameBilling" });
 
   // fill in saved profile once it loads from this browser (unless the visitor already typed)
   useEffect(() => { if (!isDirty) reset(defaults()); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, user]);
 
+  const [createOrder] = useCreateOrderMutation();
+  // discount code: checked with the server; cleared whenever the cart changes so the shown discount is never stale
+  const [quote] = useQuoteOrderMutation();
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedFor, setApplied] = useState<{ code: string; discount: number; key: string } | null>(null);
+  const [couponMsg, setCouponMsg] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const cartKey = items.map((i) => `${i.id}:${i.qty}`).join(",");
+  const applied = appliedFor && appliedFor.key === cartKey ? appliedFor : null; // a changed cart drops the discount until it is applied again
+  const applyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setChecking(true); setCouponMsg(null);
+    try {
+      const q = await quote({ items: items.map((i) => ({ id: i.id, qty: i.qty })), coupon: couponInput.trim() }).unwrap();
+      setApplied({ code: q.couponCode ?? couponInput.trim().toUpperCase(), discount: q.discount, key: cartKey });
+    } catch (e) { setApplied(null); setCouponMsg(errorMessage(e, "Could not check the coupon")); }
+    setChecking(false);
+  };
+  const discount = applied?.discount ?? 0;
+  const [updateProfile] = useUpdateProfileMutation();
   const onSubmit = async (v: Out) => {
     setServerError(null);
     try {
       // Only ids and quantities are sent — the server prices the order from its own catalogue.
-      const order = await dispatch(submitOrder({
+      const order = await createOrder({
         items: items.map((i) => ({ id: i.id, qty: i.qty })),
         payment: v.payment, name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division,
         vehicleReg: v.vehicleReg, vehicleType: v.vehicleType, preferredDate: v.preferredDate, note: v.note?.trim() || undefined,
-      }));
-      if (v.saveProfile) void dispatch(saveProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division })).catch(() => { /* best effort */ });
+        ...(applied ? { coupon: applied.code } : {}),
+        // left out, the server bills the contact at the installation address
+        ...(v.sameBilling && !v.company && !v.taxId ? {} : { billing: v.sameBilling
+          ? { name: v.name, company: v.company || undefined, taxId: v.taxId || undefined, address: v.address, division: v.division, phone: v.phone, email: v.email }
+          : { name: v.billingName!, company: v.company || undefined, taxId: v.taxId || undefined, address: v.billingAddress!, division: v.billingDivision, postcode: v.billingPostcode || undefined, phone: v.billingPhone!, email: v.billingEmail! } }),
+      }).unwrap();
+      dispatch(clearCart());
+      if (v.saveProfile) void updateProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division, company: v.company ?? "", taxId: v.taxId ?? "", ...(v.sameBilling ? {} : { billingAddress: v.billingAddress, billingDivision: v.billingDivision, billingPostcode: v.billingPostcode ?? "" }) }).unwrap().catch(() => { /* best effort */ });
       setPlaced(order);
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast.success(`Order ${order.id} placed`);
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not place the order. Please try again.";
+      const msg = errorMessage(e, "Could not place the order. Please try again.");
       setServerError(msg);
       toast.error(msg);
     }
@@ -153,7 +220,7 @@ export default function CheckoutView() {
               <p className="mt-2 text-sm text-body">Order <b className="text-ink">{placed.id}</b> is received. Our team will call {placed.contact.phone} to confirm and schedule installation for {new Date(placed.contact.preferredDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.</p>
               <div className={`${CARD} mt-6 p-5 text-left`}>
                 <dl className="grid gap-3 text-sm sm:grid-cols-3">
-                  <div><dt className="text-xs text-slate-500">Device total</dt><dd className="text-lg font-black text-ink">{formatBDT(placed.deviceTotal)}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Device total</dt><dd className="text-lg font-black text-ink">{formatBDT(placed.deviceTotal - placed.discount)}</dd></div>
                   <div><dt className="text-xs text-slate-500">Monthly</dt><dd className="text-lg font-black text-ink">{formatBDT(placed.monthlyTotal)}<span className="text-xs font-medium text-body">/mo</span></dd></div>
                   <div><dt className="text-xs text-slate-500">Payment</dt><dd className="text-lg font-black text-ink">{placed.payment}</dd></div>
                 </dl>
@@ -203,7 +270,25 @@ export default function CheckoutView() {
                   <p className="mt-3 flex items-center gap-2 text-xs text-body"><ShieldCheck className="h-4 w-4 text-green-600" />Doorstep installation by our technicians in all 64 districts.</p>
                 </Section>
 
-                <Section n={3} icon={CreditCard} title="Payment">
+                <Section n={3} icon={Receipt} title="Billing">
+                  <label className="mb-4 flex items-start gap-2.5 text-sm"><input type="checkbox" {...register("sameBilling")} className="mt-0.5 h-4 w-4 accent-brand-600" /><span className="text-body">Send the invoice to the contact and address above</span></label>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Company (optional)" icon={Building2} error={errors.company?.message}><input {...register("company")} autoComplete="organization" className={inputCls} placeholder="For a company invoice" /></Field>
+                    <Field label="BIN / TIN (optional)" error={errors.taxId?.message}><input {...register("taxId")} className={inputCls} placeholder="Tax or BIN number" aria-invalid={!!errors.taxId} /></Field>
+                    {!sameBilling && (
+                      <>
+                        <Field label="Name on the invoice" required icon={UserRound} error={errors.billingName?.message}><input {...register("billingName")} className={inputCls} aria-invalid={!!errors.billingName} /></Field>
+                        <Field label="Billing mobile" required icon={Phone} error={errors.billingPhone?.message}><input {...register("billingPhone")} type="tel" className={inputCls} placeholder="01XXXXXXXXX" aria-invalid={!!errors.billingPhone} /></Field>
+                        <div className="sm:col-span-2"><Field label="Billing email" required icon={Mail} error={errors.billingEmail?.message}><input {...register("billingEmail")} type="email" className={inputCls} aria-invalid={!!errors.billingEmail} /></Field></div>
+                        <div className="sm:col-span-2"><Field label="Billing address" required icon={MapPin} error={errors.billingAddress?.message}><input {...register("billingAddress")} className={inputCls} placeholder="House, road, area" aria-invalid={!!errors.billingAddress} /></Field></div>
+                        <Field label="Division" required><Select {...register("billingDivision")}>{DIVISIONS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
+                        <Field label="Postcode (optional)" error={errors.billingPostcode?.message}><input {...register("billingPostcode")} inputMode="numeric" className={inputCls} placeholder="1207" aria-invalid={!!errors.billingPostcode} /></Field>
+                      </>
+                    )}
+                  </div>
+                </Section>
+
+                <Section n={4} icon={CreditCard} title="Payment">
                   <div role="radiogroup" aria-label="Payment method" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {PAYMENTS.map((p) => {
                       const on = payment === p.id;
@@ -254,17 +339,29 @@ export default function CheckoutView() {
                       </li>
                     ))}
                   </ul>
-                  <dl className="mt-5 space-y-2 text-sm">
+                  <div className="mt-5">
+                    {applied ? (
+                      <p className="flex items-center justify-between rounded-lg bg-green-500/10 px-3 py-2 text-sm font-medium text-green-700 dark:text-green-400">Coupon applied<button type="button" onClick={() => { setApplied(null); setCouponInput(""); }} className="text-xs font-semibold underline">Remove</button></p>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void applyCoupon(); } }} placeholder="Discount code" aria-label="Discount code" maxLength={30} className={`${inputCls} h-10 uppercase`} />
+                        <button type="button" onClick={() => void applyCoupon()} disabled={checking || !couponInput.trim()} className="h-10 shrink-0 rounded-lg bg-surface px-4 text-sm font-semibold text-ink hover:text-brand-600 disabled:opacity-50 dark:bg-navy-950/70">{checking ? "…" : "Apply"}</button>
+                      </div>
+                    )}
+                    {couponMsg && <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">{couponMsg}</p>}
+                  </div>
+                  <dl className="mt-4 space-y-2 text-sm">
                     <div className="flex justify-between"><dt className="text-body">Devices (one-time)</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(device)}</dd></div>
+                    {applied && <div className="flex justify-between"><dt className="text-body">Coupon <span className="font-mono text-xs">{applied.code}</span></dt><dd className="font-semibold tabular-nums text-green-600">−{formatBDT(discount)}</dd></div>}
                     <div className="flex justify-between"><dt className="text-body">Installation</dt><dd className="font-semibold text-green-600">Free</dd></div>
                     <div className="flex justify-between"><dt className="text-body">Monthly service</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(monthly)}/mo</dd></div>
-                    <div className="flex items-baseline justify-between pt-3"><dt className="font-semibold text-ink">Due today</dt><dd className="text-2xl font-black tabular-nums text-ink">{formatBDT(payment === "Cash on installation" ? 0 : device)}</dd></div>
+                    <div className="flex items-baseline justify-between pt-3"><dt className="font-semibold text-ink">Due today</dt><dd className="text-2xl font-black tabular-nums text-ink">{formatBDT(payment === "Cash on installation" ? 0 : device - discount)}</dd></div>
                   </dl>
                   {serverError && <p role="alert" className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm font-medium text-red-600">{serverError}</p>}
                   <button type="submit" disabled={isSubmitting} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-bold text-white transition-all hover:bg-brand-600 active:scale-[.98] disabled:opacity-70">
                     {isSubmitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />Placing order…</> : <><Lock className="h-4 w-4" />Place order</>}
                   </button>
-                  <p className="mt-3 text-center text-xs text-slate-500">No payment is taken online. Our team confirms by phone. Questions? Call <a href={`tel:${SITE.phone}`} className="font-semibold text-ink">{SITE.phone}</a></p>
+                  <p className="mt-3 text-center text-xs text-slate-500">No payment is taken online. Our team confirms by phone. Questions? Call <a href={`tel:${site.phone}`} className="font-semibold text-ink">{site.phone}</a></p>
                 </div>
               </aside>
             </form>
