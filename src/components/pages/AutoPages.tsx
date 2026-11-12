@@ -11,12 +11,11 @@ import Container from "@/components/common/Container";
 import PageHero from "@/components/common/PageHero";
 import Accordion from "@/components/common/Accordion";
 import LocationMap from "@/components/common/LocationMap";
-import { FAQS } from "@/data/faqs";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import ContactForm from "@/components/forms/ContactForm";
 import { values } from "@/data/about";
 import { features } from "@/data/features";
 import { solutions } from "@/data/solutions";
-import { plans } from "@/data/pricing";
 import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
@@ -32,6 +31,7 @@ const SERVICE_CARDS = [
 ];
 
 export function ServiceTop() {
+  const { plans } = useCatalog();
   const dispatch = useAppDispatch();
   return (
     <>
@@ -199,6 +199,7 @@ export function ServiceTop() {
 
 /* ================================================================== ABOUT */
 export function AboutAuto() {
+  const { plans } = useCatalog();
   const stats: [string, string, string][] = [
     [String(features.length), "+", "Platform features"],
     [String(solutions.length), "+", "Industries served"],
@@ -367,6 +368,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 export function ContactAuto() {
+  const { faqs: FAQS } = useCatalog();
   const dispatch = useAppDispatch();
   const contactCards = [
     { icon: Phone, title: "24/7 Hotline", subtitle: "Emergency & Support", value: SITE.phone, href: `tel:${SITE.phone}`, action: "Call now" },

@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/common/Modal";
 import { Button } from "@/components/common/Button";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { groupFeatures } from "@/lib/featureGroups";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
@@ -16,6 +16,7 @@ import { formatBDT } from "@/utils/format";
 export default function PlanFeaturesModal() {
   const dispatch = useAppDispatch();
   const id = useAppSelector((s) => s.ui.planModalId);
+  const { plans } = useCatalog();
   const plan = plans.find((p) => p.id === id);
   const close = () => dispatch(openPlanModal(null));
 

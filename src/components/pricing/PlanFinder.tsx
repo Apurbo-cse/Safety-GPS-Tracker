@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import { Button } from "@/components/common/Button";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 import { selectPlan, setCompare } from "@/store/slices/pricingSlice";
@@ -46,6 +46,7 @@ const Option = ({ on, label, hint, icon: Icon, onClick }: { on?: boolean; label:
 );
 
 export default function PlanFinder() {
+  const { plans } = useCatalog();
   const dispatch = useAppDispatch();
   const [step, setStep] = useState(0);
   const [vehicle, setVehicle] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export default function PlanFinder() {
       pr.get(best.p) === lowest ? `Lowest ${pr.short} among your options (${formatBDT(pr.get(best.p))})` : `${pr.short.charAt(0).toUpperCase() + pr.short.slice(1)}: ${formatBDT(pr.get(best.p))}`,
     ];
     return { best: best.p, alts: ranked.slice(1, 3).map((r) => r.p), reasons };
-  }, [vehicle, monitor, priority]);
+  }, [vehicle, monitor, priority, plans]);
 
   const reset = () => { setStep(0); setVehicle(null); setMonitor(null); setPriority(null); };
   const buy = (p: PricingPlan) => {

@@ -5,7 +5,7 @@ import { GitCompare, X } from "lucide-react";
 import Container from "@/components/common/Container";
 import { Button } from "@/components/common/Button";
 import PlanCard from "./PlanCard";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleCompare } from "@/store/slices/pricingSlice";
 import type { PricingPlan } from "@/types";
@@ -24,6 +24,7 @@ const KINDS: { id: Kind; label: string; test: (p: PricingPlan) => boolean }[] = 
 export default function PricingExplorer() {
   const dispatch = useAppDispatch();
   const { sort, maxMonthly, compareIds } = useAppSelector((s) => s.pricing);
+  const { plans } = useCatalog();
   const kind: Kind = "all";
   const q = "";
 
@@ -34,7 +35,7 @@ export default function PricingExplorer() {
     if (sort === "device") list = [...list].sort((a, b) => a.devicePrice - b.devicePrice);
     if (sort === "monthly") list = [...list].sort((a, b) => a.monthlyCharge - b.monthlyCharge);
     return list;
-  }, [kind, q, sort, maxMonthly]);
+  }, [kind, q, sort, maxMonthly, plans]);
 
   return (
     <>

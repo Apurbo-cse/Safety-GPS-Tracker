@@ -1,14 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowRight, Calendar, Car, Check, ChevronDown, MapPin, Package, Phone, RotateCcw, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Calendar, Car, Check, ChevronDown, MapPin, Package, Phone, RefreshCw, RotateCcw, X } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart, setQty } from "@/store/slices/cartSlice";
-import { cancelOrder, type Order, type OrderStatus } from "@/store/slices/ordersSlice";
+import type { Order, OrderStatus } from "@/store/slices/ordersSlice";
+import { cancelOrder, loadOrders } from "@/store/thunks";
+import { ApiError } from "@/lib/api";
 import { cn, formatBDT } from "@/utils/format";
 import AccountShell, { CARD } from "./AccountShell";
 
@@ -106,7 +108,7 @@ function OrderCard({ o }: { o: Order }) {
               <button onClick={reorder} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-500 px-4 text-xs font-semibold text-white hover:bg-brand-600"><RotateCcw className="h-3.5 w-3.5" />Order again</button>
               <a href={`tel:${SITE.phone}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><Phone className="h-3.5 w-3.5" />Call support</a>
               {o.status === "received" && (
-                <button onClick={() => { dispatch(cancelOrder(o.id)); toast.success(`Order ${o.id} cancelled`); }} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-semibold text-red-600 hover:bg-red-500/10"><X className="h-3.5 w-3.5" />Cancel order</button>
+                <button onClick={() => { dispatch(cancelOrder(o.id)).then(() => toast.success(`Order ${o.id} cancelled`)).catch((e) => toast.error(e instanceof ApiError ? e.message : "Could not cancel the order")); }} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-semibold text-red-600 hover:bg-red-500/10"><X className="h-3.5 w-3.5" />Cancel order</button>
               )}
             </div>
           </motion.div>
@@ -117,13 +119,18 @@ function OrderCard({ o }: { o: Order }) {
 }
 
 export default function OrdersView() {
+  const dispatch = useAppDispatch();
   const orders = useAppSelector((s) => s.orders.list);
+  const status = useAppSelector((s) => s.orders.status);
+  const user = useAppSelector((s) => s.auth.user);
+  // statuses change when our team confirms or schedules an order, so refresh whenever the page opens
+  useEffect(() => { if (user) void dispatch(loadOrders()); }, [user, dispatch]);
   const [filter, setFilter] = useState<Filter>("all");
   const shown = orders.filter((o) => filter === "all" || (filter === "cancelled" ? o.status === "cancelled" : o.status !== "cancelled"));
   const counts = { all: orders.length, open: orders.filter((o) => o.status !== "cancelled").length, cancelled: orders.filter((o) => o.status === "cancelled").length };
 
   return (
-    <AccountShell title="My orders" subtitle="Track installation progress and reorder in one tap.">
+    <AccountShell title="My orders" subtitle="Track installation progress and reorder in one tap." what="your orders">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Filter orders" className="inline-flex rounded-full bg-softer/80 p-1 dark:bg-navy-900/90">
           {(["all", "open", "cancelled"] as const).map((f) => (
@@ -133,10 +140,22 @@ export default function OrdersView() {
             </button>
           ))}
         </div>
-        <Link href="/products" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">Shop more <ArrowRight className="h-4 w-4" /></Link>
+        <div className="flex items-center gap-4">
+          <button onClick={() => void dispatch(loadOrders())} disabled={status === "loading"} aria-label="Refresh orders" className="inline-flex items-center gap-1.5 text-sm font-semibold text-body hover:text-ink disabled:opacity-50"><RefreshCw className={cn("h-4 w-4", status === "loading" && "animate-spin")} />Refresh</button>
+          <Link href="/products" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">Shop more <ArrowRight className="h-4 w-4" /></Link>
+        </div>
       </div>
 
-      {shown.length === 0 ? (
+      {status === "error" && !orders.length ? (
+        <div className={`${CARD} p-10 text-center`}>
+          <AlertCircle className="mx-auto h-10 w-10 text-amber-500" />
+          <h2 className="mt-3 text-lg font-black text-ink">Couldn&apos;t load your orders</h2>
+          <p className="mt-1 text-sm text-body">Check your connection and try again.</p>
+          <button onClick={() => void dispatch(loadOrders())} className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-5 text-sm font-semibold text-white hover:bg-brand-600"><RefreshCw className="h-4 w-4" />Retry</button>
+        </div>
+      ) : status === "loading" && !orders.length ? (
+        <div className="space-y-4" aria-busy="true">{[0, 1].map((i) => <div key={i} className="skeleton h-40 w-full rounded-lg" />)}</div>
+      ) : shown.length === 0 ? (
         <div className={`${CARD} p-10 text-center`}>
           <Package className="mx-auto h-12 w-12 text-slate-400" />
           <h2 className="mt-3 text-xl font-black text-ink">{orders.length ? "No orders here" : "No orders yet"}</h2>

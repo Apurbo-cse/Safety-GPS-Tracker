@@ -23,7 +23,7 @@ export default function AuthShell({ title, subtitle, children, footer }: { title
           <p className="mt-1 text-sm text-body">{subtitle}</p>
           <div className="mt-6">{children}</div>
           <p className="mt-6 text-center text-sm text-body">{footer}</p>
-          <p className="mt-6 rounded-md bg-softer p-3 text-center text-xs text-slate-500">Demo authentication — no credentials are verified or stored. <Link href="/" className="font-semibold text-brand-text">Back to website</Link></p>
+          <p className="mt-6 text-center text-xs text-slate-500"><Link href="/" className="font-semibold text-brand-text">← Back to website</Link></p>
         </div>
       </div>
       <aside className="relative hidden overflow-hidden bg-navy-950 text-white lg:block">

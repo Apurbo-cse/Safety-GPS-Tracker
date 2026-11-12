@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Home, LogIn, LogOut, Package, Settings, UserRound, type LucideIcon } from "lucide-react";
+import { ChevronRight, Home, LayoutDashboard, LockKeyhole, LogIn, LogOut, Package, Settings, UserPlus, UserRound, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/store/slices/authSlice";
+import { signOut } from "@/store/thunks";
 import { cn } from "@/utils/format";
 
 export const CARD = "rounded-lg bg-softer/80 dark:bg-navy-900/90";
@@ -41,13 +41,35 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: () => v
   );
 }
 
+/** Shown instead of account pages until the visitor is signed in. */
+export function LoginGate({ what, next }: { what: string; next: string }) {
+  const q = `?next=${encodeURIComponent(next)}`;
+  return (
+    <div className={`${CARD} mx-auto max-w-lg p-8 text-center sm:p-10`}>
+      <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400"><LockKeyhole className="h-7 w-7" /></span>
+      <h2 className="mt-4 text-xl font-black tracking-tight text-ink">Log in to see {what}</h2>
+      <p className="mt-1 text-sm text-body">Your account keeps your orders, details and alert settings safe and available on every device.</p>
+      <div className="mt-5 flex flex-wrap justify-center gap-3">
+        <Link href={`/login${q}`} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white hover:bg-brand-600"><LogIn className="h-4 w-4" />Log in</Link>
+        <Link href={`/register${q}`} className="inline-flex h-11 items-center gap-2 rounded-lg bg-surface px-5 text-sm font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><UserPlus className="h-4 w-4" />Create account</Link>
+      </div>
+    </div>
+  );
+}
+
+export function GateSkeleton() {
+  return <div className="space-y-4" aria-busy="true" aria-label="Loading your account">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-28 w-full rounded-lg" />)}</div>;
+}
+
 /** Dark page header + sidebar navigation shared by Profile, Orders and Settings. */
-export default function AccountShell({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+export default function AccountShell({ title, subtitle, what, children }: { title: string; subtitle: string; what: string; children: React.ReactNode }) {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const name = useDisplayName();
   const orders = useAppSelector((s) => s.orders.list.length);
+  const ready = useAppSelector((s) => s.auth.ready);
+  const isAdmin = user?.role === "admin";
 
   return (
     <>
@@ -66,7 +88,7 @@ export default function AccountShell({ title, subtitle, children }: { title: str
               <p className="mt-0.5 text-sm text-slate-300">{subtitle}</p>
             </div>
             {user ? (
-              <button onClick={() => { dispatch(logout()); toast.success("Logged out"); }} className="inline-flex h-10 items-center gap-2 rounded-lg bg-white/10 px-4 text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20"><LogOut className="h-4 w-4" />Log out</button>
+              <button onClick={() => { void dispatch(signOut()); toast.success("Logged out"); }} className="inline-flex h-10 items-center gap-2 rounded-lg bg-white/10 px-4 text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20"><LogOut className="h-4 w-4" />Log out</button>
             ) : (
               <Link href="/login" className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold transition-colors hover:bg-brand-600"><LogIn className="h-4 w-4" />Log in</Link>
             )}
@@ -89,15 +111,18 @@ export default function AccountShell({ title, subtitle, children }: { title: str
                   </Link>
                 );
               })}
+              {isAdmin && (
+                <Link href="/admin" className="flex shrink-0 items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold text-body transition-colors hover:bg-softer/80 hover:text-ink dark:hover:bg-navy-900/90"><LayoutDashboard className="h-4 w-4" />Admin panel</Link>
+              )}
             </nav>
             {!user && (
               <div className={`${CARD} mt-4 hidden p-4 text-sm lg:block`}>
-                <p className="font-semibold text-ink">Browsing as guest</p>
-                <p className="mt-1 text-xs text-body">Your details and orders are saved in this browser. Log in to keep them with your account.</p>
+                <p className="font-semibold text-ink">You&apos;re not logged in</p>
+                <p className="mt-1 text-xs text-body">Log in to see your orders, profile and settings.</p>
               </div>
             )}
           </aside>
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0">{!ready ? <GateSkeleton /> : user ? children : <LoginGate what={what} next={pathname} />}</div>
         </Container>
       </section>
     </>

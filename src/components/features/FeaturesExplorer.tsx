@@ -6,7 +6,7 @@ import { ArrowRight, Check, Search, SearchX, Star, X } from "lucide-react";
 import Container from "@/components/common/Container";
 import { Button } from "@/components/common/Button";
 import { features, featureCategories } from "@/data/features";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { DynIcon } from "@/lib/icons";
 import { announceNavigation } from "@/lib/navigate";
 import { isPackageFeature, packagesFor, packagesWithAll } from "@/lib/featurePackages";
@@ -17,8 +17,9 @@ import { cn, formatBDT } from "@/utils/format";
 import type { FeatureCategory } from "@/types";
 
 function Availability({ id }: { id: string }) {
+  const { plans } = useCatalog();
   if (!isPackageFeature(id)) return <span className="rounded-full bg-softer px-2 py-0.5 text-xs font-semibold text-body">Platform feature</span>;
-  const n = packagesFor(id).length;
+  const n = packagesFor(id, plans).length;
   return (
     <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", n === plans.length ? "bg-green-500/15 text-green-600" : "bg-amber-500/15 text-amber-600")}>
       {n === plans.length ? `All ${n} packages` : `${n} of ${plans.length} packages`}
@@ -29,6 +30,7 @@ function Availability({ id }: { id: string }) {
 export default function FeaturesExplorer() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { plans } = useCatalog();
   const [cat, setCat] = useState<"All" | FeatureCategory>("All");
   const [q, setQ] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
@@ -47,7 +49,7 @@ export default function FeaturesExplorer() {
   const list = useMemo(() => features.filter((f) => (cat === "All" || f.category === cat) && `${f.title} ${f.description}`.toLowerCase().includes(q.trim().toLowerCase())), [cat, q]);
   const groups = featureCategories.filter((c) => list.some((f) => f.category === c));
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
-  const match = useMemo(() => packagesWithAll(picked), [picked]);
+  const match = useMemo(() => packagesWithAll(picked, plans), [picked, plans]);
   const cheapest = match.list[0];
 
   const seePackages = () => {

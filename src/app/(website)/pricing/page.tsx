@@ -10,7 +10,8 @@ import CostTimeline from "@/components/pricing/CostTimeline";
 import PackageComparison from "@/components/pricing/PackageComparison";
 import { LinkButton } from "@/components/common/Button";
 import CorporateCta from "@/components/pricing/CorporateCta";
-import { plans, pricingFaqs } from "@/data/pricing";
+import { pricingFaqs } from "@/data/pricing";
+import { getCatalog } from "@/lib/catalog.server";
 import { formatBDT } from "@/utils/format";
 import { pageMeta } from "@/lib/metadata";
 
@@ -22,16 +23,17 @@ const how = [
   { icon: Receipt, t: "Pay bills online", d: "Settle invoices any time from the Pay Bill page with bKash, Nagad or Rocket." },
 ];
 
-const minDevice = Math.min(...plans.map((p) => p.devicePrice));
-const minMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
-const stats: [string, string, string][] = [
-  [String(plans.length), "", "Tracking packages"],
-  [formatBDT(minDevice), "+", "One-time device price"],
-  [formatBDT(minMonthly), "/mo", "Monthly service from"],
-  ["0", "৳", "Hidden charges"],
-];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const { plans } = await getCatalog();
+  const minDevice = plans.length ? Math.min(...plans.map((p) => p.devicePrice)) : 0;
+  const minMonthly = plans.length ? Math.min(...plans.map((p) => p.monthlyCharge)) : 0;
+  const stats: [string, string, string][] = [
+    [String(plans.length), "", "Tracking packages"],
+    [formatBDT(minDevice), "+", "One-time device price"],
+    [formatBDT(minMonthly), "/mo", "Monthly service from"],
+    ["0", "৳", "Hidden charges"],
+  ];
   return (
     <>
       <PageHero

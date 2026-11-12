@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -15,10 +16,9 @@ import Container from "@/components/common/Container";
 import { DynIcon } from "@/lib/icons";
 import { SITE } from "@/lib/site";
 import { features, featureCategories } from "@/data/features";
-import { catalogue, categoryUrl, deviceUrl } from "@/data/catalogue";
-import { devices } from "@/data/devices";
+import { categoryUrl, deviceUrl } from "@/data/catalogue";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { solutions } from "@/data/solutions";
-import { plans } from "@/data/pricing";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDemoModal, setCartOpen, setPalette } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
@@ -50,8 +50,6 @@ const COMPANY: { href: string; icon: LucideIcon; t: string; d: string }[] = [
   { href: "/faq", icon: HelpCircle, t: "Help centre", d: "Answers about tracking, devices and billing." },
 ];
 
-const featuredDevice = devices.find((d) => d.price && d.image) ?? devices[0];
-const minMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
 
 /* ------------------------------------------------------------------ bits */
 const Eyebrow = ({ children }: { children: React.ReactNode }) => (
@@ -80,6 +78,9 @@ const tileIcon = "grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-5
 export default function Navbar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
+  const { devices, plans, catalogue } = useCatalog();
+  const featuredDevice = devices.find((d) => d.price && d.image) ?? devices[0];
+  const minMonthly = plans.length ? Math.min(...plans.map((p) => p.monthlyCharge)) : 0;
   const cartCount = useAppSelector((s) => s.cart.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useAppSelector((s) => s.wishlist.ids.length);
   const user = useAppSelector((s) => s.auth.user);
@@ -150,6 +151,7 @@ export default function Navbar() {
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-brand-400" />BTRC approved</span>
             <Link href="/pay-bill" className="hover:text-white">Pay bill</Link>
             <Link href="/faq" className="hover:text-white">Help centre</Link>
+            {user?.role === "admin" && <Link href="/admin" className="font-semibold text-brand-300 hover:text-white">Admin panel</Link>}
             <Link href="/orders" className="hover:text-white">My orders</Link>
             <Link href={user ? "/profile" : "/login"} className="inline-flex items-center gap-1 font-semibold text-white hover:text-brand-300"><UserRound className="h-3 w-3" />{user ? user.name.split(" ")[0] : "Log in"}</Link>
           </div>
@@ -285,15 +287,17 @@ export default function Navbar() {
                         </div>
                         <Link href="/products" onClick={close} className="mt-5 inline-flex items-center gap-1.5 px-3 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400">All {devices.length} products <ArrowRight className="h-3.5 w-3.5" /></Link>
                       </div>
+                      {featuredDevice ? (
                       <div className="flex flex-col rounded-lg bg-softer/80 p-4 dark:bg-navy-900/90">
                         <span className="self-start rounded-full bg-brand-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400">Featured</span>
                         {featuredDevice.image && (
-                          <div className="relative mt-2 aspect-[858/600] w-full"><Image src={featuredDevice.image} alt={featuredDevice.name} fill sizes="280px" className="object-contain" /></div>
+                          <div className="relative mt-2 aspect-[858/600] w-full"><ProductImage src={featuredDevice.image} alt={featuredDevice.name} fill sizes="280px" className="object-contain" /></div>
                         )}
                         <p className="mt-2 truncate text-sm font-semibold text-ink">{featuredDevice.name}</p>
                         <p className="text-xs text-body">{featuredDevice.price ? formatBDT(featuredDevice.price) : "Price on request"}{featuredDevice.monthly ? ` + ${formatBDT(featuredDevice.monthly)}/mo` : ""}</p>
                         <Link href={deviceUrl(featuredDevice)} onClick={close} className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand-500 text-xs font-semibold text-white transition-colors hover:bg-brand-600">View product <ArrowRight className="h-3.5 w-3.5" /></Link>
                       </div>
+                      ) : <div />}
                     </>
                   )}
 

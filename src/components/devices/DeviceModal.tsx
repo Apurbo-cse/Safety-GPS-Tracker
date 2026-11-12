@@ -1,10 +1,10 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { Check } from "lucide-react";
 import Modal from "@/components/common/Modal";
 import { Button } from "@/components/common/Button";
 import DeviceVisual from "./DeviceVisual";
-import { devices } from "@/data/devices";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDemoModal, openDeviceModal, setCartOpen } from "@/store/slices/uiSlice";
 import { addToCart } from "@/store/slices/cartSlice";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 export default function DeviceModal() {
   const dispatch = useAppDispatch();
   const id = useAppSelector((s) => s.ui.deviceModalId);
+  const { devices } = useCatalog();
   const d = devices.find((x) => x.id === id);
   const close = () => dispatch(openDeviceModal(null));
 
@@ -23,7 +24,7 @@ export default function DeviceModal() {
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             {d.image ? (
-              <div className="relative aspect-[858/600] w-full overflow-hidden rounded-md border border-line bg-transparent"><Image quality={90} src={d.image} alt={d.siteTitle ?? d.name} fill sizes="400px" className="object-contain" /></div>
+              <div className="relative aspect-[858/600] w-full overflow-hidden rounded-md border border-line bg-transparent"><ProductImage quality={90} src={d.image} alt={d.siteTitle ?? d.name} fill sizes="400px" className="object-contain" /></div>
             ) : <DeviceVisual kind={d.visual} className="h-56 rounded-md" />}
             <p className="mt-3 text-xs text-slate-500">{d.image ? "Product image from the company price list. Exact hardware model is confirmed by the sales team." : "Illustration. Actual hardware model is confirmed by the sales team."}</p>
           </div>

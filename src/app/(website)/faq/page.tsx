@@ -1,7 +1,7 @@
 import PageHero from "@/components/common/PageHero";
 import FaqExplorer from "@/components/faq/FaqExplorer";
 import ContactCta from "@/components/home/ContactCta";
-import { FAQS } from "@/data/faqs";
+import { getCatalog } from "@/lib/catalog.server";
 import { pageMeta } from "@/lib/metadata";
 
 export const metadata = pageMeta(
@@ -10,18 +10,18 @@ export const metadata = pageMeta(
   "/faq",
 );
 
-/** FAQPage structured data for search engines */
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQS.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
-
-export default function FaqPage() {
+export default async function FaqPage() {
+  const { faqs: FAQS } = await getCatalog();
+  /** FAQPage structured data for search engines */
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />

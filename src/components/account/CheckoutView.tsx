@@ -14,11 +14,12 @@ import { Field, Select, inputCls, textareaCls } from "@/components/forms/Field";
 import { emailSchema, mobileSchema } from "@/lib/validation";
 import { SITE } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { clearCart, removeFromCart, setQty } from "@/store/slices/cartSlice";
-import { placeOrder, type Order, type PaymentMethod } from "@/store/slices/ordersSlice";
-import { updateProfile } from "@/store/slices/accountSlice";
+import { removeFromCart, setQty } from "@/store/slices/cartSlice";
+import type { Order, PaymentMethod } from "@/store/slices/ordersSlice";
+import { saveProfile, submitOrder } from "@/store/thunks";
+import { ApiError } from "@/lib/api";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, Pill } from "./AccountShell";
+import { CARD, GateSkeleton, LoginGate, Pill } from "./AccountShell";
 
 export const DIVISIONS = ["Dhaka", "Chattogram", "Rajshahi", "Khulna", "Barishal", "Sylhet", "Rangpur", "Mymensingh"] as const;
 const VEHICLES = ["Private car", "Motorcycle", "Microbus / van", "Truck / covered van", "Bus", "CNG auto-rickshaw", "Construction equipment", "Other"] as const;
@@ -48,7 +49,6 @@ type In = z.input<typeof schema>;
 type Out = z.output<typeof schema>;
 
 const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); };
-const newId = () => `SGT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
 function Section({ n, icon: Icon, title, children }: { n: number; icon: typeof Car; title: string; children: React.ReactNode }) {
   return (
@@ -67,7 +67,9 @@ export default function CheckoutView() {
   const items = useAppSelector((s) => s.cart.items);
   const profile = useAppSelector((s) => s.account.profile);
   const user = useAppSelector((s) => s.auth.user);
+  const ready = useAppSelector((s) => s.auth.ready);
   const [placed, setPlaced] = useState<Order | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const device = items.reduce((n, i) => n + i.price * i.qty, 0);
   const monthly = items.reduce((n, i) => n + (i.monthly ?? 0) * i.qty, 0);
@@ -96,23 +98,23 @@ export default function CheckoutView() {
   }, [profile, user]);
 
   const onSubmit = async (v: Out) => {
-    await new Promise((r) => setTimeout(r, 700));
-    const order: Order = {
-      id: newId(),
-      createdAt: new Date().toISOString(),
-      items,
-      deviceTotal: device,
-      monthlyTotal: monthly,
-      payment: v.payment,
-      status: "received",
-      contact: { name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division, vehicleReg: v.vehicleReg, vehicleType: v.vehicleType, preferredDate: v.preferredDate, note: v.note },
-    };
-    dispatch(placeOrder(order));
-    if (v.saveProfile) dispatch(updateProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division }));
-    dispatch(clearCart());
-    setPlaced(order);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    toast.success(`Order ${order.id} placed`);
+    setServerError(null);
+    try {
+      // Only ids and quantities are sent — the server prices the order from its own catalogue.
+      const order = await dispatch(submitOrder({
+        items: items.map((i) => ({ id: i.id, qty: i.qty })),
+        payment: v.payment, name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division,
+        vehicleReg: v.vehicleReg, vehicleType: v.vehicleType, preferredDate: v.preferredDate, note: v.note?.trim() || undefined,
+      }));
+      if (v.saveProfile) void dispatch(saveProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division })).catch(() => { /* best effort */ });
+      setPlaced(order);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast.success(`Order ${order.id} placed`);
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : "Could not place the order. Please try again.";
+      setServerError(msg);
+      toast.error(msg);
+    }
   };
 
   return (
@@ -160,7 +162,7 @@ export default function CheckoutView() {
                 <Link href="/orders" className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-colors hover:bg-brand-600"><Package className="h-4 w-4" />View my orders</Link>
                 <Link href="/products" className="inline-flex h-11 items-center gap-2 rounded-lg bg-softer/80 px-5 text-sm font-semibold text-ink transition-colors hover:text-brand-600 dark:bg-navy-900/90">Continue shopping</Link>
               </div>
-              <p className="mt-4 text-xs text-slate-500">Demo checkout — no payment was taken and nothing was sent.</p>
+              <p className="mt-4 text-xs text-slate-500">Our team will contact you to confirm. No payment has been taken.</p>
             </div>
           ) : items.length === 0 ? (
             /* ---------------- empty ---------------- */
@@ -173,6 +175,10 @@ export default function CheckoutView() {
                 <Link href="/products" className="inline-flex h-11 items-center rounded-lg bg-surface px-5 text-sm font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70">Browse products</Link>
               </div>
             </div>
+          ) : !ready ? (
+            <GateSkeleton />
+          ) : !user ? (
+            <LoginGate what="checkout" next="/checkout" />
           ) : (
             /* ---------------- form + summary ---------------- */
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
@@ -254,10 +260,11 @@ export default function CheckoutView() {
                     <div className="flex justify-between"><dt className="text-body">Monthly service</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(monthly)}/mo</dd></div>
                     <div className="flex items-baseline justify-between pt-3"><dt className="font-semibold text-ink">Due today</dt><dd className="text-2xl font-black tabular-nums text-ink">{formatBDT(payment === "Cash on installation" ? 0 : device)}</dd></div>
                   </dl>
+                  {serverError && <p role="alert" className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm font-medium text-red-600">{serverError}</p>}
                   <button type="submit" disabled={isSubmitting} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-bold text-white transition-all hover:bg-brand-600 active:scale-[.98] disabled:opacity-70">
                     {isSubmitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />Placing order…</> : <><Lock className="h-4 w-4" />Place order</>}
                   </button>
-                  <p className="mt-3 text-center text-xs text-slate-500">Demo checkout — no payment is taken. Questions? Call <a href={`tel:${SITE.phone}`} className="font-semibold text-ink">{SITE.phone}</a></p>
+                  <p className="mt-3 text-center text-xs text-slate-500">No payment is taken online. Our team confirms by phone. Questions? Call <a href={`tel:${SITE.phone}`} className="font-semibold text-ink">{SITE.phone}</a></p>
                 </div>
               </aside>
             </form>

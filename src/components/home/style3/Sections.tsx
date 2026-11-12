@@ -6,6 +6,7 @@
  * All text, data and images are Safety GPS Tracker's own.
  */
 import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Swiper as SwiperType } from "swiper";
@@ -21,10 +22,10 @@ import Container from "@/components/common/Container";
 import ContactForm from "@/components/forms/ContactForm";
 import { DeviceTile } from "@/components/devices/ProductTile";
 import PlanTile from "@/components/pricing/PlanTile";
-import { plans } from "@/data/pricing";
-import { productImage } from "@/data/catalogue";
-import { devices } from "@/data/devices";
-import { FAQS } from "@/data/faqs";
+import { useCatalog } from "@/components/providers/CatalogProvider";
+import type { HeroAccent, HeroIcon, HeroSlide as HeroSlideT, HeroTelematics } from "@/data/hero";
+import { categoryUrl } from "@/data/catalogue";
+import DeviceVisual from "@/components/devices/DeviceVisual";
 import { DEVICE_PARTNER_LOGOS, SITE, TELECOM_PARTNER_LOGOS } from "@/lib/site";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
@@ -35,93 +36,17 @@ const clean = (l: string) => l.replace("/img/partners/", "/img/partners/clean/")
 
 
 /* ================================================================ 1. hero */
-interface TelematicsData {
-  vehicle: string;
-  plate: string;
-  place: string;
-  speed: string;
-  ignition: "ON" | "OFF" | "LOCKED";
-  status: string;
-  route: string;
-  sensor: string;
-  fuel: string;
-}
-
-const HERO_SLIDES = [
-  {
-    id: "car-tracking",
-    tab: "Private cars",
-    badge: "Bangladesh's Leading GPS Platform",
-    badgeIcon: Shield,
-    titleMain: "Monitor Your Vehicle & Keep It",
-    titleHighlight: "Out Of The Stolen List",
-    text: "Track your vehicle in real time with 10s updates, shut down the engine remotely from your smartphone, and receive instant anti-theft alerts.",
-    bgImage: "/img/hero-car.jpg",
-    accentGlow: "from-brand-500/35 via-orange-500/20 to-sky-500/15",
-    primaryCta: { label: "Explore Products", href: "/products" },
-    telematics: {
-      vehicle: "Toyota Premio 2022",
-      plate: "Dhaka Metro Ga 32-1142",
-      place: "Mirpur Road, Dhanmondi",
-      speed: "44 km/h",
-      ignition: "ON" as const,
-      status: "In Transit",
-      route: "M10 160 C 80 150, 120 70, 230 70 S 300 120, 310 120",
-      sensor: "AC: ON · Door: Closed",
-      fuel: "78% Fuel",
-    },
-  },
-  {
-    id: "bike-security",
-    tab: "Motorcycles",
-    badge: "Motorcycle Security & Alarm",
-    badgeIcon: Bike,
-    titleMain: "Compact Waterproof GPS for",
-    titleHighlight: "Bikes & Scooters",
-    text: "Hidden compact tracker with vibration shock alert, ignition notification, and remote engine lock from your smartphone to stop bike theft cold.",
-    bgImage: "/img/hero-bike.jpg",
-    accentGlow: "from-amber-500/35 via-orange-500/20 to-brand-500/15",
-    primaryCta: { label: "View Bike Trackers", href: "/products/category/gps-tracking-devices/bike-trackers" },
-    telematics: {
-      vehicle: "Yamaha R15 V4",
-      plate: "Dhaka Metro Ha 19-4820",
-      place: "Bashundhara R/A, Dhaka",
-      speed: "0 km/h",
-      ignition: "OFF" as const,
-      status: "Parked & Armed",
-      route: "M20 40 H280 V140 H60 Z",
-      sensor: "Shock Sensor: Armed",
-      fuel: "12.8V Battery",
-    },
-  },
-  {
-    id: "fleet-management",
-    tab: "Fleets",
-    badge: "Fleet & Heavy Commercial",
-    badgeIcon: Truck,
-    titleMain: "Complete Fleet Control &",
-    titleHighlight: "Fuel Rod Monitoring",
-    text: "Ultrasonic fuel rods to detect theft, trip mileage logs, speed violation alerts, and automated BRTA reminders.",
-    bgImage: "/img/hero-truck.jpg",
-    accentGlow: "from-sky-500/35 via-blue-500/20 to-cyan-500/15",
-    primaryCta: { label: "Fleet Solutions", href: "/solutions" },
-    telematics: {
-      vehicle: "Isuzu 5-Ton Covered Van",
-      plate: "Dhaka Metro Ta 14-8831",
-      place: "Gazipur Bypass, Highway",
-      speed: "58 km/h",
-      ignition: "ON" as const,
-      status: "Highway Route",
-      route: "M10 40 C 90 40, 160 160, 250 160 S 300 40, 310 40",
-      sensor: "BRTA Tax & Fitness: Valid",
-      fuel: "86% (Ultrasonic)",
-    },
-  },
-];
+const HERO_ICONS: Record<HeroIcon, LucideIcon> = { shield: Shield, bike: Bike, truck: Truck };
+/** Tailwind needs these class names written out in full. */
+const HERO_GLOW: Record<HeroAccent, string> = {
+  brand: "from-brand-500/35 via-orange-500/20 to-sky-500/15",
+  sky: "from-sky-500/35 via-blue-500/20 to-cyan-500/15",
+  emerald: "from-emerald-500/35 via-teal-500/20 to-cyan-500/15",
+};
 
 const ROADS = ["M0 40 H320", "M0 120 H320", "M70 0 V180", "M230 0 V180", "M0 160 C 100 150, 180 60, 320 70"];
 
-function InteractiveTelematicsCard({ t }: { t: TelematicsData }) {
+function InteractiveTelematicsCard({ t }: { t: HeroTelematics }) {
   const [locked, setLocked] = useState(t.ignition === "LOCKED");
   const isMoving = !locked && t.ignition === "ON";
 
@@ -218,6 +143,13 @@ function InteractiveTelematicsCard({ t }: { t: TelematicsData }) {
 }
 
 export function HeroDark() {
+  const { heroSlides: slides } = useCatalog();
+  // remount when the slide list changes so the carousel never points at a slide that no longer exists
+  if (!slides.length) return null;
+  return <HeroCarousel key={slides.map((x) => x.id).join("|")} slides={slides} />;
+}
+
+function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
   const dispatch = useAppDispatch();
   const swiperRef = useRef<SwiperType | null>(null);
   const [active, setActive] = useState(0);
@@ -229,26 +161,26 @@ export function HeroDark() {
         modules={[Autoplay, EffectFade]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
-        loop
+        loop={slides.length > 1}
         speed={700}
         autoplay={{ delay: 6500, disableOnInteraction: false, pauseOnMouseEnter: true }}
         onSwiper={(sw) => { swiperRef.current = sw; }}
         onSlideChange={(sw) => setActive(sw.realIndex)}
         onAutoplayTimeLeft={(_, __, pct) => setProgress(1 - pct)}
       >
-        {HERO_SLIDES.map((s, idx) => (
+        {slides.map((s, idx) => (
           <SwiperSlide key={s.id}>
             <div className="relative isolate flex min-h-[520px] items-center overflow-hidden bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] sm:min-h-[580px]">
               <Image src={s.bgImage} alt="" fill priority={idx === 0} sizes="100vw" className="-z-30 object-cover object-center opacity-60" />
               <div aria-hidden className="absolute inset-0 -z-20 bg-gradient-to-r from-[#0c1e31]/95 via-[#0c1e31]/70 to-[#0c1e31]/20" />
               <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#0c1e31] to-transparent" />
-              <div aria-hidden className={cn("pointer-events-none absolute right-[5%] top-1/4 -z-10 h-[420px] w-[420px] rounded-full bg-gradient-to-tr opacity-70 blur-3xl", s.accentGlow)} />
+              <div aria-hidden className={cn("pointer-events-none absolute right-[5%] top-1/4 -z-10 h-[420px] w-[420px] rounded-full bg-gradient-to-tr opacity-70 blur-3xl", HERO_GLOW[s.accent] ?? HERO_GLOW.brand)} />
               <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-20" />
 
               <Container className="grid items-center gap-10 pb-28 pt-12 lg:grid-cols-12">
                 <div className="lg:col-span-7">
                   <span className="inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold text-brand-300 backdrop-blur-md">
-                    <s.badgeIcon className="h-3.5 w-3.5" />{s.badge}
+                    {(() => { const I = HERO_ICONS[s.badgeIcon] ?? Shield; return <I className="h-3.5 w-3.5" />; })()}{s.badge}
                   </span>
                   <h1 className="mt-4 text-3xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-[54px]">
                     {s.titleMain}{" "}
@@ -256,9 +188,9 @@ export function HeroDark() {
                   </h1>
                   <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">{s.text}</p>
                   <div className="mt-7 flex flex-wrap gap-3">
-                    <Link href={s.primaryCta.href} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-600">
-                      {s.primaryCta.label}<ArrowRight className="h-4 w-4" />
-                    </Link>
+                    {s.ctaHref.startsWith("https://")
+                      ? <a href={s.ctaHref} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></a>
+                      : <Link href={s.ctaHref} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></Link>}
                     <button onClick={() => dispatch(openDemoModal("Hero live demo"))} className="inline-flex h-11 items-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">
                       <CalendarCheck className="h-4 w-4 text-brand-300" />Book a demo
                     </button>
@@ -274,10 +206,10 @@ export function HeroDark() {
       </Swiper>
 
       {/* slide tabs with autoplay progress */}
-      <div className="absolute inset-x-0 bottom-6 z-20">
+      {slides.length > 1 && <div className="absolute inset-x-0 bottom-6 z-20">
         <Container>
           <div role="tablist" aria-label="Choose slide" className="grid max-w-md grid-cols-3 gap-3">
-            {HERO_SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <button key={s.id} role="tab" aria-selected={active === i} onClick={() => swiperRef.current?.slideToLoop(i)} className="group text-left">
                 <span className="block h-1 overflow-hidden rounded-full bg-white/15">
                   <span className="block h-full rounded-full bg-brand-500 transition-[width] duration-100" style={{ width: active === i ? `${progress * 100}%` : i < active ? "100%" : "0%" }} />
@@ -287,7 +219,7 @@ export function HeroDark() {
             ))}
           </div>
         </Container>
-      </div>
+      </div>}
     </section>
   );
 }
@@ -484,15 +416,8 @@ export function AppBlock() {
 }
 
 /* ============================================== shared product card + tabs */
-const TRACKER_CATS = ["GPS Tracking Devices", "Voice Monitoring Devices", "Video & Voice Monitoring Devices"] as const;
-const HARDWARE_CAT = "Vehicle GPS Hardware";
 const TAB_EVENT = "sgt:catalogue-tab";
 
-/** Jump to a product list and switch it to `tab` */
-function openList(sectionId: string, tab: string) {
-  window.dispatchEvent(new CustomEvent(TAB_EVENT, { detail: { sectionId, tab } }));
-  document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 function useListTab(sectionId: string, initial: string) {
   const [tab, setTab] = useState(initial);
   useEffect(() => {
@@ -516,13 +441,8 @@ function Tabs({ tabs, tab, setTab }: { tabs: readonly string[]; tab: string; set
 
 
 /* ========================================================== 5. categories */
-const CATEGORIES: { label: string; section: string; tab: string }[] = [
-  { label: "GPS Tracking Devices", section: "gps-tracker", tab: "GPS Tracking Devices" },
-  { label: "Voice Monitoring Devices", section: "gps-tracker", tab: "Voice Monitoring Devices" },
-  { label: "Video & Voice Monitoring", section: "gps-tracker", tab: "Video & Voice Monitoring Devices" },
-  { label: "Vehicle GPS Hardware", section: "other-products", tab: "Hardware & Accessories" },
-];
 export function CategoryGrid() {
+  const { devices, catalogue } = useCatalog();
   const cover = (cat: string) => devices.find((d) => d.category === cat && d.image) ?? devices.find((d) => d.category === cat);
   return (
     <section className="bg-surface py-14 sm:py-20">
@@ -530,22 +450,22 @@ export function CategoryGrid() {
         <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Shop by category</span>
         <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Our Product&apos;s Category</h2>
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {CATEGORIES.map((c) => {
-            const d = cover(c.tab === "Hardware & Accessories" ? HARDWARE_CAT : c.tab);
-            const count = devices.filter((x) => x.category === (c.tab === "Hardware & Accessories" ? HARDWARE_CAT : c.tab)).length;
+          {catalogue.map((c) => {
+            const d = cover(c.name);
+            const count = c.count;
             return (
-              <button key={c.label} onClick={() => openList(c.section, c.tab)} className="group overflow-hidden rounded-lg bg-softer/80 text-left transition-all hover:-translate-y-1 dark:bg-navy-900/90">
+              <Link key={c.slug} href={categoryUrl(c.name)} className="group overflow-hidden rounded-lg bg-softer/80 text-left transition-all hover:-translate-y-1 dark:bg-navy-900/90">
                 <span className="relative block aspect-[4/3] overflow-hidden">
-                  {d && <Image src={productImage(d)} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-contain transition-transform duration-500 group-hover:scale-105" />}
+                  {d?.image ? <ProductImage src={d.image} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-contain transition-transform duration-500 group-hover:scale-105" /> : d ? <DeviceVisual kind={d.visual} className="h-full w-full" /> : null}
                 </span>
                 <span className="flex items-center justify-between gap-2 p-3 sm:p-4">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-ink sm:text-[15px]">{c.label}</span>
+                    <span className="block truncate text-sm font-semibold text-ink sm:text-[15px]">{c.name}</span>
                     <span className="block text-xs text-slate-500">{count} product{count === 1 ? "" : "s"}</span>
                   </span>
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:bg-navy-950/70 dark:text-brand-400"><ArrowRight className="h-4 w-4" /></span>
                 </span>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -554,43 +474,49 @@ export function CategoryGrid() {
   );
 }
 
-/* ======================================================== 6. GPS tracker */
+/* ======================================================== 6. products by category */
+const PER_TAB = 8;
+
+/** One tab per real category (so a category created in the admin panel gets its own tab automatically). */
 export function DeviceCatalogue() {
-  const [tab, setTab] = useListTab("gps-tracker", TRACKER_CATS[0]);
+  const { devices, catalogue } = useCatalog();
+  const names = catalogue.map((c) => c.name);
+  const [picked, setPicked] = useListTab("gps-tracker", names[0] ?? "");
+  const tab = names.includes(picked) ? picked : names[0] ?? "";
+  if (!names.length) return null;
+  const node = catalogue.find((c) => c.name === tab)!;
   const list = devices.filter((d) => d.category === tab);
   return (
     <section id="gps-tracker" className="scroll-mt-20 bg-soft py-14 sm:py-20">
       <Container>
-        <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Trackers</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">GPS Tracker</h2></div>
-        <Tabs tabs={TRACKER_CATS} tab={tab} setTab={setTab} />
+        <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Shop products</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">GPS Trackers &amp; Hardware</h2></div>
+        <Tabs tabs={names} tab={tab} setTab={setPicked} />
         <AnimatePresence mode="wait">
           <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            {list.map((d) => <DeviceTile key={d.id} d={d} />)}
+            {list.slice(0, PER_TAB).map((d) => <DeviceTile key={d.id} d={d} />)}
           </motion.div>
         </AnimatePresence>
+        {list.length > PER_TAB && (
+          <div className="mt-8 text-center">
+            <Link href={categoryUrl(node.name)} className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">View all {list.length} {node.name} <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        )}
       </Container>
     </section>
   );
 }
 
-/* ===================================================== 6b. other products */
-const OTHER_TABS = ["Hardware & Accessories", "Service Packages"] as const;
+/* ========================================================= 6b. service packages */
 export function OtherProducts() {
-  const [tab, setTab] = useListTab("other-products", OTHER_TABS[0]);
+  const { plans } = useCatalog();
+  if (!plans.length) return null;
   return (
     <section id="other-products" className="scroll-mt-20 bg-surface py-14 sm:py-20">
       <Container>
-        <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Hardware &amp; packages</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Other Products</h2></div>
-        <Tabs tabs={OTHER_TABS} tab={tab} setTab={setTab} />
-        <AnimatePresence mode="wait">
-          <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            {tab === "Hardware & Accessories"
-              ? devices.filter((d) => d.category === HARDWARE_CAT).map((d) => <DeviceTile key={d.id} d={d} />)
-              : plans.map((p) => (
-                <PlanTile key={p.id} p={p} />
-              ))}
-          </motion.div>
-        </AnimatePresence>
+        <div className="text-center"><span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Packages</span><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Service Packages</h2><p className="mx-auto mt-3 max-w-xl text-sm text-body">Pay once for the device, then a simple monthly charge for tracking, apps and support.</p></div>
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {plans.map((p) => <PlanTile key={p.id} p={p} />)}
+        </div>
       </Container>
     </section>
   );
@@ -598,10 +524,11 @@ export function OtherProducts() {
 
 /* ============================================================== 7. why */
 export function WhyChecklist() {
+  const { plans } = useCatalog();
   const dispatch = useAppDispatch();
   const telecom = TELECOM_PARTNER_LOGOS.slice(0, 3).map((p) => p.name).join(", ");
-  const minDevice = Math.min(...plans.map((p) => p.devicePrice));
-  const minMonthly = Math.min(...plans.map((p) => p.monthlyCharge));
+  const minDevice = plans.length ? Math.min(...plans.map((p) => p.devicePrice)) : 0;
+  const minMonthly = plans.length ? Math.min(...plans.map((p) => p.monthlyCharge)) : 0;
   const cards: { icon: LucideIcon; t: string; d: string }[] = [
     { icon: MapPin, t: "10-second live tracking", d: "Every vehicle refreshes on the map about every 10 seconds." },
     { icon: Lock, t: "Remote engine lock", d: "Stop an unauthorised trip by locking the engine from the app." },
@@ -717,6 +644,7 @@ export function PartnerBorderGrid() {
 
 /* =============================================================== 9. faq */
 export function FaqGrid() {
+  const { faqs: FAQS } = useCatalog();
   const items = FAQS.slice(0, 8);
   const [open, setOpen] = useState<string | null>(null);
   const cols = [items.filter((_, i) => i % 2 === 0), items.filter((_, i) => i % 2 === 1)];

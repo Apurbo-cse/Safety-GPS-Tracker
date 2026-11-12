@@ -1,31 +1,16 @@
 "use client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { MailCheck } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/common/Button";
-import { Field, inputCls } from "./Field";
-import { phoneRegex } from "@/lib/validation";
+import { LifeBuoy, Phone } from "lucide-react";
+import { SITE } from "@/lib/site";
 
-const schema = z.object({ identifier: z.string().min(1, "Enter your email or mobile number").refine((v) => z.string().email().safeParse(v).success || phoneRegex.test(v), "Enter a valid email or mobile number") });
-type V = z.infer<typeof schema>;
-
+/** Self-service reset needs an email/SMS provider (not connected yet), so route people to support. */
 export default function ForgotForm() {
-  const [sentTo, setSentTo] = useState<string | null>(null);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<V>({ resolver: zodResolver(schema) });
-  if (sentTo) return (
-    <div className="rounded-md border border-green-200 bg-green-50 p-6 text-center">
-      <MailCheck className="mx-auto h-10 w-10 text-green-600" />
-      <p className="mt-2 font-semibold text-ink">Reset instructions “sent” to {sentTo}</p>
-      <p className="mt-1 text-sm text-body">Demo only — no message was actually sent.</p>
-    </div>
-  );
   return (
-    <form onSubmit={handleSubmit(async (v) => { await new Promise((r) => setTimeout(r, 800)); setSentTo(v.identifier); toast.success("Reset link sent (demo)"); })} noValidate className="space-y-4">
-      <Field label="Email / mobile number" error={errors.identifier?.message}><input className={inputCls} {...register("identifier")} /></Field>
-      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>{isSubmitting ? "Sending…" : "Send reset link"}</Button>
-    </form>
+    <div className="rounded-lg bg-softer/80 p-6 text-center dark:bg-navy-900/90">
+      <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400"><LifeBuoy className="h-7 w-7" /></span>
+      <p className="mt-3 font-semibold text-ink">We&apos;ll reset it for you</p>
+      <p className="mt-1 text-sm text-body">Call our 24×7 helpline with your registered mobile number and we&apos;ll verify you and set a new password.</p>
+      <a href={`tel:${SITE.phone}`} className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-5 text-sm font-bold text-white hover:bg-brand-600"><Phone className="h-4 w-4" />{SITE.phone}</a>
+      <p className="mt-3 text-xs text-slate-500">If you&apos;re signed in, you can also change it any time in Settings → Security.</p>
+    </div>
   );
 }

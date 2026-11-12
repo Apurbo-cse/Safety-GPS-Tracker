@@ -7,7 +7,8 @@ import {
   BadgeDollarSign, ChevronDown, Cpu, Headset, HelpCircle, Link2, Mail, MapPin, Phone, Search, ShieldCheck, X, type LucideIcon,
 } from "lucide-react";
 import Container from "@/components/common/Container";
-import { FAQ_CATEGORIES, FAQS, type FaqCategoryName } from "@/data/faqs";
+import { useCatalog } from "@/components/providers/CatalogProvider";
+import type { FaqCategoryName } from "@/data/faqs";
 import { SITE } from "@/lib/site";
 import { cn } from "@/utils/format";
 
@@ -29,9 +30,11 @@ function Highlight({ text, q }: { text: string; q: string }) {
 }
 
 export default function FaqExplorer() {
+  const { faqs: FAQS, faqCategories } = useCatalog();
+  const FAQ_CATEGORIES = faqCategories as readonly FaqCategoryName[];
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<FaqCategoryName | "All">("All");
-  const [open, setOpen] = useState<Set<string>>(() => new Set([FAQS[0].id]));
+  const [open, setOpen] = useState<Set<string>>(() => new Set(FAQS[0] ? [FAQS[0].id] : []));
 
   /* Deep link: /faq#question-id opens and scrolls to that question */
   useEffect(() => {
@@ -41,12 +44,12 @@ export default function FaqExplorer() {
       setOpen((s) => new Set(s).add(id));
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
     });
-  }, []);
+  }, [FAQS]);
 
   const q = query.trim().toLowerCase();
   const results = useMemo(
     () => FAQS.filter((f) => (cat === "All" || f.category === cat) && (!q || `${f.q} ${f.a} ${f.tag}`.toLowerCase().includes(q))),
-    [cat, q],
+    [cat, q, FAQS],
   );
   const groups = FAQ_CATEGORIES.map((c) => ({ c, items: results.filter((f) => f.category === c) })).filter((g) => g.items.length);
 
@@ -83,7 +86,7 @@ export default function FaqExplorer() {
           <nav aria-label="FAQ categories" className="-mx-3 mt-3 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 lg:flex-col lg:gap-1 [&::-webkit-scrollbar]:hidden">
             {(["All", ...FAQ_CATEGORIES] as const).map((c) => {
               const on = cat === c;
-              const Icon = c === "All" ? HelpCircle : ICONS[c];
+              const Icon = c === "All" ? HelpCircle : (ICONS[c] ?? HelpCircle);
               const count = c === "All" ? FAQS.length : FAQS.filter((f) => f.category === c).length;
               return (
                 <button
@@ -148,7 +151,7 @@ export default function FaqExplorer() {
           ) : (
             <div className="space-y-8">
               {groups.map(({ c, items }) => {
-                const Icon = ICONS[c];
+                const Icon = ICONS[c] ?? HelpCircle;
                 return (
                   <section key={c} id={slug(c)} aria-labelledby={`${slug(c)}-h`} className="scroll-mt-24">
                     <h2 id={`${slug(c)}-h`} className="mb-3 flex items-center gap-2 text-base font-bold text-ink">

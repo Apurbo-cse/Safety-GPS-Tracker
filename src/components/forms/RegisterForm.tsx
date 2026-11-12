@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,7 +10,9 @@ import { Field, Select, inputCls } from "./Field";
 import PasswordInput from "./PasswordInput";
 import { emailSchema, mobileSchema, passwordSchema } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { authStart, loginSuccess } from "@/store/slices/authSlice";
+import { signUp } from "@/store/thunks";
+import { safeNext } from "@/lib/redirect";
+import { ApiError } from "@/lib/api";
 
 const VEHICLES = ["Private Car", "Motorcycle", "Truck / Logistics", "Bus / Public Transport", "Construction Equipment", "CNG Auto-Rickshaw", "Ship / Cargo", "Business Fleet"];
 const schema = z.object({
@@ -25,17 +27,21 @@ type V = z.infer<typeof schema>;
 
 export default function RegisterForm() {
   const router = useRouter();
+  const next = safeNext(useSearchParams().get("next"));
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.status === "loading");
-  const { register, handleSubmit, formState: { errors } } = useForm<V>({ resolver: zodResolver(schema), defaultValues: { vehicleType: "" } });
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<V>({ resolver: zodResolver(schema), defaultValues: { vehicleType: "" } });
 
   const onSubmit = async (v: V) => {
-    dispatch(authStart());
-    await new Promise((r) => setTimeout(r, 1000));
-    dispatch(loginSuccess({ name: v.name, identifier: v.email, vehicleType: v.vehicleType }));
-    toast.success("Account created (demo)");
-    announceNavigation();
-    router.push("/");
+    try {
+      await dispatch(signUp({ name: v.name, mobile: v.mobile, email: v.email, password: v.password, vehicleType: v.vehicleType }));
+      toast.success("Account created — welcome!");
+      announceNavigation();
+      router.push(next);
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : "Could not create the account. Please try again.";
+      setError(e instanceof ApiError && e.status === 409 ? "email" : "root", { message: msg });
+    }
   };
 
   return (
@@ -50,6 +56,7 @@ export default function RegisterForm() {
       <Field label="Vehicle type" error={errors.vehicleType?.message}>
         <Select {...register("vehicleType")}><option value="">Select…</option>{VEHICLES.map((v) => <option key={v}>{v}</option>)}</Select>
       </Field>
+      {errors.root && <p role="alert" className="text-sm font-medium text-red-600">{errors.root.message}</p>}
       <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading ? "Creating account…" : "Create account"}</Button>
     </form>
   );

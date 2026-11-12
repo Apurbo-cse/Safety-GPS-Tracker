@@ -10,10 +10,14 @@ import BottomNav from "@/components/layout/BottomNav";
 import MoreSheet from "@/components/layout/MoreSheet";
 import PlanFeaturesModal from "@/components/pricing/PlanFeaturesModal";
 import LeadModal from "@/components/forms/LeadModal";
+import CatalogProvider from "@/components/providers/CatalogProvider";
+import { getCatalog } from "@/lib/catalog.server";
 
-export default function WebsiteLayout({ children }: { children: React.ReactNode }) {
+/** Products, plans and FAQs come from the API (refreshed every minute) and are shared with every client component below. */
+export default async function WebsiteLayout({ children }: { children: React.ReactNode }) {
+  const catalog = await getCatalog();
   return (
-    <>
+    <CatalogProvider catalog={catalog}>
       <Navbar />
       <MobilePageBar />
       <div className="pb-[calc(3.6rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -29,6 +33,6 @@ export default function WebsiteLayout({ children }: { children: React.ReactNode 
       <MoreSheet />
       <FloatingActions />
       <CommandPalette />
-    </>
+    </CatalogProvider>
   );
 }

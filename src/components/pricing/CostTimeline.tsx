@@ -2,19 +2,22 @@
 import { useRef, useState } from "react";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { cn, formatBDT } from "@/utils/format";
 
 const COLORS = ["#f05a22", "#3b82f6", "#22c55e", "#a855f7", "#f59e0b", "#ec4899", "#14b8a6", "#64748b"];
 const W = 640, H = 320, L = 58, R = 16, T = 16, B = 34, MONTHS = 24;
-const cost = (i: number, m: number) => plans[i].devicePrice + plans[i].monthlyCharge * m;
 const niceMax = (v: number) => { const step = v > 20000 ? 5000 : 2500; return Math.ceil(v / step) * step; };
 
 export default function CostTimeline() {
-  const [sel, setSel] = useState<number[]>([0, 3, 5, 6]);
+  const { plans } = useCatalog();
+  const cost = (i: number, m: number) => plans[i].devicePrice + plans[i].monthlyCharge * m;
+  const [sel, setSel] = useState<number[]>(() => [0, 3, 5, 6].filter((i) => i < plans.length));
   const [hover, setHover] = useState<number | null>(null);
   const ref = useRef<SVGSVGElement>(null);
 
+  const valid = sel.filter((i) => i < plans.length);
+  if (!plans.length || !valid.length) return null;
   const yMax = niceMax(Math.max(...sel.map((i) => cost(i, MONTHS)), 1000));
   const x = (m: number) => L + (m / MONTHS) * (W - L - R);
   const y = (v: number) => T + (1 - v / yMax) * (H - T - B);
@@ -36,7 +39,7 @@ export default function CostTimeline() {
           <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Packages on the chart">
             {plans.map((p, i) => { const on = sel.includes(i); return (
               <button key={p.id} onClick={() => toggle(i)} aria-pressed={on} className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors", on ? "border-transparent bg-surface text-ink dark:bg-navy-950/70" : "border-transparent text-slate-400 hover:text-ink")}>
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: on ? COLORS[i] : "#cbd5e1" }} />{p.name}
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: on ? COLORS[i % COLORS.length] : "#cbd5e1" }} />{p.name}
               </button>
             ); })}
           </div>
@@ -47,9 +50,9 @@ export default function CostTimeline() {
                 <g key={k}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--line)" strokeDasharray={k ? "3 4" : undefined} /><text x={L - 8} y={y(v) + 4} textAnchor="end" fontSize="11" fill="var(--body)">{v >= 1000 ? `${Math.round(v / 1000 * 10) / 10}k` : v}</text></g>
               ); })}
               {[0, 6, 12, 18, 24].map((mo) => <text key={mo} x={x(mo)} y={H - 10} textAnchor="middle" fontSize="11" fill="var(--body)">{mo === 0 ? "Start" : `${mo} mo`}</text>)}
-              {sel.map((i) => <line key={i} x1={x(0)} y1={y(cost(i, 0))} x2={x(MONTHS)} y2={y(cost(i, MONTHS))} stroke={COLORS[i]} strokeWidth="2.75" strokeLinecap="round" />)}
+              {sel.map((i) => <line key={i} x1={x(0)} y1={y(cost(i, 0))} x2={x(MONTHS)} y2={y(cost(i, MONTHS))} stroke={COLORS[i % COLORS.length]} strokeWidth="2.75" strokeLinecap="round" />)}
               {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={T} y2={H - B} stroke="var(--ink)" strokeOpacity=".35" strokeDasharray="4 4" />}
-              {sel.map((i) => <circle key={i} cx={x(m)} cy={y(cost(i, m))} r={hover !== null ? 5 : 3.5} fill={COLORS[i]} stroke="#fff" strokeWidth="2" />)}
+              {sel.map((i) => <circle key={i} cx={x(m)} cy={y(cost(i, m))} r={hover !== null ? 5 : 3.5} fill={COLORS[i % COLORS.length]} stroke="#fff" strokeWidth="2" />)}
             </svg>
 
             <div>
@@ -57,7 +60,7 @@ export default function CostTimeline() {
               <ul className="mt-2 space-y-1.5">
                 {readout.map((i, rank) => (
                   <li key={i} className="flex items-center gap-2 rounded-md bg-surface px-3 py-2 text-sm dark:bg-navy-950/70">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORS[i] }} />
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                     <span className="min-w-0 flex-1 truncate font-medium text-ink">{plans[i].name}</span>
                     <span className="font-bold tabular-nums text-ink">{formatBDT(cost(i, m))}</span>
                     {rank === 0 && readout.length > 1 && <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-xs font-semibold text-green-600">Lowest</span>}

@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ArrowLeftRight, BadgeDollarSign, Check, ChevronDown, Layers, Minus, Pin, ShoppingCart, Trophy, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import { Button } from "@/components/common/Button";
-import { comparisonFeatures, plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { groupFeatures } from "@/lib/featureGroups";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
@@ -16,13 +16,14 @@ import type { PricingPlan } from "@/types";
 
 const DEFAULTS = ["premium-voice", "gps-2", "voice-gps", "video-voice"];
 const MAX = 4;
-const GROUPS = groupFeatures(comparisonFeatures);
 const PERIODS = [12, 24, 36] as const;
 
 const Best = () => <span className="ml-1.5 rounded-full bg-green-500/15 px-1.5 py-0.5 text-xs font-semibold text-green-600">Lowest</span>;
 const Mark = ({ on }: { on: boolean }) => on ? <Check className="mx-auto h-4 w-4 text-green-600" aria-label="Included" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="Not listed" />;
 
 export default function PackageComparison() {
+  const { plans, comparisonFeatures } = useCatalog();
+  const GROUPS = useMemo(() => groupFeatures(comparisonFeatures), [comparisonFeatures]);
   const dispatch = useAppDispatch();
   const compareIds = useAppSelector((s) => s.pricing.compareIds);
   const ids = compareIds.length >= 2 ? compareIds : DEFAULTS;

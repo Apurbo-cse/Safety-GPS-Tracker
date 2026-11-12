@@ -1,4 +1,6 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,10 +14,9 @@ import PasswordInput from "@/components/forms/PasswordInput";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import { passwordSchema } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { resetSettings, toggleAlert, toggleChannel, updateProfile, updateSettings, type AlertKey, type Channel } from "@/store/slices/accountSlice";
-import { hydrateOrders } from "@/store/slices/ordersSlice";
-import { clearCart } from "@/store/slices/cartSlice";
-import { logout } from "@/store/slices/authSlice";
+import { resetSettings, toggleAlert, toggleChannel, updateSettings, type AlertKey, type Channel } from "@/store/slices/accountSlice";
+import { deleteAccount, saveSettings } from "@/store/thunks";
+import { api, ApiError } from "@/lib/api";
 import AccountShell, { CARD, Pill, Toggle } from "./AccountShell";
 
 const ALERTS: { key: AlertKey; icon: LucideIcon; t: string; d: string }[] = [
@@ -67,26 +68,45 @@ function Row({ icon: Icon, t, d, children }: { icon?: LucideIcon; t: string; d?:
 
 export default function SettingsView() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const s = useAppSelector((st) => st.account.settings);
-  const user = useAppSelector((st) => st.auth.user);
+  const loaded = useAppSelector((st) => st.account.loaded);
   const anyChannel = Object.values(s.channels).some(Boolean);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<Pw>({ resolver: zodResolver(pwSchema) });
-  const changePw = async () => { await new Promise((r) => setTimeout(r, 600)); reset(); toast.success("Password updated (demo)"); };
+  // ---- autosave: any change is sent to the server after a short pause
+  const lastSaved = useRef<string | null>(null);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  useEffect(() => {
+    if (!loaded) return;
+    const json = JSON.stringify(s);
+    if (lastSaved.current === null) { lastSaved.current = json; return; } // first load from the server
+    if (json === lastSaved.current) return;
+    setSaveState("saving");
+    const t = setTimeout(() => {
+      dispatch(saveSettings(s))
+        .then(() => { lastSaved.current = json; setSaveState("saved"); })
+        .catch((e) => { setSaveState("error"); toast.error(e instanceof ApiError ? e.message : "Couldn't save your settings"); });
+    }, 700);
+    return () => clearTimeout(t);
+  }, [s, loaded, dispatch]);
 
-  const clearAll = () => {
-    if (!window.confirm("Clear your saved profile, orders, cart and settings from this browser?")) return;
-    dispatch(hydrateOrders([])); dispatch(clearCart()); dispatch(resetSettings());
-    dispatch(updateProfile({ name: "", phone: "", email: "", company: "", address: "", division: "Dhaka" }));
-    dispatch(logout());
-    toast.success("Saved data cleared");
+  const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<Pw>({ resolver: zodResolver(pwSchema) });
+  const changePw = async (v: Pw) => {
+    try { await api.changePassword({ current: v.current, next: v.next }); reset(); toast.success("Password updated"); }
+    catch (e) { setError(e instanceof ApiError && e.status === 401 ? "current" : "next", { message: e instanceof ApiError ? e.message : "Could not update the password" }); }
+  };
+
+  const removeAccount = async () => {
+    if (!window.confirm("Delete your account permanently? Your profile, settings and order history will be removed. This can't be undone.")) return;
+    try { await dispatch(deleteAccount()); toast.success("Your account was deleted"); router.push("/"); }
+    catch (e) { toast.error(e instanceof ApiError ? e.message : "Could not delete the account"); }
   };
 
   return (
-    <AccountShell title="Settings" subtitle="Alerts, appearance, security and privacy.">
+    <AccountShell title="Settings" subtitle="Alerts, appearance, security and privacy. Changes save automatically." what="your settings">
       <div className="space-y-5">
         <Card icon={Bell} pill="Vehicle alerts" title="What should we tell you about?"
-          aside={<button onClick={() => { dispatch(resetSettings()); toast.success("Settings reset to defaults"); }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-body hover:text-ink"><RotateCcw className="h-3.5 w-3.5" />Reset defaults</button>}>
+          aside={<div className="flex items-center gap-4"><span role="status" className="text-xs font-semibold text-slate-500">{saveState === "saving" ? "Saving…" : saveState === "saved" ? "✓ Saved" : saveState === "error" ? "Not saved" : ""}</span><button onClick={() => dispatch(resetSettings())} className="inline-flex items-center gap-1.5 text-xs font-semibold text-body hover:text-ink"><RotateCcw className="h-3.5 w-3.5" />Reset defaults</button></div>}>
           <div className="grid gap-2.5 md:grid-cols-2">
             {ALERTS.map((a) => (
               <Row key={a.key} icon={a.icon} t={a.t} d={a.d}><Toggle on={s.alerts[a.key]} onChange={() => dispatch(toggleAlert(a.key))} label={a.t} /></Row>
@@ -120,27 +140,23 @@ export default function SettingsView() {
 
         <Card icon={KeyRound} pill="Security" title="Password & sign-in">
           <Row icon={ShieldCheck} t="Two-step verification" d="Ask for an SMS code when signing in on a new device.">
-            <Toggle on={s.twoFactor} onChange={() => { dispatch(updateSettings({ twoFactor: !s.twoFactor })); toast.success(s.twoFactor ? "Two-step verification off" : "Two-step verification on"); }} label="Two-step verification" />
+            <Toggle on={s.twoFactor} onChange={() => dispatch(updateSettings({ twoFactor: !s.twoFactor }))} label="Two-step verification" />
           </Row>
-          {user ? (
             <form onSubmit={handleSubmit(changePw)} noValidate className="mt-4 grid gap-4 sm:grid-cols-3">
               <Field label="Current password" error={errors.current?.message}><PasswordInput {...register("current")} autoComplete="current-password" aria-invalid={!!errors.current} /></Field>
               <Field label="New password" error={errors.next?.message} hint="8+ characters, a letter and a number"><PasswordInput {...register("next")} autoComplete="new-password" aria-invalid={!!errors.next} /></Field>
               <Field label="Confirm new password" error={errors.confirm?.message}><PasswordInput {...register("confirm")} autoComplete="new-password" aria-invalid={!!errors.confirm} /></Field>
               <div className="sm:col-span-3"><button type="submit" disabled={isSubmitting} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60">Update password</button></div>
             </form>
-          ) : (
-            <p className="mt-4 text-sm text-body">Log in to change your password.</p>
-          )}
         </Card>
 
-        <Card icon={ShieldAlert} pill="Privacy" title="Data & communication">
+        <Card icon={ShieldAlert} pill="Privacy" title="Communication & data">
           <Row icon={Mail} t="Offers & product news" d="Occasional emails about new devices and packages.">
             <Toggle on={s.marketing} onChange={() => dispatch(updateSettings({ marketing: !s.marketing }))} label="Offers and product news" />
           </Row>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-500/5 p-4">
-            <div><p className="text-sm font-semibold text-ink">Clear saved data</p><p className="text-xs text-body">Removes your profile, orders, cart and settings from this browser.</p></div>
-            <button onClick={clearAll} className="inline-flex h-10 items-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700"><Trash2 className="h-4 w-4" />Clear data</button>
+            <div><p className="text-sm font-semibold text-ink">Delete my account</p><p className="text-xs text-body">Permanently removes your profile, settings and order history.</p></div>
+            <button onClick={removeAccount} className="inline-flex h-10 items-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700"><Trash2 className="h-4 w-4" />Delete account</button>
           </div>
         </Card>
       </div>

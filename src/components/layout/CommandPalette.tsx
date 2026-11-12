@@ -5,8 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CornerDownLeft, CreditCard, FileText, Globe, HardDrive, Layers, Mail, Moon, Phone, Search, ShoppingCart, Sparkles, Sun, Tag, type LucideIcon } from "lucide-react";
 import { announceNavigation } from "@/lib/navigate";
 import { features } from "@/data/features";
-import { devices } from "@/data/devices";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { NAV_LINKS, SITE } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDemoModal, openDeviceModal, openFeatureModal, setCartOpen, setPalette, setTheme } from "@/store/slices/uiSlice";
@@ -23,6 +22,7 @@ export default function CommandPalette() {
   const theme = useAppSelector((s) => s.ui.theme);
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
+  const { devices, plans } = useCatalog();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -58,7 +58,7 @@ export default function CommandPalette() {
       ...devices.map((d): Cmd => ({ id: `d-${d.id}`, group: "Products", label: d.name, hint: d.category, icon: HardDrive, keywords: "tracker hardware", run: () => dispatch(openDeviceModal(d.id)) })),
       ...features.map((f): Cmd => ({ id: `f-${f.id}`, group: "Features", label: f.title, hint: f.category, icon: f.category === "Reports & Analytics" ? FileText : f.category === "Platform" ? Layers : CreditCard, keywords: f.description, run: () => dispatch(openFeatureModal(f.id)) })),
     ];
-  }, [dispatch, router, theme]);
+  }, [dispatch, router, theme, devices, plans]);
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();

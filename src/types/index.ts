@@ -45,8 +45,10 @@ export interface Device {
   /** Second level of the catalogue (e.g. "Bike Trackers") */
   subcategory: string;
   visual: "tracker" | "voice" | "video" | "relay" | "sos";
-  /** Product image from the company price list */
+  /** Main picture (first of `images`) */
   image?: string;
+  /** Gallery, main picture first. Entries are /public paths or full URLs of uploaded pictures. */
+  images?: string[];
   /** Product title as shown on the company price list image */
   siteTitle?: string;
   summary: string;

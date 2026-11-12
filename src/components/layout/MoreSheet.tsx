@@ -13,7 +13,7 @@ import ThemeToggle from "./ThemeToggle";
 import { SITE } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setMobileNav } from "@/store/slices/uiSlice";
-import { logout } from "@/store/slices/authSlice";
+import { signOut } from "@/store/thunks";
 import { cn } from "@/utils/format";
 
 const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
@@ -38,6 +38,7 @@ export default function MoreSheet() {
   const pathname = usePathname();
   const open = useAppSelector((s) => s.ui.mobileNavOpen);
   const user = useAppSelector((s) => s.auth.user);
+  const links = user?.role === "admin" ? [...LINKS, { href: "/admin", label: "Admin panel", icon: LayoutGrid }] : LINKS;
   const close = () => dispatch(setMobileNav(false));
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export default function MoreSheet() {
 
             <div className="flex-1 overflow-y-auto px-2 py-2">
               <motion.nav aria-label="Pages" initial="hide" animate="show" variants={{ show: { transition: { staggerChildren: 0.035, delayChildren: 0.08 } } }}>
-                {LINKS.map((l) => {
+                {links.map((l) => {
                   const on = isActive(l.href);
                   return (
                     <motion.div key={l.href} variants={{ hide: { opacity: 0, x: -14 }, show: { opacity: 1, x: 0 } }} transition={{ duration: 0.22, ease: "easeOut" }}>
@@ -101,7 +102,7 @@ export default function MoreSheet() {
               {user ? (
                 <div className="flex items-center justify-between gap-2 px-3">
                   <span className="truncate text-sm font-semibold text-ink">{user.name}</span>
-                  <button onClick={() => { dispatch(logout()); close(); toast.success("Signed out (demo)"); announceNavigation(); router.push("/"); }} className="flex items-center gap-1.5 text-sm font-semibold text-body"><LogOut className="h-4 w-4" />Logout</button>
+                  <button onClick={() => { void dispatch(signOut()); close(); toast.success("Signed out"); announceNavigation(); router.push("/"); }} className="flex items-center gap-1.5 text-sm font-semibold text-body"><LogOut className="h-4 w-4" />Logout</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2 px-3">

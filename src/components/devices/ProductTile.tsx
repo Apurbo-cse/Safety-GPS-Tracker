@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, Eye, Heart, Phone, ShoppingCart } from "lucide-react";
@@ -13,7 +13,6 @@ import { addToCart } from "@/store/slices/cartSlice";
 import { openDeviceModal, setCartOpen, openDemoModal } from "@/store/slices/uiSlice";
 import { toggleWishlist } from "@/store/slices/wishlistSlice";
 import { cn, formatBDT } from "@/utils/format";
-import { productImage } from "@/data/catalogue";
 import type { Device } from "@/types";
 
 export type TileProps = {
@@ -108,7 +107,7 @@ export default function ProductTile({
         {href ? (
           <Link href={href} aria-label={name} className="block h-full w-full">
             {image ? (
-              <Image
+              <ProductImage
                 src={image}
                 alt={name}
                 fill
@@ -122,7 +121,7 @@ export default function ProductTile({
         ) : (
           <div onClick={onView} className="h-full w-full cursor-pointer">
             {image ? (
-              <Image
+              <ProductImage
                 src={image}
                 alt={name}
                 fill
@@ -221,7 +220,7 @@ export function DeviceTile({ d }: { d: Device }) {
 
   return (
     <ProductTile
-      image={productImage(d)}
+      image={d.image}
       visual={d.visual}
       name={d.name}
       category={d.category}

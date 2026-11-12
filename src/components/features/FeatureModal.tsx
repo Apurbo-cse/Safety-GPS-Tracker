@@ -5,6 +5,7 @@ import Modal from "@/components/common/Modal";
 import { LinkButton } from "@/components/common/Button";
 import { features } from "@/data/features";
 import { isPackageFeature, packagesFor } from "@/lib/featurePackages";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { formatBDT } from "@/utils/format";
 import { DynIcon } from "@/lib/icons";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -13,6 +14,7 @@ import { openFeatureModal } from "@/store/slices/uiSlice";
 export default function FeatureModal() {
   const dispatch = useAppDispatch();
   const id = useAppSelector((s) => s.ui.featureModalId);
+  const { plans } = useCatalog();
   const f = features.find((x) => x.id === id);
   return (
     <Modal open={!!f} onClose={() => dispatch(openFeatureModal(null))} title={f?.title ?? ""}>
@@ -28,7 +30,7 @@ export default function FeatureModal() {
             <p className="text-xs font-semibold uppercase tracking-wide text-body">Included in</p>
             {isPackageFeature(f.id) ? (
               <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
-                {packagesFor(f.id).map((p) => <li key={p.id} className="flex items-center justify-between gap-2 rounded-md bg-soft px-3 py-2 text-sm"><span className="truncate font-medium text-ink">{p.name}</span><span className="shrink-0 text-xs tabular-nums text-body">{formatBDT(p.devicePrice)} + {formatBDT(p.monthlyCharge)}/mo</span></li>)}
+                {packagesFor(f.id, plans).map((p) => <li key={p.id} className="flex items-center justify-between gap-2 rounded-md bg-soft px-3 py-2 text-sm"><span className="truncate font-medium text-ink">{p.name}</span><span className="shrink-0 text-xs tabular-nums text-body">{formatBDT(p.devicePrice)} + {formatBDT(p.monthlyCharge)}/mo</span></li>)}
               </ul>
             ) : <p className="mt-1 text-sm text-body">A platform capability. The price list does not break this feature down per package — ask sales to confirm for your package.</p>}
           </div>

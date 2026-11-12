@@ -2,11 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { solutionDetails } from "@/data/solutionDetails";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { formatBDT } from "@/utils/format";
 
 /** Clean, uncluttered recommended package & key solution Q&A. */
 export default function SolutionExtras({ id }: { id: string }) {
+  const { plans } = useCatalog();
   const d = solutionDetails[id];
   const plan = d && plans.find((p) => p.id === d.planId);
   if (!d) return null;

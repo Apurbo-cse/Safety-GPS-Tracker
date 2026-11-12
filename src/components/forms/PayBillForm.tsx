@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/common/Button";
 import { Field, inputCls } from "./Field";
 import { mobileSchema } from "@/lib/validation";
-import { plans } from "@/data/pricing";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { SITE } from "@/lib/site";
 import { formatBDT, cn } from "@/utils/format";
 
@@ -24,8 +24,6 @@ const METHOD_STYLE: Record<Method, { color: string; note: string }> = {
   "Bank Transfer": { color: "#1e3a5f", note: "Any bank" },
 };
 /** Quick amounts: the published monthly charges, plus 3-month and 6-month multiples of the lowest */
-const MONTHLY = [...new Set(plans.map((p) => p.monthlyCharge))].sort((a, b) => a - b);
-const QUICK = [...MONTHLY, MONTHLY[0] * 3, MONTHLY[0] * 6];
 
 const schema = z.object({
   customerId: z.string().min(3, "Enter your customer ID"),
@@ -49,6 +47,12 @@ function MethodBadge({ m, size = "h-8 w-8" }: { m: Method; size?: string }) {
 }
 
 export default function PayBillForm() {
+  const { plans } = useCatalog();
+  // quick-pay amounts: each distinct monthly charge, plus 3 and 6 months of the lowest
+  const QUICK = useMemo(() => {
+    const monthly = [...new Set(plans.map((p) => p.monthlyCharge))].sort((a, b) => a - b);
+    return monthly.length ? [...monthly, monthly[0] * 3, monthly[0] * 6] : [300, 900, 1800];
+  }, [plans]);
   const [step, setStep] = useState<Step>("form");
   const [data, setData] = useState<Out | null>(null);
   const [ref, setRef] = useState("");

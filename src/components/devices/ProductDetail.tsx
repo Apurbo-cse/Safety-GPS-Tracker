@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { useState } from "react";
 import { Check, Heart, Minus, Phone, Plus, ShieldCheck, ShoppingCart, Truck, Headset, Zap } from "lucide-react";
@@ -7,21 +7,22 @@ import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import DeviceVisual from "./DeviceVisual";
 import { DeviceTile } from "./ProductTile";
-import { devices } from "@/data/devices";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { categoryUrl } from "@/data/catalogue";
-import { plans } from "@/data/pricing";
 import { SITE } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart, setQty } from "@/store/slices/cartSlice";
 import { setCartOpen } from "@/store/slices/uiSlice";
 import { toggleWishlist } from "@/store/slices/wishlistSlice";
 import { cn, formatBDT } from "@/utils/format";
+import type { Device } from "@/types";
 
 type Tab = "description" | "specs" | "package";
 
 /** Full product page: gallery, buy box, details tabs and related products. */
-export default function ProductDetail({ id }: { id: string }) {
-  const d = devices.find((x) => x.id === id)!;
+export default function ProductDetail({ id, device }: { id: string; device?: Device }) {
+  const { devices, plans } = useCatalog();
+  const d = device ?? devices.find((x) => x.id === id)!;
   const dispatch = useAppDispatch();
   const wished = useAppSelector((s) => s.wishlist.ids.includes(d.id));
   const inCart = useAppSelector((s) => s.cart.items.find((i) => i.id === `dev-${d.id}`));
@@ -30,7 +31,8 @@ export default function ProductDetail({ id }: { id: string }) {
   const [tab, setTab] = useState<Tab>("description");
   const plan = d.planId ? plans.find((p) => p.id === d.planId) : undefined;
 
-  const shots = [d.image ? { kind: "image" as const, src: d.image } : null, { kind: "art" as const }].filter(Boolean) as ({ kind: "image"; src: string } | { kind: "art" })[];
+  const pics = d.images?.length ? d.images : d.image ? [d.image] : [];
+  const shots: ({ kind: "image"; src: string } | { kind: "art" })[] = pics.length ? pics.map((src) => ({ kind: "image" as const, src })) : [{ kind: "art" as const }];
   const related = devices.filter((x) => x.id !== d.id && x.category === d.category).concat(devices.filter((x) => x.id !== d.id && x.category !== d.category)).slice(0, 4);
 
   const add = (openCart: boolean) => {
@@ -60,7 +62,7 @@ export default function ProductDetail({ id }: { id: string }) {
             <div className="relative aspect-[858/600] overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900/90">
               {d.price && <span className="absolute left-3 top-3 z-10 grid h-12 w-12 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white shadow">HOT</span>}
               {shots[shot]?.kind === "image" ? (
-                <Image src={(shots[shot] as { src: string }).src} alt={d.name} fill priority sizes="(min-width:1024px) 50vw, 100vw" className="object-contain" />
+                <ProductImage src={(shots[shot] as { src: string }).src} alt={d.name} fill priority sizes="(min-width:1024px) 50vw, 100vw" className="object-contain" />
               ) : (
                 <DeviceVisual kind={d.visual} className="h-full w-full" />
               )}
@@ -69,7 +71,7 @@ export default function ProductDetail({ id }: { id: string }) {
               <div className="mt-3 flex gap-3">
                 {shots.map((sh, i) => (
                   <button key={i} onClick={() => setShot(i)} aria-label={`Image ${i + 1}`} className={cn("relative h-20 w-20 overflow-hidden rounded border bg-transparent", shot === i ? "border-brand-500 ring-2 ring-brand-500/20" : "border-line")}>
-                    {sh.kind === "image" ? <Image src={sh.src} alt="" fill sizes="80px" className="object-contain p-1.5" /> : <DeviceVisual kind={d.visual} className="h-full w-full" />}
+                    {sh.kind === "image" ? <ProductImage src={sh.src} alt="" fill sizes="80px" className="object-contain p-1.5" /> : <DeviceVisual kind={d.visual} className="h-full w-full" />}
                   </button>
                 ))}
               </div>

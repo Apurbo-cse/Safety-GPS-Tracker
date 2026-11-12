@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,7 +11,9 @@ import { Field, inputCls } from "./Field";
 import PasswordInput from "./PasswordInput";
 import { phoneRegex } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { authStart, loginSuccess } from "@/store/slices/authSlice";
+import { signIn } from "@/store/thunks";
+import { safeNext } from "@/lib/redirect";
+import { ApiError } from "@/lib/api";
 
 const schema = z.object({
   identifier: z.string().min(1, "Enter your email or mobile number").refine((v) => z.string().email().safeParse(v).success || phoneRegex.test(v), "Enter a valid email or mobile number"),
@@ -22,17 +24,20 @@ type V = z.infer<typeof schema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const next = safeNext(useSearchParams().get("next"));
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.status === "loading");
-  const { register, handleSubmit, formState: { errors } } = useForm<V>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<V>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (v: V) => {
-    dispatch(authStart());
-    await new Promise((r) => setTimeout(r, 900));
-    dispatch(loginSuccess({ name: "Demo Customer", identifier: v.identifier }));
-    toast.success("Signed in (demo)");
-    announceNavigation();
-    router.push("/");
+    try {
+      const user = await dispatch(signIn(v.identifier, v.password));
+      toast.success(`Welcome back, ${user.name.split(" ")[0]}`);
+      announceNavigation();
+      router.push(next === "/" && user.role === "admin" ? "/admin" : next);
+    } catch (e) {
+      setError("password", { message: e instanceof ApiError ? e.message : "Could not sign in. Please try again." });
+    }
   };
 
   return (

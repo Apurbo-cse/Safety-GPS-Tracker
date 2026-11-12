@@ -1,24 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductDetail from "@/components/devices/ProductDetail";
-import { devices } from "@/data/devices";
 import { deviceUrl } from "@/data/catalogue";
+import { getCatalog, getProduct } from "@/lib/catalog.server";
 import { pageMeta } from "@/lib/metadata";
 
-export function generateStaticParams() {
-  return devices.map((d) => ({ id: d.id }));
+export async function generateStaticParams() {
+  return (await getCatalog()).devices.map((d) => ({ id: d.id }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  const d = devices.find((x) => x.id === id);
+  const d = await getProduct((await params).id);
   if (!d) return {};
   return pageMeta(d.name, d.summary, deviceUrl(d));
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const d = devices.find((x) => x.id === id);
+  const d = await getProduct((await params).id);
   if (!d) notFound();
-  return <ProductDetail id={d.id} />;
+  return <ProductDetail id={d.id} device={d} />;
 }

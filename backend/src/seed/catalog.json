@@ -1,0 +1,848 @@
+{
+  "plans": [
+    {
+      "id": "premium-voice",
+      "image": "/img/packages/premium-voice.png",
+      "siteTitle": "Premium Pro With Voice",
+      "name": "Premium Voice Monitoring",
+      "devicePrice": 7000,
+      "monthlyCharge": 500,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Car Inside Voice Monitoring",
+        "AC On Notification",
+        "Door Open Alert"
+      ],
+      "sourceNo": 1,
+      "highlight": "Most complete cabin alerts",
+      "sort": 0
+    },
+    {
+      "id": "standard-gps",
+      "image": "/img/packages/standard-gps.png",
+      "siteTitle": "Premium Device With Voice",
+      "name": "Standard GPS",
+      "devicePrice": 6000,
+      "monthlyCharge": 400,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Car Inside Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 2,
+      "sort": 1
+    },
+    {
+      "id": "gps-1",
+      "image": "/img/packages/gps-1.png",
+      "siteTitle": "Premium Without Voice",
+      "name": "GPS Package 1",
+      "devicePrice": 4000,
+      "monthlyCharge": 400,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Car Inside Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 3,
+      "sort": 2
+    },
+    {
+      "id": "gps-2",
+      "image": "/img/packages/gps-2.png",
+      "siteTitle": "Bike Premium Device",
+      "name": "GPS Package 2",
+      "devicePrice": 4000,
+      "monthlyCharge": 300,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Car Inside Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 4,
+      "highlight": "Lowest monthly charge",
+      "sort": 3
+    },
+    {
+      "id": "gps-3",
+      "image": "/img/packages/gps-3.png",
+      "siteTitle": "Excavator Device",
+      "name": "GPS Package 3",
+      "devicePrice": 4000,
+      "monthlyCharge": 300,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Car Inside Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 5,
+      "sort": 4
+    },
+    {
+      "id": "voice-gps",
+      "image": "/img/packages/voice-gps.png",
+      "siteTitle": "Truck Tracking Device",
+      "name": "Voice Monitoring GPS",
+      "devicePrice": 4000,
+      "monthlyCharge": 300,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 6,
+      "sort": 5
+    },
+    {
+      "id": "video-voice",
+      "image": "/img/packages/video-voice.png",
+      "siteTitle": "Live Video & Tracking",
+      "name": "Video & Voice Monitoring",
+      "devicePrice": 16000,
+      "monthlyCharge": 500,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Live Video & Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 7,
+      "highlight": "Live video + voice",
+      "sort": 6
+    },
+    {
+      "id": "voice-gps-2",
+      "image": "/img/packages/voice-gps-2.png",
+      "siteTitle": "Easy OBD Device",
+      "name": "Voice Monitoring GPS 2",
+      "devicePrice": 4000,
+      "monthlyCharge": 300,
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert",
+        "Speed Violation Alert",
+        "Geo Fencing",
+        "Panic Button",
+        "BRTA Papers Update Alert",
+        "Car Accident Alert",
+        "Live Traffic Update",
+        "Working Hours",
+        "Android and iOS App",
+        "Destination Alert",
+        "Add Driver Details",
+        "Insurance Expire Alert",
+        "Engine Oil Change Alert",
+        "24×7 Helpline Facility",
+        "Voice Monitoring",
+        "Device Removal Alert",
+        "Travel History"
+      ],
+      "sourceNo": 8,
+      "sort": 7
+    }
+  ],
+  "devices": [
+    {
+      "id": "premium-pro-voice",
+      "name": "Premium Pro With Voice",
+      "category": "Voice Monitoring Devices",
+      "subcategory": "Car Voice Trackers",
+      "visual": "voice",
+      "summary": "Voice monitoring tracker with AC On and Door Open notifications.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳7,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳500"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 7000,
+      "monthly": 500,
+      "planId": "premium-voice",
+      "image": "/img/packages/premium-voice.png",
+      "siteTitle": "Premium Pro With Voice",
+      "priceNote": "Device price from the Premium Voice Monitoring package",
+      "sort": 0
+    },
+    {
+      "id": "premium-with-voice",
+      "name": "Premium Device With Voice",
+      "category": "Voice Monitoring Devices",
+      "subcategory": "Car Voice Trackers",
+      "visual": "voice",
+      "summary": "Tracker with in-car voice monitoring and full security alerts.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳6,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳400"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 6000,
+      "monthly": 400,
+      "planId": "standard-gps",
+      "image": "/img/packages/standard-gps.png",
+      "siteTitle": "Premium Device With Voice",
+      "priceNote": "Device price from the Standard GPS package",
+      "sort": 1
+    },
+    {
+      "id": "premium-without-voice",
+      "name": "Premium Without Voice",
+      "category": "GPS Tracking Devices",
+      "subcategory": "Car Trackers",
+      "visual": "tracker",
+      "summary": "Everyday GPS tracker for cars with live tracking, history and alerts.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳4,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳400"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 4000,
+      "monthly": 400,
+      "planId": "gps-1",
+      "image": "/img/packages/gps-1.png",
+      "siteTitle": "Premium Without Voice",
+      "priceNote": "Device price from the GPS Package 1 package",
+      "sort": 2
+    },
+    {
+      "id": "bike-premium",
+      "name": "Bike Premium Device",
+      "category": "GPS Tracking Devices",
+      "subcategory": "Bike Trackers",
+      "visual": "tracker",
+      "summary": "Tracker for motorcycles with live location, engine lock and alerts.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳4,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳300"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 4000,
+      "monthly": 300,
+      "planId": "gps-2",
+      "image": "/img/packages/gps-2.png",
+      "siteTitle": "Bike Premium Device",
+      "priceNote": "Device price from the GPS Package 2 package",
+      "sort": 3
+    },
+    {
+      "id": "excavator-device",
+      "name": "Excavator Device",
+      "category": "GPS Tracking Devices",
+      "subcategory": "Heavy Vehicle Trackers",
+      "visual": "tracker",
+      "summary": "Tracking for construction equipment with working hours and engine alerts.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳4,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳300"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 4000,
+      "monthly": 300,
+      "planId": "gps-3",
+      "image": "/img/packages/gps-3.png",
+      "siteTitle": "Excavator Device",
+      "priceNote": "Device price from the GPS Package 3 package",
+      "sort": 4
+    },
+    {
+      "id": "truck-tracking",
+      "name": "Truck Tracking Device",
+      "category": "GPS Tracking Devices",
+      "subcategory": "Heavy Vehicle Trackers",
+      "visual": "voice",
+      "summary": "Tracking for trucks and commercial vehicles with voice monitoring.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳4,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳300"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 4000,
+      "monthly": 300,
+      "planId": "voice-gps",
+      "image": "/img/packages/voice-gps.png",
+      "siteTitle": "Truck Tracking Device",
+      "priceNote": "Device price from the Voice Monitoring GPS package",
+      "sort": 5
+    },
+    {
+      "id": "live-video-tracking",
+      "name": "Live Video & Tracking",
+      "category": "Video & Voice Monitoring Devices",
+      "subcategory": "Video Telematics",
+      "visual": "video",
+      "summary": "Live video and voice monitoring terminal for high-assurance fleets.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳16,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳500"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 16000,
+      "monthly": 500,
+      "planId": "video-voice",
+      "image": "/img/packages/video-voice.png",
+      "siteTitle": "Live Video & Tracking",
+      "priceNote": "Device price from the Video & Voice Monitoring package",
+      "sort": 6
+    },
+    {
+      "id": "easy-obd",
+      "name": "Easy OBD Device",
+      "category": "Vehicle GPS Hardware",
+      "subcategory": "OBD Devices",
+      "visual": "tracker",
+      "summary": "Plug-in style tracker for passenger vehicles.",
+      "specs": [
+        {
+          "label": "Device price",
+          "value": "৳4,000"
+        },
+        {
+          "label": "Monthly charge",
+          "value": "৳300"
+        },
+        {
+          "label": "Location updates",
+          "value": "Every 10 seconds"
+        },
+        {
+          "label": "Apps",
+          "value": "Android, iOS and web"
+        }
+      ],
+      "features": [
+        "Live Tracking",
+        "Daily Mileage Report",
+        "Engine Lock & Unlock",
+        "Speed Violation Alert",
+        "Geo Fencing"
+      ],
+      "price": 4000,
+      "monthly": 300,
+      "planId": "voice-gps-2",
+      "image": "/img/packages/voice-gps-2.png",
+      "siteTitle": "Easy OBD Device",
+      "priceNote": "Device price from the Voice Monitoring GPS 2 package",
+      "sort": 7
+    },
+    {
+      "id": "engine-lock-relay",
+      "name": "Engine Lock Relay Kit",
+      "category": "Vehicle GPS Hardware",
+      "subcategory": "Accessories",
+      "visual": "relay",
+      "summary": "Wiring accessory that lets the tracker cut and restore engine power remotely.",
+      "specs": [
+        {
+          "label": "Price",
+          "value": "Request quote"
+        },
+        {
+          "label": "Function",
+          "value": "Remote engine lock & unlock"
+        },
+        {
+          "label": "Technical specs",
+          "value": "On request"
+        }
+      ],
+      "features": [
+        "Engine Lock & Unlock",
+        "Engine On & Off Alert"
+      ],
+      "priceNote": "Price not published — request a quote",
+      "sort": 8
+    },
+    {
+      "id": "panic-sos-button",
+      "name": "Panic / SOS Button",
+      "category": "Vehicle GPS Hardware",
+      "subcategory": "Accessories",
+      "visual": "sos",
+      "summary": "Driver-operated emergency button that raises an alert to the account owner.",
+      "specs": [
+        {
+          "label": "Price",
+          "value": "Request quote"
+        },
+        {
+          "label": "Function",
+          "value": "Emergency alert"
+        },
+        {
+          "label": "Technical specs",
+          "value": "On request"
+        }
+      ],
+      "features": [
+        "Panic Button",
+        "Car Accident Alert"
+      ],
+      "priceNote": "Price not published — request a quote",
+      "sort": 9
+    }
+  ],
+  "faqs": [
+    {
+      "id": "update-rate",
+      "category": "Tracking & GPS",
+      "q": "How fast does the GPS location update on the map?",
+      "a": "Safety GPS Tracker features an ultra-low latency 10-second satellite refresh rate. This ensures road turns, highway speed changes, and traffic stops are reflected accurately in real-time without sluggish delays.",
+      "tag": "10s Ultra-Fast Ping",
+      "sort": 0
+    },
+    {
+      "id": "engine-immobilizer",
+      "category": "Security & Relay",
+      "q": "How does the Remote Engine Immobilizer work?",
+      "a": "Through your mobile app or web portal, you can tap 'Immobilize Engine'. An encrypted command is transmitted via the onboard 4G IoT relay in under 400 milliseconds to cut power to the fuel solenoid. A smart speed-latch ensures the command only executes safely when the vehicle slows down.",
+      "tag": "Solid-State Relay",
+      "sort": 1
+    },
+    {
+      "id": "fuel-monitoring",
+      "category": "Hardware & Sensors",
+      "q": "Can I monitor fuel pilferage and diesel consumption?",
+      "a": "Yes. Our Fuel Monitoring Package pairs with capacitive and ultrasonic fuel sensor rods (±1% accuracy) installed in your vehicle's fuel tank, giving you instant alerts for sudden fuel drops, tank drainage, and refuel receipts.",
+      "tag": "99.5% Accuracy Rods",
+      "sort": 2
+    },
+    {
+      "id": "dead-zones",
+      "category": "Tracking & GPS",
+      "q": "What happens if a vehicle enters cellular dead zones on remote highways?",
+      "a": "Our hardware uses Multi-Carrier 4G IoT SIM cards with automatic network switching across Grameenphone, Robi, and Banglalink towers. In rare instances where all networks are unreachable, internal flash memory stores up to 30,000 GPS points and uploads them automatically the moment signal returns.",
+      "tag": "Dual-SIM Roaming",
+      "sort": 3
+    },
+    {
+      "id": "installation",
+      "category": "Hardware & Sensors",
+      "q": "Do you provide doorstep installation across all 64 districts in Bangladesh?",
+      "a": "Yes! Our certified telematics technicians provide free doorstep installation, covert wiring, and device calibration in Dhaka, Chittagong, Sylhet, Rajshahi, Khulna, and all 64 districts.",
+      "tag": "64 Districts Coverage",
+      "sort": 4
+    },
+    {
+      "id": "multi-login",
+      "category": "Billing & Support",
+      "q": "Can multiple dispatchers track the fleet simultaneously on Android, iOS, and PC?",
+      "a": "Absolutely. One account gives your dispatchers and executives simultaneous multi-login access on native Android and iOS mobile apps as well as any desktop web browser with role-based access control.",
+      "tag": "Multi-Platform Access",
+      "sort": 5
+    },
+    {
+      "id": "btrc-approval",
+      "category": "Hardware & Sensors",
+      "q": "Is this tracking hardware approved by BTRC and BRTA compliant?",
+      "a": "Yes, 100%. All tracking units supplied by Safety GPS Tracker are officially BTRC approved (Reg. BTRC/LL/GPS-2021) and comply with BRTA digital safety guidelines for commercial and private motor vehicles.",
+      "tag": "BTRC Licensed",
+      "sort": 6
+    },
+    {
+      "id": "tamper",
+      "category": "Security & Relay",
+      "q": "What happens if a thief attempts to cut or disconnect the tracker?",
+      "a": "The moment the primary wiring is severed, the device triggers an instant 'Power Cut / Tamper Alert' notification to your phone. The onboard backup battery keeps the GPS running for up to 72 hours while alerting our 24/7 recovery dispatch desk.",
+      "tag": "Tamper & Battery",
+      "sort": 7
+    },
+    {
+      "id": "pricing-1",
+      "category": "Pricing & Packages",
+      "q": "What do the device price and monthly charge cover?",
+      "a": "The device price is a one-time hardware cost. The monthly charge is the recurring subscription for the tracking service and the features listed on the package.",
+      "tag": "Device + Monthly",
+      "sort": 8
+    },
+    {
+      "id": "pricing-2",
+      "category": "Pricing & Packages",
+      "q": "Why do some packages look the same?",
+      "a": "Several packages share the same published feature list and differ only in device price and monthly charge. Contact sales to confirm which one suits your vehicle and budget.",
+      "tag": "Package Differences",
+      "sort": 9
+    },
+    {
+      "id": "pricing-3",
+      "category": "Pricing & Packages",
+      "q": "Which package has voice or video monitoring?",
+      "a": "Premium Voice Monitoring lists Car Inside Voice Monitoring. Voice Monitoring GPS and Voice Monitoring GPS 2 list Voice Monitoring. Video & Voice Monitoring lists Live Video & Voice Monitoring.",
+      "tag": "Voice & Video",
+      "sort": 10
+    },
+    {
+      "id": "pricing-4",
+      "category": "Pricing & Packages",
+      "q": "Can I get a package for a larger fleet?",
+      "a": "Yes. Use the Contact Sales button or the corporate package request below and the sales team will discuss fleet requirements with you.",
+      "tag": "Fleet Packages",
+      "sort": 11
+    },
+    {
+      "id": "pricing-5",
+      "category": "Pricing & Packages",
+      "q": "Is payment processed on this website?",
+      "a": "No. This site is a frontend demo. Buy Now adds a package to a demo cart and no payment is taken.",
+      "tag": "Demo Checkout",
+      "sort": 12
+    },
+    {
+      "id": "apps",
+      "category": "Billing & Support",
+      "q": "Which apps can I use to track my vehicle?",
+      "a": "You can track and control your vehicles from the Android app, the iOS app, and the web platform in any desktop browser.",
+      "tag": "Android · iOS · Web",
+      "sort": 13
+    },
+    {
+      "id": "pay-bill",
+      "category": "Billing & Support",
+      "q": "How do I pay my monthly bill?",
+      "a": "Use the Pay Bill page on this website to look up your account and pay the monthly charge. On this demo site the payment step is simulated and no money is taken.",
+      "tag": "Pay Bill Online",
+      "sort": 14
+    },
+    {
+      "id": "support",
+      "category": "Billing & Support",
+      "q": "How do I reach customer support?",
+      "a": "Call the 24/7 helpline on 01713546487, email info@imprssivebd.com, or send a message from the Contact page and the right team will get back to you.",
+      "tag": "24/7 Helpline",
+      "sort": 15
+    }
+  ],
+  "heroSlides": [
+    {
+      "id": "car-tracking",
+      "tab": "Private cars",
+      "badge": "Bangladesh's Leading GPS Platform",
+      "badgeIcon": "shield",
+      "titleMain": "Monitor Your Vehicle & Keep It",
+      "titleHighlight": "Out Of The Stolen List",
+      "text": "Track your vehicle in real time with 10s updates, shut down the engine remotely from your smartphone, and receive instant anti-theft alerts.",
+      "bgImage": "/img/hero-car.jpg",
+      "accent": "brand",
+      "ctaLabel": "Explore Products",
+      "ctaHref": "/products",
+      "telematics": {
+        "vehicle": "Toyota Premio 2022",
+        "plate": "Dhaka Metro Ga 32-1142",
+        "place": "Mirpur Road, Dhanmondi",
+        "speed": "44 km/h",
+        "ignition": "ON",
+        "status": "In Transit",
+        "route": "M10 160 C 80 150, 120 70, 230 70 S 300 120, 310 120",
+        "sensor": "AC: ON · Door: Closed",
+        "fuel": "78% Fuel"
+      },
+      "sort": 0
+    },
+    {
+      "id": "bike-security",
+      "tab": "Motorcycles",
+      "badge": "Motorcycle Security & Alarm",
+      "badgeIcon": "bike",
+      "titleMain": "Compact Waterproof GPS for",
+      "titleHighlight": "Bikes & Scooters",
+      "text": "Hidden compact tracker with vibration shock alert, ignition notification, and remote engine lock from your smartphone to stop bike theft cold.",
+      "bgImage": "/img/hero-bike.jpg",
+      "accent": "brand",
+      "ctaLabel": "View Bike Trackers",
+      "ctaHref": "/products/category/gps-tracking-devices/bike-trackers",
+      "telematics": {
+        "vehicle": "Yamaha R15 V4",
+        "plate": "Dhaka Metro Ha 19-4820",
+        "place": "Bashundhara R/A, Dhaka",
+        "speed": "0 km/h",
+        "ignition": "OFF",
+        "status": "Parked & Armed",
+        "route": "M20 40 H280 V140 H60 Z",
+        "sensor": "Shock Sensor: Armed",
+        "fuel": "12.8V Battery"
+      },
+      "sort": 1
+    },
+    {
+      "id": "fleet-management",
+      "tab": "Fleets",
+      "badge": "Fleet & Heavy Commercial",
+      "badgeIcon": "truck",
+      "titleMain": "Complete Fleet Control &",
+      "titleHighlight": "Fuel Rod Monitoring",
+      "text": "Ultrasonic fuel rods to detect theft, trip mileage logs, speed violation alerts, and automated BRTA reminders.",
+      "bgImage": "/img/hero-truck.jpg",
+      "accent": "sky",
+      "ctaLabel": "Fleet Solutions",
+      "ctaHref": "/solutions",
+      "telematics": {
+        "vehicle": "Isuzu 5-Ton Covered Van",
+        "plate": "Dhaka Metro Ta 14-8831",
+        "place": "Gazipur Bypass, Highway",
+        "speed": "58 km/h",
+        "ignition": "ON",
+        "status": "Highway Route",
+        "route": "M10 40 C 90 40, 160 160, 250 160 S 300 40, 310 40",
+        "sensor": "BRTA Tax & Fitness: Valid",
+        "fuel": "86% (Ultrasonic)"
+      },
+      "sort": 2
+    }
+  ]
+}

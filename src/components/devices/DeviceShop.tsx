@@ -1,20 +1,31 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import Container from "@/components/common/Container";
 import PageHero from "@/components/common/PageHero";
 import { DeviceTile } from "./ProductTile";
-import { devices } from "@/data/devices";
-import { catalogue, categoryUrl } from "@/data/catalogue";
+import { useCatalog } from "@/components/providers/CatalogProvider";
+import { categoryUrl } from "@/data/catalogue";
+import { api, type Paged, type ProductsQuery } from "@/lib/api";
+import { useLoad } from "@/lib/useLoad";
+import type { Device } from "@/types";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openDeviceModal } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
 
 type Sort = "default" | "price-asc" | "price-desc" | "name";
-const MAX_PRICE = Math.max(...devices.map((d) => d.price ?? 0));
+
+/** 1 … 4 5 6 … 20 — a short list of page numbers with gaps. */
+function pageWindow(current: number, total: number): (number | "…")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const keep = new Set([1, total, current - 1, current, current + 1].filter((n) => n >= 1 && n <= total));
+  const out: (number | "…")[] = [];
+  [...keep].sort((a, b) => a - b).forEach((n, i, arr) => { if (i && n - arr[i - 1] > 1) out.push("…"); out.push(n); });
+  return out;
+}
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -26,7 +37,9 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 }
 
 /** Shop grid; pass `category` / `subcategory` (display names) for category pages. */
-export default function DeviceShop({ category, subcategory }: { category?: string; subcategory?: string } = {}) {
+export default function DeviceShop({ category, subcategory, initial }: { category?: string; subcategory?: string; initial?: Paged<Device> } = {}) {
+  const { devices, catalogue } = useCatalog();
+  const MAX_PRICE = Math.max(0, ...devices.map((d) => d.price ?? 0));
   const cat = category ?? null;
   const sub = subcategory ?? null;
   const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
@@ -46,22 +59,26 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
     return () => window.removeEventListener("hashchange", sync);
   }, []);
 
-  let list = devices.filter((d) =>
-    (!wishOnly || wishIds.includes(d.id)) &&
-    (!cat || d.category === cat) &&
-    (!sub || d.subcategory === sub) &&
-    (d.price === undefined || d.price <= applied) &&
-    (!(avail.priced || avail.call) || (avail.priced && d.price) || (avail.call && !d.price)),
-  );
-  if (sort === "price-asc") list = [...list].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
-  if (sort === "price-desc") list = [...list].sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-  if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-
-  const totalPages = Math.ceil(list.length / pageSize) || 1;
-  const currentPage = Math.min(Math.max(1, page), totalPages);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, list.length);
-  const shown = list.slice(startIndex, startIndex + pageSize);
+  // Everything below is asked of the server: it filters, sorts and returns just one page.
+  const query = useMemo<ProductsQuery>(() => ({
+    category: cat ?? undefined, sub: sub ?? undefined,
+    maxPrice: applied < MAX_PRICE ? applied : undefined,
+    priced: avail.priced, call: avail.call,
+    sort: sort === "default" ? undefined : sort,
+    ids: wishOnly ? wishIds : undefined,
+    page, limit: pageSize,
+  }), [cat, sub, applied, MAX_PRICE, avail, sort, wishOnly, wishIds, page, pageSize]);
+  // the page the server already rendered is reused until the visitor changes something
+  const isInitialView = !!initial && page === 1 && pageSize === initial.limit && !query.maxPrice && !avail.priced && !avail.call && sort === "default" && !wishOnly;
+  const loaded = useLoad(() => (isInitialView ? Promise.resolve(initial!) : api.products(query)), [query, isInitialView]);
+  const result = isInitialView ? initial! : loaded.data;
+  const loading = !isInitialView && loaded.loading;
+  const shown = result?.items ?? [];
+  const total = result?.total ?? 0;
+  const totalPages = result?.pages ?? 1;
+  const currentPage = result?.page ?? page;
+  const startIndex = total ? (currentPage - 1) * pageSize : 0;
+  const endIndex = Math.min(startIndex + shown.length, total);
   const top = devices.filter((d) => d.price).slice(0, 3);
   const dispatch = useAppDispatch();
 
@@ -106,7 +123,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
 
       <Block title="My wishlist">
         <label className="flex cursor-pointer items-center gap-2 py-1 text-sm text-body">
-          <input type="checkbox" checked={wishOnly} onChange={(e) => setWishOnly(e.target.checked)} className="h-4 w-4 accent-brand-600" />
+          <input type="checkbox" checked={wishOnly} onChange={(e) => { setWishOnly(e.target.checked); setPage(1); }} className="h-4 w-4 accent-brand-600" />
           Show wishlist only <span className="ml-auto grid h-6 min-w-6 place-items-center rounded-full border border-line px-1.5 text-xs text-slate-500">{wishIds.length}</span>
         </label>
       </Block>
@@ -114,7 +131,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
       <Block title="Availability">
         {([["priced", "Price listed"], ["call", "Call for price"]] as const).map(([k, l]) => (
           <label key={k} className="flex cursor-pointer items-center gap-2 py-1 text-sm text-body">
-            <input type="checkbox" checked={avail[k]} onChange={(e) => setAvail((a) => ({ ...a, [k]: e.target.checked }))} className="h-4 w-4 accent-brand-600" />{l}
+            <input type="checkbox" checked={avail[k]} onChange={(e) => { setAvail((a) => ({ ...a, [k]: e.target.checked })); setPage(1); }} className="h-4 w-4 accent-brand-600" />{l}
           </label>
         ))}
       </Block>
@@ -125,7 +142,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
           {top.map((d) => (
             <li key={d.id}>
               <button onClick={() => dispatch(openDeviceModal(d.id))} className="flex w-full items-center gap-3 py-3 text-left">
-                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded border border-line bg-transparent">{d.image && <Image src={d.image} alt="" fill sizes="48px" className="object-contain p-1" />}</span>
+                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded border border-line bg-transparent">{d.image && <ProductImage src={d.image} alt="" fill sizes="48px" className="object-contain p-1" />}</span>
                 <span><span className="block text-sm text-ink">{d.name}</span><span className="text-sm font-semibold text-brand-text">{d.price ? formatBDT(d.price) : "Call for Price"}</span></span>
               </button>
             </li>
@@ -167,9 +184,9 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
               <div>
                 <h2 className="text-xl font-bold text-ink sm:text-2xl">
                   {sub ?? cat ?? "All Products"}{" "}
-                  <span className="text-sm font-normal text-slate-500">({list.length} devices)</span>
+                  <span className="text-sm font-normal text-slate-500">({total} devices)</span>
                 </h2>
-                <p className="text-xs text-body mt-0.5">Showing {shown.length} of {list.length} products</p>
+                <p className="text-xs text-body mt-0.5" aria-live="polite">{loaded.error ? "Couldn't load products" : loading && !result ? "Loading…" : `Showing ${shown.length} of ${total} products`}</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm">
               <button onClick={() => setOpen(true)} className="flex items-center gap-1.5 rounded border border-line px-3 py-1.5 font-semibold text-ink lg:hidden">
@@ -189,8 +206,15 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
           </div>
 
           {/* grid */}
-          {shown.length ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+          {loaded.error && !isInitialView ? (
+            <div className="rounded-md border border-dashed border-line-strong p-10 text-center text-sm text-body">
+              <p>{loaded.error}</p>
+              <button onClick={loaded.reload} className="mt-3 inline-flex h-9 items-center rounded bg-brand-600 px-4 text-xs font-semibold uppercase text-white hover:bg-brand-500">Try again</button>
+            </div>
+          ) : !result ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton aspect-[3/4] rounded-lg" />)}</div>
+          ) : shown.length ? (
+            <div className={cn("grid grid-cols-2 gap-3 transition-opacity sm:grid-cols-3 sm:gap-4 xl:grid-cols-4", loading && "opacity-50")} aria-busy={loading}>
               {shown.map((d) => <DeviceTile key={d.id} d={d} />)}
             </div>
           ) : (
@@ -198,11 +222,11 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
           )}
 
           {/* Bottom Pagination */}
-          {list.length > 0 && (
+          {total > 0 && (
             <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-line pt-6 sm:flex-row">
               {/* Product count readout */}
               <p className="text-xs text-slate-500">
-                Showing <span className="font-semibold text-ink">{startIndex + 1}–{endIndex}</span> of <span className="font-semibold text-ink">{list.length}</span> products
+                Showing <span className="font-semibold text-ink">{startIndex + 1}–{endIndex}</span> of <span className="font-semibold text-ink">{total}</span> products
               </p>
 
               {/* Page buttons */}
@@ -222,7 +246,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
                     <span className="hidden sm:inline">Prev</span>
                   </button>
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  {pageWindow(currentPage, totalPages).map((p, i) => p === "…" ? <span key={`gap-${i}`} aria-hidden className="px-1 text-slate-400">…</span> : (
                     <button
                       key={p}
                       type="button"
@@ -261,7 +285,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
               {/* Items per page selector */}
               <div className="flex items-center gap-2 text-xs text-body">
                 <span>Per page:</span>
-                {[12, 24, 48, 99].map((n) => (
+                {[12, 24, 48].map((n) => (
                   <button
                     key={n}
                     type="button"
@@ -273,7 +297,7 @@ export default function DeviceShop({ category, subcategory }: { category?: strin
                         : "text-slate-500 hover:text-ink"
                     )}
                   >
-                    {n === 99 ? "All" : n}
+                    {n}
                   </button>
                 ))}
               </div>

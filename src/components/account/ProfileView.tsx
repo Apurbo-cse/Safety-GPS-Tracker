@@ -9,7 +9,8 @@ import { Building2, CreditCard, Heart, Mail, MapPin, Package, Phone, Save, Setti
 import { Field, Select, inputCls } from "@/components/forms/Field";
 import { phoneRegex } from "@/lib/validation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { updateProfile } from "@/store/slices/accountSlice";
+import { saveProfile } from "@/store/thunks";
+import { ApiError } from "@/lib/api";
 import { setCartOpen } from "@/store/slices/uiSlice";
 import { formatBDT } from "@/utils/format";
 import AccountShell, { CARD, Pill, useDisplayName } from "./AccountShell";
@@ -35,11 +36,19 @@ export default function ProfileView() {
   const name = useDisplayName();
 
   const fromStore = (): Values => ({ ...profile, name: profile.name || user?.name || "" });
-  const { register, handleSubmit, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: fromStore() });
+  const { register, handleSubmit, reset, setError, formState: { errors, isDirty, isSubmitting } } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: fromStore() });
   useEffect(() => { reset(fromStore()); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, user]);
 
-  const onSubmit = (v: Values) => { dispatch(updateProfile(v)); toast.success("Profile saved"); };
+  const onSubmit = async (v: Values) => {
+    try {
+      await dispatch(saveProfile({ name: v.name, phone: v.phone, email: v.email, company: v.company, address: v.address, division: v.division }));
+      toast.success("Profile saved");
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : "Could not save your profile";
+      if (e instanceof ApiError && e.status === 409) setError("email", { message: msg }); else toast.error(msg);
+    }
+  };
 
   const active = orders.filter((o) => o.status !== "cancelled");
   const spent = active.reduce((n, o) => n + o.deviceTotal, 0);
@@ -51,7 +60,7 @@ export default function ProfileView() {
   ];
 
   return (
-    <AccountShell title={`Hi, ${name.split(" ")[0]}`} subtitle="Manage your details, orders and preferences.">
+    <AccountShell title={`Hi, ${name.split(" ")[0]}`} subtitle="Manage your details, orders and preferences." what="your profile">
       <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => {
           const body = (<>

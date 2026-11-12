@@ -1,48 +1,25 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CartItem } from "@/types";
+import type { ApiOrder, OrderStatus, PaymentMethod } from "@/lib/api";
 
-export type PaymentMethod = "bKash" | "Nagad" | "Rocket" | "Card" | "Cash on installation";
-export type OrderStatus = "received" | "confirmed" | "scheduled" | "active" | "cancelled";
+export type { OrderStatus, PaymentMethod };
+export type Order = ApiOrder;
 
-export interface OrderContact {
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  division: string;
-  vehicleReg: string;
-  vehicleType: string;
-  preferredDate: string;
-  note?: string;
-}
+interface OrdersState { list: Order[]; status: "idle" | "loading" | "error"; loaded: boolean }
+const initialState: OrdersState = { list: [], status: "idle", loaded: false };
 
-export interface Order {
-  id: string;
-  createdAt: string; // ISO
-  items: CartItem[];
-  deviceTotal: number;
-  monthlyTotal: number;
-  payment: PaymentMethod;
-  contact: OrderContact;
-  status: OrderStatus;
-}
-
-interface OrdersState { list: Order[] }
-const initialState: OrdersState = { list: [] };
-
-/** Demo order history — saved in this browser only (see StoreProvider). */
+/** The signed-in customer's orders, loaded from the API. */
 const ordersSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    hydrateOrders(s, a: PayloadAction<Order[]>) { s.list = a.payload; },
-    placeOrder(s, a: PayloadAction<Order>) { s.list.unshift(a.payload); },
-    cancelOrder(s, a: PayloadAction<string>) {
-      const o = s.list.find((x) => x.id === a.payload);
-      if (o && o.status === "received") o.status = "cancelled";
-    },
+    ordersLoading(s) { s.status = "loading"; },
+    ordersFailed(s) { s.status = "error"; },
+    setOrders(s, a: PayloadAction<Order[]>) { s.list = a.payload; s.status = "idle"; s.loaded = true; },
+    addOrder(s, a: PayloadAction<Order>) { s.list.unshift(a.payload); },
+    replaceOrder(s, a: PayloadAction<Order>) { const i = s.list.findIndex((o) => o.id === a.payload.id); if (i >= 0) s.list[i] = a.payload; },
+    clearOrders() { return initialState; },
   },
 });
 
-export const { hydrateOrders, placeOrder, cancelOrder } = ordersSlice.actions;
+export const { ordersLoading, ordersFailed, setOrders, addOrder, replaceOrder, clearOrders } = ordersSlice.actions;
 export default ordersSlice.reducer;

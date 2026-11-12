@@ -2,41 +2,36 @@
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { makeStore } from "./index";
-import { hydrateOrders } from "./slices/ordersSlice";
-import { hydrateAccount } from "./slices/accountSlice";
 import { hydrateCart } from "./slices/cartSlice";
-import { loginSuccess } from "./slices/authSlice";
+import { signOut, bootstrapSession } from "./thunks";
+import { UNAUTHORIZED_EVENT } from "@/lib/api";
 
-const KEY = "sgt:state:v1";
+const CART_KEY = "sgt:cart:v1";
 
-/** Redux store + per-browser persistence of cart, orders, profile, settings and log-in (demo data only). */
+/**
+ * Redux store. The cart is remembered in this browser; everything else (account, orders, settings)
+ * lives on the server and is restored from the saved log-in token.
+ */
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const [store] = useState(makeStore);
 
   useEffect(() => {
-    // restore after mount so the server HTML and first client render match
+    // restore after mount so the server HTML and the first client render match
     try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (Array.isArray(saved.orders)) store.dispatch(hydrateOrders(saved.orders));
-        if (saved.account) store.dispatch(hydrateAccount(saved.account));
-        if (Array.isArray(saved.cart)) store.dispatch(hydrateCart(saved.cart));
-        if (saved.user) store.dispatch(loginSuccess(saved.user));
-      }
-    } catch { /* storage blocked or corrupt — start fresh */ }
+      localStorage.removeItem("sgt:state:v1"); // old demo storage (orders/profile now come from the API)
+      const raw = localStorage.getItem(CART_KEY);
+      if (raw) { const items = JSON.parse(raw); if (Array.isArray(items)) store.dispatch(hydrateCart(items)); }
+    } catch { /* storage blocked or corrupt */ }
+    void store.dispatch(bootstrapSession());
 
     let t: ReturnType<typeof setTimeout> | undefined;
     const unsub = store.subscribe(() => {
       clearTimeout(t);
-      t = setTimeout(() => {
-        const s = store.getState();
-        try {
-          localStorage.setItem(KEY, JSON.stringify({ orders: s.orders.list, account: s.account, cart: s.cart.items, user: s.auth.user }));
-        } catch { /* ignore quota / private mode */ }
-      }, 250);
+      t = setTimeout(() => { try { localStorage.setItem(CART_KEY, JSON.stringify(store.getState().cart.items)); } catch { /* ignore */ } }, 250);
     });
-    return () => { clearTimeout(t); unsub(); };
+    const onUnauthorized = () => { void store.dispatch(signOut()); };
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    return () => { clearTimeout(t); unsub(); window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized); };
   }, [store]);
 
   return <Provider store={store}>{children}</Provider>;

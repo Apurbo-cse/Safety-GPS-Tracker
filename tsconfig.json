@@ -38,9 +38,12 @@
     ".next-check/types/**/*.ts",
     ".next-check/dev/types/**/*.ts",
     ".next-turbo/types/**/*.ts",
-    ".next-turbo/dev/types/**/*.ts"
+    ".next-turbo/dev/types/**/*.ts",
+    ".next-down/types/**/*.ts",
+    ".next-down/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "backend"
   ]
 }

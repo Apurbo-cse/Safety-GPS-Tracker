@@ -1,4 +1,3 @@
-import { plans } from "@/data/pricing";
 import type { PricingPlan } from "@/types";
 
 /**
@@ -36,15 +35,15 @@ const MAP: Record<string, string[]> = {
 };
 
 export const isPackageFeature = (id: string) => id in MAP;
-export const packagesFor = (id: string): PricingPlan[] => {
+export const packagesFor = (id: string, plans: PricingPlan[]): PricingPlan[] => {
   const labels = MAP[id];
   return labels ? plans.filter((p) => labels.some((l) => p.features.includes(l))) : [];
 };
 
 /** Packages that include every mapped feature in `ids`, cheapest first-year cost first. */
-export function packagesWithAll(ids: string[]) {
+export function packagesWithAll(ids: string[], plans: PricingPlan[]) {
   const mapped = ids.filter(isPackageFeature);
-  const list = plans.filter((p) => mapped.every((id) => packagesFor(id).some((x) => x.id === p.id)))
+  const list = plans.filter((p) => mapped.every((id) => packagesFor(id, plans).some((x) => x.id === p.id)))
     .sort((a, b) => a.devicePrice + a.monthlyCharge * 12 - (b.devicePrice + b.monthlyCharge * 12));
   return { mapped, unmapped: ids.length - mapped.length, list };
 }

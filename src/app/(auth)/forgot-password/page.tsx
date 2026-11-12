@@ -3,7 +3,7 @@ import AuthShell from "@/components/forms/AuthShell";
 import ForgotForm from "@/components/forms/ForgotForm";
 import { pageMeta } from "@/lib/metadata";
 
-export const metadata = pageMeta("Forgot Password", "Reset your Safety GPS Tracker account password (demo).", "/forgot-password");
+export const metadata = pageMeta("Forgot Password", "Reset your Safety GPS Tracker account password.", "/forgot-password");
 
 export default function ForgotPage() {
   return (
