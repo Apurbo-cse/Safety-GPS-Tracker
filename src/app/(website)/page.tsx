@@ -1,6 +1,8 @@
 import {
   AppBlock, CategoryGrid, DeviceCatalogue, EnquiryBlock, OtherProducts, FaqGrid, HeroDark, PartnerBorderGrid, ProductWheel, SoftwareBlock, WhyChecklist,
 } from "@/components/home/style3/Sections";
+import { CtaBand, HowItWorksStepper, IndustriesSlider, PlatformTour, StatsBand } from "@/components/home/style3/More";
+import LatestNews from "@/components/home/LatestNews";
 import { pageMeta } from "@/lib/metadata";
 
 export const metadata = pageMeta(
@@ -14,15 +16,21 @@ export default function HomePage() {
   return (
     <>
       <HeroDark />
+      <StatsBand />
       <ProductWheel />
+      <PlatformTour />
       <SoftwareBlock />
       <AppBlock />
       <CategoryGrid />
       <DeviceCatalogue />
       <OtherProducts />
+      <HowItWorksStepper />
+      <IndustriesSlider />
       <WhyChecklist />
       <PartnerBorderGrid />
+      <LatestNews />
       <FaqGrid />
+      <CtaBand />
       <EnquiryBlock />
     </>
   );

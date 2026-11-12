@@ -99,6 +99,10 @@ npm run migration:generate -- src/database/migrations/DescribeTheChange
 npm run migration:run      # optional — also runs on app start
 ```
 
+## Starter content
+
+`npm run seed:samples` adds six News posts and fifteen FAQs written for the site (how tracking works, theft-prevention habits, choosing a package, geo-fencing, papers and insurance, fleet reports). They only describe what the product does — no statistics or customer stories. It adds a row only when its id is free, so re-running never overwrites anything you edited. Edit or delete them in Admin → News / FAQs.
+
 ## Tests
 
 ```bash

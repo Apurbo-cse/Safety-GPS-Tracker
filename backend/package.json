@@ -13,6 +13,7 @@
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
     "seed": "ts-node src/seed/seed.ts",
     "seed:prod": "node dist/seed/seed.js --if-empty",
+    "seed:samples": "ts-node src/seed/sample-content.ts",
     "test": "jest"
   },
   "dependencies": {
