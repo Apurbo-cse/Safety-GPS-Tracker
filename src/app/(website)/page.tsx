@@ -1,5 +1,5 @@
 import {
-  AppBlock, CategoryGrid, DeviceCatalogue, EnquiryBlock, OtherProducts, FaqGrid, HeroDark, PartnerBorderGrid, ProductWheel, SoftwareBlock, WhyChecklist,
+  AppBlock, CategoryGrid, DeviceCatalogue, OtherProducts, FaqGrid, HeroDark, PartnerBorderGrid, ProductWheel, SoftwareBlock, WhyChecklist, InnovationGrid,
 } from "@/components/home/style3/Sections";
 import { CtaBand, HowItWorksStepper, IndustriesSlider, PlatformTour, StatsBand } from "@/components/home/style3/More";
 import LatestNews from "@/components/home/LatestNews";
@@ -27,11 +27,11 @@ export default function HomePage() {
       <HowItWorksStepper />
       <IndustriesSlider />
       <WhyChecklist />
+      <InnovationGrid />
       <PartnerBorderGrid />
       <LatestNews />
       <FaqGrid />
       <CtaBand />
-      <EnquiryBlock />
     </>
   );
 }

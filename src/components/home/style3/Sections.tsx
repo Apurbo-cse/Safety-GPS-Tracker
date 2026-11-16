@@ -23,7 +23,7 @@ import ContactForm from "@/components/forms/ContactForm";
 import { DeviceTile } from "@/components/devices/ProductTile";
 import PlanTile from "@/components/pricing/PlanTile";
 import { useCatalog } from "@/components/providers/CatalogProvider";
-import type { HeroAccent, HeroIcon, HeroSlide as HeroSlideT, HeroTelematics } from "@/data/hero";
+import type { HeroIcon, HeroSlide as HeroSlideT, HeroTelematics } from "@/data/hero";
 import { categoryUrl } from "@/data/catalogue";
 import DeviceVisual from "@/components/devices/DeviceVisual";
 import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS } from "@/lib/site";
@@ -38,18 +38,9 @@ const clean = (l: string) => l.replace("/img/partners/", "/img/partners/clean/")
 
 /* ================================================================ 1. hero */
 const HERO_ICONS: Record<HeroIcon, LucideIcon> = { shield: Shield, bike: Bike, truck: Truck };
-/** Tailwind needs these class names written out in full. */
-const HERO_GLOW: Record<HeroAccent, string> = {
-  brand: "from-brand-500/35 via-orange-500/20 to-sky-500/15",
-  sky: "from-sky-500/35 via-blue-500/20 to-cyan-500/15",
-  emerald: "from-emerald-500/35 via-teal-500/20 to-cyan-500/15",
-};
 
-const ROADS = ["M0 40 H320", "M0 120 H320", "M70 0 V180", "M230 0 V180", "M0 160 C 100 150, 180 60, 320 70"];
-
-function InteractiveTelematicsCard({ t }: { t: HeroTelematics }) {
+function TelematicsPreviewCard({ t }: { t: HeroTelematics }) {
   const [locked, setLocked] = useState(t.ignition === "LOCKED");
-  const isMoving = !locked && t.ignition === "ON";
 
   const handleToggleLock = () => {
     if (!locked) {
@@ -62,90 +53,80 @@ function InteractiveTelematicsCard({ t }: { t: HeroTelematics }) {
   };
 
   return (
-    <div className="w-full max-w-[360px] overflow-hidden rounded-md bg-[#0c2033]/80 text-white ring-1 ring-white/10 backdrop-blur-xl">
-      {/* Top telemetry bar */}
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 bg-white/[0.04]">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="relative flex h-2.5 w-2.5 shrink-0">
+    <div className="w-full max-w-[380px] rounded-md border border-white/10 bg-[#0d1e30]/90 p-5 text-white backdrop-blur-xl">
+      {/* Top status */}
+      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
             <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-75", locked ? "bg-amber-400" : "bg-emerald-400")} />
-            <span className={cn("relative inline-flex h-2.5 w-2.5 rounded-full", locked ? "bg-amber-400" : "bg-emerald-400")} />
+            <span className={cn("relative inline-flex h-2 w-2 rounded-full", locked ? "bg-amber-400" : "bg-emerald-400")} />
           </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-white">{t.vehicle}</p>
-            <p className="font-mono text-[11px] text-slate-400">{t.plate}</p>
-          </div>
+          <span className="text-xs font-semibold text-slate-200">Live Telematics</span>
         </div>
-        <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border",
-          locked ? "border-amber-500/30 bg-amber-500/15 text-amber-300" : isMoving ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300" : "border-slate-500/30 bg-slate-500/15 text-slate-300")}>
+        <span className={cn(
+          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border",
+          locked
+            ? "border-amber-500/30 bg-amber-500/15 text-amber-300"
+            : "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
+        )}>
           {locked ? "Engine Locked" : t.status}
         </span>
       </div>
 
-      {/* SVG Map Screen */}
-      <div className="relative h-44 bg-[#0e273e]" aria-hidden>
-        <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
-          <rect width="320" height="180" fill="#0b2034" />
-          {[[10, 52, 50, 56], [88, 8, 128, 24], [88, 52, 128, 56], [246, 52, 64, 56], [10, 132, 50, 40], [246, 132, 64, 40]].map(([x, y, w, h], i) => (
-            <rect key={i} x={x} y={y} width={w} height={h} rx="4" fill="#38bdf8" fillOpacity=".04" />
-          ))}
-          <g stroke="#1e293b" strokeWidth="8" fill="none" strokeLinecap="round">
-            {ROADS.map((d) => <path key={d} d={d} />)}
-          </g>
-          <path d={t.route} fill="none" stroke="#f05a22" strokeOpacity=".3" strokeWidth="6" strokeLinecap="round" />
-          <path d={t.route} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeDasharray="6 7" strokeLinecap="round" className="route-flow" />
-          <g>
-            <circle r="12" fill={locked ? "#f59e0b" : "#f05a22"} fillOpacity=".3">
-              <animate attributeName="r" values="8;16;8" dur="1.8s" repeatCount="indefinite" />
-            </circle>
-            <circle r="5" fill={locked ? "#f59e0b" : "#f05a22"} stroke="#fff" strokeWidth="2" />
-            {isMoving && <animateMotion dur="8s" repeatCount="indefinite" path={t.route} />}
-          </g>
-        </svg>
-
-        <MapPin className="absolute right-3 top-3 h-5 w-5 fill-brand-500 text-white drop-shadow" />
-        <span className="absolute bottom-2.5 left-2.5 flex max-w-[90%] items-center gap-1.5 truncate rounded-md bg-black/70 px-2 py-1 text-[11px] text-slate-200 backdrop-blur-md border border-white/10">
-          <MapPin className="h-3 w-3 shrink-0 text-brand-400" />
-          <span className="truncate">{t.place}</span>
-        </span>
+      {/* Vehicle Info */}
+      <div className="mt-3.5">
+        <p className="text-base font-bold text-white">{t.vehicle}</p>
+        <p className="font-mono text-xs text-slate-400">{t.plate}</p>
       </div>
 
-      {/* Streamlined Live Controls Bar */}
-      <div className="flex items-center justify-between gap-3 border-t border-white/10 bg-[#091d30] px-4 py-3">
-        <div className="flex items-center gap-3 text-xs">
-          <div>
-            <span className="text-[10px] font-semibold uppercase text-slate-400 block">Speed</span>
-            <span className="font-bold text-white">{locked ? "0 km/h" : t.speed}</span>
-          </div>
-          <div className="h-6 w-px bg-white/10" />
-          <div>
-            <span className="text-[10px] font-semibold uppercase text-slate-400 block">Engine</span>
-            <span className={cn("font-bold", locked ? "text-amber-400" : t.ignition === "ON" ? "text-emerald-400" : "text-slate-400")}>
-              {locked ? "LOCKED" : t.ignition}
-            </span>
-          </div>
+      {/* Location */}
+      <div className="mt-3 flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.04] px-3 py-2 text-xs text-slate-300">
+        <MapPin className="h-4 w-4 shrink-0 text-brand-400" />
+        <span className="truncate">{t.place}</span>
+      </div>
+
+      {/* 2x2 Stats Grid */}
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
+          <span className="block text-[10px] font-medium uppercase text-slate-400">Speed</span>
+          <span className="mt-0.5 block text-sm font-bold text-white">{locked ? "0 km/h" : t.speed}</span>
         </div>
-
-        <button
-          onClick={handleToggleLock}
-          type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all active:scale-95",
-            locked
-              ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/30"
-              : "bg-red-600 text-white hover:bg-red-500 shadow-red-600/30"
-          )}
-        >
-          <Lock className="h-3.5 w-3.5" />
-          <span>{locked ? "Unlock" : "Lock Engine"}</span>
-        </button>
+        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
+          <span className="block text-[10px] font-medium uppercase text-slate-400">Ignition</span>
+          <span className={cn("mt-0.5 block text-sm font-bold", locked ? "text-amber-400" : t.ignition === "ON" ? "text-emerald-400" : "text-slate-300")}>
+            {locked ? "LOCKED" : t.ignition}
+          </span>
+        </div>
+        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
+          <span className="block text-[10px] font-medium uppercase text-slate-400">Fuel / Battery</span>
+          <span className="mt-0.5 block text-sm font-bold text-white">{t.fuel}</span>
+        </div>
+        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
+          <span className="block text-[10px] font-medium uppercase text-slate-400">Sensors</span>
+          <span className="mt-0.5 block truncate text-xs font-semibold text-slate-300">{t.sensor}</span>
+        </div>
       </div>
+
+      {/* Lock Button */}
+      <button
+        onClick={handleToggleLock}
+        type="button"
+        className={cn(
+          "mt-4 flex w-full items-center justify-center gap-2 rounded-md py-2.5 text-xs font-bold transition-all active:scale-[0.98]",
+          locked
+            ? "bg-emerald-600 text-white hover:bg-emerald-500"
+            : "bg-red-600/90 text-white hover:bg-red-600"
+        )}
+      >
+        <Lock className="h-3.5 w-3.5" />
+        <span>{locked ? "Restore Engine Ignition" : "Remote Engine Immobilizer"}</span>
+      </button>
     </div>
   );
 }
 
 export function HeroDark() {
   const { heroSlides: slides } = useCatalog();
-  // remount when the slide list changes so the carousel never points at a slide that no longer exists
   if (!slides.length) return null;
   return <HeroCarousel key={slides.map((x) => x.id).join("|")} slides={slides} />;
 }
@@ -154,73 +135,128 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
   const dispatch = useAppDispatch();
   const swiperRef = useRef<SwiperType | null>(null);
   const [active, setActive] = useState(0);
-  const [progress, setProgress] = useState(0);
 
   return (
-    <section className="relative bg-[#0c1f33] text-white" aria-roledescription="carousel" aria-label="Hero highlights">
+    <section className="relative bg-[#0a1628] text-white" aria-roledescription="carousel" aria-label="Hero highlights">
       <Swiper
         modules={[Autoplay, EffectFade]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
         loop={slides.length > 1}
-        speed={700}
+        speed={600}
         autoplay={{ delay: 6500, disableOnInteraction: false, pauseOnMouseEnter: true }}
         onSwiper={(sw) => { swiperRef.current = sw; }}
         onSlideChange={(sw) => setActive(sw.realIndex)}
-        onAutoplayTimeLeft={(_, __, pct) => setProgress(1 - pct)}
       >
-        {slides.map((s, idx) => (
-          <SwiperSlide key={s.id}>
-            <div className="relative isolate flex min-h-[520px] items-center overflow-hidden bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] sm:min-h-[580px]">
-              <Image src={s.bgImage} alt="" fill priority={idx === 0} sizes="100vw" className="-z-30 object-cover object-center opacity-60" />
-              <div aria-hidden className="absolute inset-0 -z-20 bg-gradient-to-r from-[#0c1e31]/95 via-[#0c1e31]/70 to-[#0c1e31]/20" />
-              <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#0c1e31] to-transparent" />
-              <div aria-hidden className={cn("pointer-events-none absolute right-[5%] top-1/4 -z-10 h-[420px] w-[420px] rounded-full bg-gradient-to-tr opacity-70 blur-3xl", HERO_GLOW[s.accent] ?? HERO_GLOW.brand)} />
-              <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-20" />
+        {slides.map((s, idx) => {
+          const BadgeIcon = HERO_ICONS[s.badgeIcon] ?? Shield;
+          return (
+            <SwiperSlide key={s.id}>
+              <div className="relative isolate flex min-h-[480px] items-center overflow-hidden bg-[#0a1628] sm:min-h-[520px]">
+                <Image
+                  src={s.bgImage}
+                  alt=""
+                  fill
+                  priority={idx === 0}
+                  sizes="100vw"
+                  className="-z-20 object-cover object-center opacity-85"
+                />
+                <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0a1628]/90 via-[#0a1628]/55 to-[#0a1628]/20" />
+                <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-[#0a1628] to-transparent" />
 
-              <Container className="grid items-center gap-10 pb-28 pt-12 lg:grid-cols-12">
-                <div className="lg:col-span-7">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold text-brand-300 backdrop-blur-md">
-                    {(() => { const I = HERO_ICONS[s.badgeIcon] ?? Shield; return <I className="h-3.5 w-3.5" />; })()}{s.badge}
-                  </span>
-                  <h1 className="mt-4 text-3xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-[54px]">
-                    {s.titleMain}{" "}
-                    <span className="bg-gradient-to-r from-brand-400 via-orange-400 to-amber-300 bg-clip-text text-transparent">{s.titleHighlight}</span>
-                  </h1>
-                  <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">{s.text}</p>
-                  <div className="mt-7 flex flex-wrap gap-3">
-                    {s.ctaHref.startsWith("https://")
-                      ? <a href={s.ctaHref} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></a>
-                      : <Link href={s.ctaHref} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">{s.ctaLabel}<ArrowRight className="h-4 w-4" /></Link>}
-                    <button onClick={() => dispatch(openDemoModal("Hero live demo"))} className="inline-flex h-11 items-center gap-2 rounded-md bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">
-                      <CalendarCheck className="h-4 w-4 text-brand-300" />Book a demo
-                    </button>
+                <Container className="grid items-center gap-10 pb-20 pt-12 lg:grid-cols-12">
+                  <div className="lg:col-span-7">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-brand-400 backdrop-blur-md">
+                      <BadgeIcon className="h-3.5 w-3.5" />
+                      {s.badge}
+                    </span>
+                    <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-[52px]">
+                      {s.titleMain}{" "}
+                      <span className="text-brand-500">{s.titleHighlight}</span>
+                    </h1>
+                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
+                      {s.text}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-slate-300">
+                      <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-400" /> 10s Live Refresh</span>
+                      <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-brand-400" /> Remote Engine Lock</span>
+                      <span className="inline-flex items-center gap-1.5"><Phone className="h-4 w-4 text-sky-400" /> 24/7 Helpline Support</span>
+                    </div>
+
+                    <div className="mt-7 flex flex-wrap gap-3">
+                      {s.ctaHref.startsWith("https://") ? (
+                        <a
+                          href={s.ctaHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:bg-brand-600"
+                        >
+                          {s.ctaLabel}
+                          <ArrowRight className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <Link
+                          href={s.ctaHref}
+                          className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:bg-brand-600"
+                        >
+                          {s.ctaLabel}
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => dispatch(openDemoModal("Hero live demo"))}
+                        className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md border border-white/15 bg-white/5 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10"
+                      >
+                        <CalendarCheck className="h-4 w-4 text-brand-400" />
+                        Book a demo
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="hidden justify-center sm:flex lg:col-span-5 lg:justify-end">
-                  <InteractiveTelematicsCard t={s.telematics} />
-                </div>
-              </Container>
-            </div>
-          </SwiperSlide>
-        ))}
+
+                  <div className="hidden justify-center sm:flex lg:col-span-5 lg:justify-end">
+                    <TelematicsPreviewCard t={s.telematics} />
+                  </div>
+                </Container>
+              </div>
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
 
-      {/* slide tabs with autoplay progress */}
-      {slides.length > 1 && <div className="absolute inset-x-0 bottom-6 z-20">
-        <Container>
-          <div role="tablist" aria-label="Choose slide" className="grid max-w-md grid-cols-3 gap-3">
-            {slides.map((s, i) => (
-              <button key={s.id} role="tab" aria-selected={active === i} onClick={() => swiperRef.current?.slideToLoop(i)} className="group text-left">
-                <span className="block h-1 overflow-hidden rounded-full bg-white/15">
-                  <span className="block h-full rounded-full bg-brand-500 transition-[width] duration-100" style={{ width: active === i ? `${progress * 100}%` : i < active ? "100%" : "0%" }} />
-                </span>
-                <span className={cn("mt-2 block truncate text-xs font-semibold transition-colors", active === i ? "text-white" : "text-slate-400 group-hover:text-slate-200")}>{s.tab}</span>
-              </button>
-            ))}
-          </div>
-        </Container>
-      </div>}
+      {/* slide tabs */}
+      {slides.length > 1 && (
+        <div className="absolute inset-x-0 bottom-5 z-20">
+          <Container>
+            <div role="tablist" aria-label="Choose slide" className="flex items-center gap-4">
+              {slides.map((s, i) => (
+                <button
+                  key={s.id}
+                  role="tab"
+                  aria-selected={active === i}
+                  onClick={() => swiperRef.current?.slideToLoop(i)}
+                  className="group flex items-center gap-2 text-left"
+                >
+                  <span
+                    className={cn(
+                      "block h-1.5 rounded-full transition-all duration-300",
+                      active === i ? "w-8 bg-brand-500" : "w-3 bg-white/25 group-hover:bg-white/50"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-xs font-medium transition-colors",
+                      active === i ? "text-white" : "text-slate-400 group-hover:text-slate-200"
+                    )}
+                  >
+                    {s.tab}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </Container>
+        </div>
+      )}
     </section>
   );
 }
@@ -263,10 +299,10 @@ export function ProductWheel() {
           <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-ink sm:text-5xl">We&apos;re Here To Keep Your Vehicles Safe</h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-body">One platform for cars, bikes, trucks and whole fleets — live tracking, alerts and remote engine control.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <button onClick={() => dispatch(openDemoModal("Book a schedule"))} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">
+            <button onClick={() => dispatch(openDemoModal("Book a schedule"))} className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">
               <CalendarCheck className="h-4 w-4" />Book a schedule
             </button>
-            <Link href="/products" className="inline-flex h-11 items-center gap-2 rounded-md bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90">
+            <Link href="/products" className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-softer/80 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90">
               Explore products <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -338,8 +374,8 @@ const Pill = ({ children, dark }: { children: React.ReactNode; dark?: boolean })
   </span>
 );
 
-const primaryBtn = "inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600";
-const softBtn = "inline-flex h-11 items-center gap-2 rounded-md bg-softer/80 px-5 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90";
+const primaryBtn = "inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600";
+const softBtn = "inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-softer/80 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:text-brand-600 dark:bg-navy-900/90";
 
 export function SoftwareBlock() {
   const dispatch = useAppDispatch();
@@ -370,7 +406,7 @@ export function SoftwareBlock() {
           </ul>
           <div className="mt-7 flex flex-wrap gap-3">
             <button onClick={() => dispatch(openDemoModal("Schedule a demo (software)"))} className={primaryBtn}><CalendarCheck className="h-4 w-4" />Schedule a demo</button>
-            <Link href="/features" className="inline-flex h-11 items-center gap-2 rounded-md border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">See how it works <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/features" className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/20">See how it works <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
 
@@ -516,7 +552,7 @@ export function DeviceCatalogue() {
         </AnimatePresence>
         {list.length > PER_TAB && (
           <div className="mt-8 text-center">
-            <Link href={categoryUrl(node.name)} className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">View all {list.length} {node.name} <ArrowRight className="h-4 w-4" /></Link>
+            <Link href={categoryUrl(node.name)} className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-600">View all {list.length} {node.name} <ArrowRight className="h-4 w-4" /></Link>
           </div>
         )}
       </Container>
@@ -598,8 +634,8 @@ export function WhyChecklist() {
             ))}
           </dl>
           <div className="mt-auto flex flex-wrap gap-2 pt-6">
-            <Link href="/pricing" className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-md bg-brand-500 px-4 text-sm font-semibold transition-colors hover:bg-brand-600">Compare packages <ArrowRight className="h-4 w-4" /></Link>
-            <button onClick={() => dispatch(openDemoModal("Demo request (why choose)"))} className="inline-flex h-10 flex-1 items-center justify-center rounded-md bg-white/10 px-4 text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20">Book a demo</button>
+            <Link href="/pricing" className="inline-flex h-8 sm:h-10 flex-1 items-center justify-center gap-1.5 rounded-md bg-brand-500 px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-colors hover:bg-brand-600">Compare packages <ArrowRight className="h-4 w-4" /></Link>
+            <button onClick={() => dispatch(openDemoModal("Demo request (why choose)"))} className="inline-flex h-8 sm:h-10 flex-1 items-center justify-center rounded-md bg-white/10 px-3 sm:px-4 text-xs sm:text-sm font-semibold backdrop-blur-md transition-colors hover:bg-white/20">Book a demo</button>
           </div>
         </aside>
       </Container>
@@ -715,7 +751,7 @@ export function EnquiryBlock() {
       <Container>
         <div className="flex flex-wrap gap-2.5 sm:ml-[8%]">
           {([["products", "Inquiry for products"], ["fleet", "Inquiry for corporate fleet"]] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} className={cn("h-10 rounded-md px-4 text-xs font-semibold uppercase tracking-wide transition-colors", tab === k ? "bg-brand-500 text-white font-bold" : "bg-softer text-body hover:text-ink dark:bg-navy-900 dark:text-slate-300")}>{l}</button>
+            <button key={k} onClick={() => setTab(k)} className={cn("h-8 sm:h-10 rounded-md px-3 sm:px-4 text-xs font-semibold uppercase tracking-wide transition-colors", tab === k ? "bg-brand-500 text-white font-bold" : "bg-softer text-body hover:text-ink dark:bg-navy-900 dark:text-slate-300")}>{l}</button>
           ))}
         </div>
         <div className="mt-3 grid overflow-hidden rounded-md ring-1 ring-line/40 lg:grid-cols-[1.6fr_1fr]">
@@ -739,3 +775,36 @@ export function EnquiryBlock() {
   );
 }
 
+
+/* ======================================================== 8. innovation */
+const INNOVATIONS: { icon: LucideIcon; t: string; d: string }[] = [
+  { icon: MapPin, t: "Live in 10 seconds", d: "Positions refresh about every 10 seconds on the map." },
+  { icon: Lock, t: "Remote engine lock", d: "Lock the engine from the app on supported packages." },
+  { icon: Bell, t: "Alerts you choose", d: "Ignition, geo-fence, device removal and panic — only the ones you need." },
+  { icon: Smartphone, t: "Android, iOS & web", d: "One platform, the same vehicles on every screen." },
+  { icon: CalendarCheck, t: "Smart reminders", d: "BRTA paper, insurance and engine-oil reminders before they expire." },
+  { icon: BarChart3, t: "Reports that save money", d: "Daily mileage, stops and working hours in one place." },
+];
+
+export function InnovationGrid() {
+  return (
+    <section className="bg-white py-16 dark:bg-navy-950 sm:py-24">
+      <Container>
+        <div className="text-center">
+          <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Innovation</span>
+          <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Built To Keep Getting Smarter</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-body">Practical features designed around how vehicles are really used.</p>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {INNOVATIONS.map((c) => (
+            <div key={c.t} className="group rounded-md bg-slate-100/80 p-5 transition-all hover:-translate-y-1 dark:bg-navy-900/90">
+              <span className="grid h-11 w-11 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
+              <h3 className="mt-3 text-base font-bold text-ink">{c.t}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-body">{c.d}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}

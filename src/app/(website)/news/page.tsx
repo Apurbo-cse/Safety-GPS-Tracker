@@ -46,9 +46,9 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
               </ul>
               {pages > 1 && (
                 <nav aria-label="News pages" className="mt-10 flex items-center justify-center gap-3 text-sm">
-                  {page > 1 ? <Link href={`/news?page=${page - 1}`} className="inline-flex h-10 items-center gap-1 rounded-lg bg-softer/80 px-4 font-semibold text-ink hover:text-brand-600 dark:bg-navy-900/90"><ChevronLeft className="h-4 w-4" />Newer</Link> : <span />}
+                  {page > 1 ? <Link href={`/news?page=${page - 1}`} className="inline-flex h-8 sm:h-10 items-center gap-1 rounded-lg bg-softer/80 px-3 sm:px-4 font-semibold text-ink hover:text-brand-600 dark:bg-navy-900/90"><ChevronLeft className="h-4 w-4" />Newer</Link> : <span />}
                   <span className="text-body">Page {page} of {pages} · {total} posts</span>
-                  {page < pages ? <Link href={`/news?page=${page + 1}`} className="inline-flex h-10 items-center gap-1 rounded-lg bg-softer/80 px-4 font-semibold text-ink hover:text-brand-600 dark:bg-navy-900/90">Older<ChevronRight className="h-4 w-4" /></Link> : <span />}
+                  {page < pages ? <Link href={`/news?page=${page + 1}`} className="inline-flex h-8 sm:h-10 items-center gap-1 rounded-lg bg-softer/80 px-3 sm:px-4 font-semibold text-ink hover:text-brand-600 dark:bg-navy-900/90">Older<ChevronRight className="h-4 w-4" /></Link> : <span />}
                 </nav>
               )}
             </>

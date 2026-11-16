@@ -80,6 +80,44 @@ const POSTS: { id: string; title: string; cover: string; daysAgo: number; conten
 <p>For equipment and delivery vehicles, working hours show how much a machine is actually used, which helps with maintenance planning.</p>
 <p>All three are available in the web platform and the apps, so managers and owners see the same numbers.</p>`,
   },
+  {
+    id: "smarter-alerts-instead-of-more-alerts", title: "Innovation in alerts: fewer notifications, more useful ones", cover: "/img/hero-car.jpg", daysAgo: 1,
+    content: `<p>More alerts do not make you safer; the right alerts do. Our platform lets you choose exactly which events reach your phone.</p>
+<h2>Pick the events that matter</h2>
+<ul><li><strong>Ignition on/off</strong> — know when the engine starts.</li><li><strong>Geo-fence enter/leave</strong> — only for the zones you draw.</li><li><strong>Device removal</strong> — if the tracker is disconnected.</li><li><strong>Panic button</strong> — an urgent alert from the driver.</li></ul>
+<h2>Keep it quiet until it counts</h2>
+<p>Start with two or three alerts per vehicle and add more only if you need them. A calm phone makes the important alert stand out.</p>`,
+  },
+  {
+    id: "one-platform-phone-and-web", title: "One platform, three screens: Android, iOS and web", cover: "/img/hero-truck.jpg", daysAgo: 5,
+    content: `<p>Owners check from a phone; managers work at a desk. Both see the same vehicles because they use the same platform.</p>
+<h2>What stays in sync</h2>
+<ul><li>Live map positions, refreshed about every 10 seconds</li><li>Route and travel history</li><li>Alerts and reminders</li><li>Reports for mileage, stops and working hours</li></ul>
+<h2>Why it matters</h2>
+<p>Nobody has to forward screenshots or export sheets just to share what is happening on the road.</p>`,
+  },
+  {
+    id: "remote-engine-lock-responsible-use", title: "Remote engine lock: a powerful feature that needs care", cover: "/img/industries/private-cars-hd.jpg", daysAgo: 11,
+    content: `<p>Remote engine lock is one of the most useful features on supported packages, and the one to use most carefully.</p>
+<h2>When it makes sense</h2>
+<ul><li>The vehicle is parked and you did not authorise its use.</li><li>You have confirmed the situation and it is safe to act.</li></ul>
+<h2>When to stop and call first</h2>
+<p>Never lock a vehicle that is moving fast or in traffic. If in doubt, call the helpline and share the live location with the police.</p>`,
+  },
+  {
+    id: "route-history-for-better-planning", title: "Use route history to plan better, not just to look back", cover: "/img/industries/logistics-bd.jpg", daysAgo: 18,
+    content: `<p>Route history is often used after something goes wrong. It is even more useful before.</p>
+<h2>Ideas to try</h2>
+<ul><li><strong>Compare routes</strong> — which path takes the least time at your usual hour?</li><li><strong>Spot long stops</strong> — are they planned or avoidable?</li><li><strong>Plan maintenance</strong> — daily mileage shows when a service is due.</li></ul>
+<p>Replay a few past trips each month and adjust the plan from what you see.</p>`,
+  },
+  {
+    id: "tracking-equipment-on-site", title: "Tracking machines, not just vehicles", cover: "/img/industries/construction-hd.jpg", daysAgo: 26,
+    content: `<p>Excavators, generators and other equipment can be tracked too.</p>
+<h2>What you can follow</h2>
+<ul><li>Where each machine is, on one map</li><li>Working hours, to plan maintenance</li><li>Geo-fence alerts if a machine leaves the site after hours</li></ul>
+<p>Ask our team which device suits your equipment.</p>`,
+  },
 ];
 
 const FAQS: { id: string; category: string; q: string; a: string; tag: string }[] = [
@@ -98,6 +136,13 @@ const FAQS: { id: string; category: string; q: string; a: string; tag: string }[
   { id: "cancel-order", category: "Billing & Support", tag: "orders", q: "Can I cancel an order?", a: "<p>You can cancel from <b>My orders</b> while the order is still marked Received. After the team confirms it, please call the helpline.</p>" },
   { id: "discount-codes", category: "Billing & Support", tag: "coupon", q: "Do you have discount codes?", a: "<p>When we run an offer, you enter its code in the <b>Discount code</b> box at checkout. The discount applies to the device price.</p>" },
   { id: "update-profile", category: "Billing & Support", tag: "account", q: "How do I change my phone number or email?", a: "<p>Open your <b>Profile</b>, edit the details and save. They are used the next time you check out.</p>" },
+  { id: "alert-types", category: "Security & Relay", tag: "alerts", q: "Which alerts can I switch on?", a: "<p>You can choose alerts such as ignition, geo-fence enter or leave, device removal and the panic button. Pick only the ones you need so important alerts stand out.</p>" },
+  { id: "multiple-vehicles", category: "Tracking & GPS", tag: "fleet", q: "Can I track many vehicles from one account?", a: "<p>Yes. All your vehicles appear on one map in the apps and web platform, with reports for each.</p>" },
+  { id: "update-interval", category: "Tracking & GPS", tag: "live", q: "How often does the position update?", a: "<p>Positions refresh about every 10 seconds when the device has GPS and mobile network coverage.</p>" },
+  { id: "geo-fence-how", category: "Tracking & GPS", tag: "geo-fence", q: "How do I set up a geo-fence?", a: "<p>Open the vehicle in the app, choose geo-fence, mark the area and decide whether to be alerted on entering, leaving or both.</p>" },
+  { id: "paper-reminders", category: "Hardware & Sensors", tag: "reminders", q: "Can the app remind me about BRTA papers and insurance?", a: "<p>Yes. Enter the dates once per vehicle and the app sends a reminder as they approach.</p>" },
+  { id: "equipment-tracking", category: "Hardware & Sensors", tag: "equipment", q: "Can I track machines and equipment?", a: "<p>Yes. Working-hours reports and geo-fence alerts help with machines on site. Ask the team which device fits.</p>" },
+  { id: "plan-finder", category: "Pricing & Packages", tag: "plan finder", q: "How do I know which package to pick?", a: "<p>Use the plan finder on the pricing page: choose your vehicle, monitoring need and priority, and it recommends a package.</p>" },
 ];
 
 async function main() {

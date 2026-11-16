@@ -23,11 +23,11 @@ export default function CorporateCta() {
         <div className="flex shrink-0 flex-wrap gap-3">
           <button
             onClick={() => dispatch(openDemoModal("Custom corporate package enquiry"))}
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-all hover:bg-brand-600 active:scale-95"
+            className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-lg bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:bg-brand-600 active:scale-95"
           >
             Request a proposal <ArrowRight className="h-4 w-4" />
           </button>
-          <a href={`tel:${site.phone}`} className="inline-flex h-11 items-center gap-2 rounded-lg bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20">
+          <a href={`tel:${site.phone}`} className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-lg bg-white/10 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20">
             <Phone className="h-4 w-4" />{site.phone}
           </a>
         </div>

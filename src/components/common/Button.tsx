@@ -16,8 +16,8 @@ const variants: Record<Variant, string> = {
 };
 const sizes: Record<Size, string> = {
   sm: "h-8 px-2.5 text-xs",
-  md: "h-9 px-3.5 text-sm",
-  lg: "h-10 px-4 text-sm sm:h-11 sm:px-5",
+  md: "h-8 px-3 text-xs sm:h-9 sm:px-3.5 sm:text-sm",
+  lg: "h-9 px-3.5 text-xs sm:h-11 sm:px-5 sm:text-sm",
 };
 
 interface Common { variant?: Variant; size?: Size; className?: string; children: React.ReactNode }

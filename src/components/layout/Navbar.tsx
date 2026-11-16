@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
-import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   ArrowRight, BarChart3, Bell, ChevronDown, CreditCard, HelpCircle, Info, LayoutGrid, Mail, Phone,
-  Search, Shield, ShieldCheck, ShoppingCart, Smartphone, Heart, UserRound, Wrench, Navigation,
+  Shield, ShieldCheck, ShoppingCart, Smartphone, Heart, UserRound, Wrench, Navigation,
   Newspaper, type LucideIcon } from "lucide-react";
 import Logo from "@/components/common/Logo";
 import ThemeToggle from "./ThemeToggle";
@@ -20,7 +20,7 @@ import { useCatalog } from "@/components/providers/CatalogProvider";
 import { solutions } from "@/data/solutions";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useMyOrdersQuery } from "@/store/apiSlice";
-import { setCartOpen, setPalette } from "@/store/slices/uiSlice";
+import { setCartOpen } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
 
 /* ------------------------------------------------------------------ data */
@@ -101,10 +101,6 @@ export default function Navbar() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const headerRef = useRef<HTMLElement>(null);
 
-  // reading-progress bar along the bottom edge
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 30, mass: 0.3 });
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
@@ -134,8 +130,7 @@ export default function Navbar() {
       ref={headerRef}
       onMouseLeave={leave}
       className={cn(
-        "sticky top-0 z-50 bg-surface/90 backdrop-blur-xl transition-shadow duration-300 dark:bg-navy-950/85",
-        scrolled && "shadow-lg shadow-black/5 dark:shadow-black/30",
+        "sticky top-0 z-50 bg-surface/90 backdrop-blur-xl dark:bg-navy-950/85",
         // phones/tablets: full navbar only on the home page; inner pages use MobilePageBar
         pathname !== "/" && "max-lg:hidden",
       )}
@@ -188,18 +183,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => dispatch(setPalette(true))}
-            aria-label="Search (Ctrl K)"
-            className="hidden h-9 items-center gap-2 rounded-full bg-softer/80 pl-3 pr-1.5 text-xs text-slate-500 transition-colors hover:text-ink dark:bg-navy-900/90 xl:inline-flex"
-          >
-            <Search className="h-3.5 w-3.5" />Search
-            <kbd className="rounded-full bg-surface px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-500 dark:bg-navy-950">⌘K</kbd>
-          </button>
-          <button type="button" onClick={() => dispatch(setPalette(true))} aria-label="Search" className="grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer xl:hidden dark:hover:bg-navy-900">
-            <Search className="h-4.5 w-4.5" />
-          </button>
           <ThemeToggle />
           <Link href="/profile" aria-label="My account" className={cn("relative grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-softer dark:hover:bg-navy-900", ["/profile", "/orders", "/settings"].some((p) => pathname.startsWith(p)) ? "text-brand-600 dark:text-brand-400" : "text-body-strong")}>
             <UserRound className="h-4.5 w-4.5" />
@@ -215,9 +198,6 @@ export default function Navbar() {
           </button> 
         </div>
       </Container>
-
-      {/* scroll progress */}
-      <motion.div aria-hidden style={{ scaleX: progress }} className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-gradient-to-r from-brand-600 to-brand-400" />
 
       {/* ---------- mega menu ---------- */}
       <AnimatePresence>

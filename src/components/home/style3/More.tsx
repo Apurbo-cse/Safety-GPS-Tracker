@@ -149,7 +149,7 @@ function LockScreen({ shell }: { shell: string }) {
         </motion.span>
         <p className="mt-4 text-lg font-bold">{locked ? "Engine locked" : "Engine unlocked"}</p>
         <p className="text-xs text-slate-300">Try it — this is a demo, no vehicle is connected</p>
-        <button type="button" onClick={() => setLocked((v) => !v)} className="mt-4 inline-flex h-10 items-center rounded-lg bg-white/10 px-5 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20">{locked ? "Unlock engine" : "Lock engine"}</button>
+        <button type="button" onClick={() => setLocked((v) => !v)} className="mt-4 inline-flex h-8 sm:h-10 items-center rounded-lg bg-white/10 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20">{locked ? "Unlock engine" : "Lock engine"}</button>
       </div>
     </div>
   );
@@ -240,8 +240,8 @@ export function HowItWorksStepper() {
           </motion.div>
         </AnimatePresence>
         <div className="mt-5 flex justify-center gap-2">
-          <button type="button" onClick={() => setI((v) => Math.max(0, v - 1))} disabled={i === 0} className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-surface px-4 text-sm font-semibold text-ink hover:text-brand-600 disabled:opacity-40 dark:bg-navy-900"><ArrowLeft className="h-4 w-4" />Back</button>
-          <button type="button" onClick={() => setI((v) => Math.min(STEPS.length - 1, v + 1))} disabled={i === STEPS.length - 1} className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-500 px-5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-40">Next<ArrowRight className="h-4 w-4" /></button>
+          <button type="button" onClick={() => setI((v) => Math.max(0, v - 1))} disabled={i === 0} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-lg bg-surface px-3 sm:px-4 text-xs sm:text-sm font-semibold text-ink hover:text-brand-600 disabled:opacity-40 dark:bg-navy-900"><ArrowLeft className="h-4 w-4" />Back</button>
+          <button type="button" onClick={() => setI((v) => Math.min(STEPS.length - 1, v + 1))} disabled={i === STEPS.length - 1} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-lg bg-brand-500 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-40">Next<ArrowRight className="h-4 w-4" /></button>
         </div>
       </Container>
     </section>
@@ -305,9 +305,9 @@ export function CtaBand() {
           <h2 className="mx-auto max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">Ready to keep your vehicles safe?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">Order online, or call our team — we&apos;ll help you choose the right package and book the installation.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link href="/pricing" className="inline-flex h-12 items-center gap-2 rounded-lg bg-brand-500 px-7 text-sm font-bold transition-colors hover:bg-brand-600">See packages<ArrowRight className="h-4 w-4" /></Link>
-            <a href={`tel:${site.phone}`} className="inline-flex h-12 items-center gap-2 rounded-lg bg-white/10 px-7 text-sm font-bold backdrop-blur transition-colors hover:bg-white/20"><Phone className="h-4 w-4" />{site.phone}</a>
-            <button type="button" onClick={() => dispatch(openDemoModal("Call-back request (home)"))} className="inline-flex h-12 items-center rounded-lg px-5 text-sm font-semibold text-slate-200 hover:text-white">Request a call-back</button>
+            <Link href="/pricing" className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-lg bg-brand-500 px-5 sm:px-7 text-xs sm:text-sm font-bold transition-colors hover:bg-brand-600">See packages<ArrowRight className="h-4 w-4" /></Link>
+            <a href={`tel:${site.phone}`} className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-lg bg-white/10 px-5 sm:px-7 text-xs sm:text-sm font-bold backdrop-blur transition-colors hover:bg-white/20"><Phone className="h-4 w-4" />{site.phone}</a>
+            <button type="button" onClick={() => dispatch(openDemoModal("Call-back request (home)"))} className="inline-flex h-10 sm:h-12 items-center rounded-lg px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white">Request a call-back</button>
           </div>
           <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-300">
             {["Doorstep installation", "24×7 helpline", "Android, iOS & web apps"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />{t}</li>)}

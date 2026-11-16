@@ -106,20 +106,20 @@ export default function ProductDetail({ id, device }: { id: string; device?: Dev
 
             {d.price ? (
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <div className="inline-flex h-11 items-center rounded border border-line-strong">
+                <div className="inline-flex h-9 sm:h-11 items-center rounded border border-line-strong">
                   <button onClick={() => setQ((n) => Math.max(1, n - 1))} aria-label="Decrease quantity" className="grid h-full w-10 place-items-center hover:bg-softer"><Minus className="h-4 w-4" /></button>
                   <span className="w-10 text-center text-sm font-bold tabular-nums text-ink" aria-live="polite">{qtyShown}</span>
                   <button onClick={() => setQ((n) => Math.min(Math.max(1, left), n + 1))} disabled={qtyShown >= left} aria-label="Increase quantity" className="grid h-full w-10 place-items-center hover:bg-softer disabled:opacity-40"><Plus className="h-4 w-4" /></button>
                 </div>
-                <button onClick={() => add(false)} disabled={left < 1} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-brand-600 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700 sm:flex-none">
+                <button onClick={() => add(false)} disabled={left < 1} className="inline-flex h-9 sm:h-11 flex-1 items-center justify-center gap-2 rounded bg-brand-600 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700 sm:flex-none">
                   <ShoppingCart className="h-4 w-4" />{left < 1 ? (state === "out" ? "Out of stock" : "All in your cart") : "Add to cart"}
                 </button>
-                <button onClick={() => add(true)} disabled={left < 1} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-navy-900 px-5 text-sm font-semibold uppercase tracking-wide text-white hover:bg-navy-800 sm:flex-none">
+                <button onClick={() => add(true)} disabled={left < 1} className="inline-flex h-9 sm:h-11 flex-1 items-center justify-center gap-2 rounded bg-navy-900 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold uppercase tracking-wide text-white hover:bg-navy-800 sm:flex-none">
                   <Zap className="h-4 w-4" />Buy now
                 </button>
               </div>
             ) : (
-              <a href={`tel:${site.phone}`} className="mt-5 inline-flex h-11 items-center gap-2 rounded bg-brand-600 px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700">
+              <a href={`tel:${site.phone}`} className="mt-5 inline-flex h-9 sm:h-11 items-center gap-2 rounded bg-brand-600 px-4 sm:px-6 text-xs sm:text-sm font-semibold uppercase tracking-wide text-white hover:bg-brand-700">
                 <Phone className="h-4 w-4" />Call {site.phone} for price
               </a>
             )}
