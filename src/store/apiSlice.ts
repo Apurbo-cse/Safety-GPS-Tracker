@@ -87,6 +87,10 @@ export const baseApi = createApi({
         } catch { /* the caller shows the error */ }
       },
     }),
+    /** Starts a bKash payment for an order; the browser is then sent to the returned bKash page. */
+    payBkash: b.mutation<{ bkashURL: string }, string>({
+      query: (orderId) => ({ method: "POST", path: "/payments/bkash/create", body: { orderId } }),
+    }),
     /** The Contact page form and the "Talk to our team" pop-up. */
     sendContact: b.mutation<{ ok: true }, ContactBody>({
       query: (body) => ({ method: "POST", path: "/contact", body, auth: false }),
@@ -372,7 +376,7 @@ export function applyUser(dispatch: (a: unknown) => unknown, u: ApiUser) {
 export const {
   useProductsQuery, useProductQuery, usePostsQuery, usePostQuery,
   useLoginMutation, useRegisterMutation, useMeQuery, useDeleteAccountMutation, useUploadImageMutation, useDiscardImageMutation,
-  useMyOrdersQuery, useMyOrderQuery, useCreateOrderMutation, useCancelOrderMutation, useUpdateProfileMutation, useUpdateSettingsMutation, useChangePasswordMutation,
+  useMyOrdersQuery, useMyOrderQuery, useCreateOrderMutation, usePayBkashMutation, useCancelOrderMutation, useUpdateProfileMutation, useUpdateSettingsMutation, useChangePasswordMutation,
   useAdminCatalogQuery, useAdminProductsQuery, useAdminStatsQuery, useAdminOrdersQuery, useAdminCustomersQuery, useSetOrderStatusMutation,
   useSaveCatalogItemMutation, useDeleteCatalogItemMutation,
   useStaffQuery, useAddStaffMutation, useUpdateStaffMutation, useRemoveStaffMutation, useSetStaffPasswordMutation,

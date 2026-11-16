@@ -18,16 +18,18 @@ const newOrderId = () => "SGT-" + Array.from(randomBytes(6), (b) => ALPHABET[b %
 const isUniqueViolation = (e: unknown) => (e as { code?: string } | null)?.code === "23505" || (e as { driverError?: { code?: string } } | null)?.driverError?.code === "23505";
 
 /** Shape the website expects (matches its Order / CartItem types). */
-export const toOrderView = (o: Order) => ({
+export const toOrderView = (o: Order, images?: Map<string, string>) => ({
   id: o.id,
   createdAt: o.createdAt.toISOString(),
   status: o.status,
   payment: o.payment,
+  paymentStatus: o.paymentStatus,
+  paymentTrxId: o.paymentTrxId ?? undefined,
   deviceTotal: o.deviceTotal,
   discount: o.discount,
   couponCode: o.couponCode ?? undefined,
   monthlyTotal: o.monthlyTotal,
-  items: (o.items ?? []).map((i) => ({ id: i.itemRef, kind: i.kind, name: i.name, price: i.unitPrice, monthly: i.monthly || undefined, qty: i.qty })),
+  items: (o.items ?? []).map((i) => ({ id: i.itemRef, kind: i.kind, name: i.name, price: i.unitPrice, monthly: i.monthly || undefined, qty: i.qty, image: images?.get(i.itemRef) })),
   billing: { name: o.billingName, company: o.billingCompany || undefined, taxId: o.billingTaxId || undefined, address: o.billingAddress, division: o.billingDivision, postcode: o.billingPostcode || undefined, phone: o.billingPhone, email: o.billingEmail },
   contact: {
     name: o.contactName, phone: o.contactPhone, email: o.contactEmail, address: o.address, division: o.division,
@@ -175,9 +177,23 @@ export class OrdersService {
     if (d.getTime() > today + 365 * day) throw new BadRequestException("Choose a date within the next year");
   }
 
+  /** Current catalogue picture for each cart ref ("plan-x" / "dev-y"). Orders don't store pictures, so a deleted product simply has none. */
+  private async imagesFor(orders: Order[]) {
+    const refs = [...new Set(orders.flatMap((o) => o.items ?? []).map((i) => parseRef(i.itemRef)).filter((r): r is NonNullable<typeof r> => !!r))];
+    const [plans, devices] = await Promise.all([
+      this.plans.find({ where: { id: In(refs.filter((r) => r.kind === "plan").map((r) => r.ref)) }, select: { id: true, image: true } }),
+      this.devices.find({ where: { id: In(refs.filter((r) => r.kind === "device").map((r) => r.ref)) }, select: { id: true, image: true, images: true } }),
+    ]);
+    const map = new Map<string, string>();
+    for (const p of plans) if (p.image) map.set(`plan-${p.id}`, p.image);
+    for (const d of devices) { const img = d.images?.[0] ?? d.image; if (img) map.set(`dev-${d.id}`, img); }
+    return map;
+  }
+
   async listMine(user: User) {
     const rows = await this.orders.find({ where: { userId: user.id }, relations: { items: true }, order: { createdAt: "DESC" }, take: 100 });
-    return rows.map(toOrderView);
+    const images = await this.imagesFor(rows);
+    return rows.map((o) => toOrderView(o, images));
   }
 
   async cancel(user: User, id: string) {
@@ -187,7 +203,7 @@ export class OrdersService {
   async getMine(user: User, id: string) {
     const o = await this.orders.findOne({ where: { id, userId: user.id }, relations: { items: true } });
     if (!o) throw new NotFoundException("Order not found");
-    return toOrderView(o);
+    return toOrderView(o, await this.imagesFor([o]));
   }
 
   /* ------------------------------------------------------------- admin */

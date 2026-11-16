@@ -7,6 +7,14 @@ export interface Env {
   FRONTEND_ORIGINS: string[];
   TRUST_PROXY: boolean;
   NODE_ENV: string;
+  /** bKash tokenized checkout. Empty values = bKash payment is switched off. */
+  BKASH_BASE_URL: string;
+  BKASH_USERNAME: string;
+  BKASH_PASSWORD: string;
+  BKASH_APP_KEY: string;
+  BKASH_APP_SECRET: string;
+  /** Public URL of this API (with /api/v1) — bKash sends the customer back to it. */
+  API_PUBLIC_URL: string;
 }
 
 const flag = (v: unknown) => v === "1" || v === "true";
@@ -35,5 +43,11 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     FRONTEND_ORIGINS: String(raw.FRONTEND_ORIGINS ?? "http://localhost:3000").split(",").map((s) => s.trim()).filter(Boolean),
     TRUST_PROXY: flag(raw.TRUST_PROXY),
     NODE_ENV: String(raw.NODE_ENV ?? "development"),
+    BKASH_BASE_URL: String(raw.BKASH_BASE_URL ?? "https://tokenized.sandbox.bka.sh/v1.2.0-beta").replace(/\/+$/, ""),
+    BKASH_USERNAME: String(raw.BKASH_USERNAME ?? ""),
+    BKASH_PASSWORD: String(raw.BKASH_PASSWORD ?? ""),
+    BKASH_APP_KEY: String(raw.BKASH_APP_KEY ?? ""),
+    BKASH_APP_SECRET: String(raw.BKASH_APP_SECRET ?? ""),
+    API_PUBLIC_URL: String(raw.API_PUBLIC_URL ?? `http://localhost:${PORT}/api/v1`).replace(/\/+$/, ""),
   };
 }

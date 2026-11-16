@@ -72,7 +72,7 @@ export interface Billing { name: string; company?: string; taxId?: string; addre
 export type OrderStatus = "received" | "confirmed" | "scheduled" | "active" | "cancelled";
 export type PaymentMethod = "bKash" | "Nagad" | "Rocket" | "Card" | "Cash on installation";
 export interface ApiOrder {
-  id: string; createdAt: string; status: OrderStatus; payment: PaymentMethod; deviceTotal: number; monthlyTotal: number;
+  id: string; createdAt: string; status: OrderStatus; payment: PaymentMethod; paymentStatus?: "unpaid" | "paid" | "failed"; paymentTrxId?: string; deviceTotal: number; monthlyTotal: number;
   /** Taken off deviceTotal by a coupon (what is due now is deviceTotal − discount). */
   discount: number; couponCode?: string;
   items: CartItem[];

@@ -184,10 +184,12 @@ export default function Navbar() {
 
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
-          <Link href="/profile" aria-label="My account" className={cn("relative grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-softer dark:hover:bg-navy-900", ["/profile", "/orders", "/settings"].some((p) => pathname.startsWith(p)) ? "text-brand-600 dark:text-brand-400" : "text-body-strong")}>
-            <UserRound className="h-4.5 w-4.5" />
-            {orderCount > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-surface dark:ring-navy-950" />}
-          </Link>
+          {user && (
+            <Link href="/profile" aria-label="My account" className={cn("relative grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-softer dark:hover:bg-navy-900", ["/profile", "/orders", "/settings"].some((p) => pathname.startsWith(p)) ? "text-brand-600 dark:text-brand-400" : "text-body-strong")}>
+              <UserRound className="h-4.5 w-4.5" />
+              {orderCount > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-surface dark:ring-navy-950" />}
+            </Link>
+          )}
           <Link href="/products#wishlist" aria-label={`Wishlist, ${wishCount} items`} className="relative grid h-9 w-9 place-items-center rounded-full text-body-strong transition-colors hover:bg-softer dark:hover:bg-navy-900">
             <Heart className="h-4.5 w-4.5" />
             {wishCount > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{wishCount}</span>}

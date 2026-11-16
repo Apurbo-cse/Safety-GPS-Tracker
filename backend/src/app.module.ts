@@ -36,6 +36,8 @@ import { ContactMessage } from "./contact/contact.entity";
 import { ContactService } from "./contact/contact.service";
 import { EventsGateway } from "./events/events.gateway";
 import { CouponsService } from "./orders/coupons.service";
+import { PaymentsController } from "./payments/payments.controller";
+import { PaymentsService } from "./payments/payments.service";
 import { OrdersController } from "./orders/orders.controller";
 import { OrdersService } from "./orders/orders.service";
 import { User } from "./users/user.entity";
@@ -70,9 +72,9 @@ import { UsersService } from "./users/users.service";
     }),
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 60_000, limit: 120 }] }),
   ],
-  controllers: [StaffController, PostsController, ContentController, ContactController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, AdminController, HealthController],
+  controllers: [StaffController, PostsController, ContentController, ContactController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, PaymentsController, AdminController, HealthController],
   providers: [
-    UsersService, AuthService, CatalogService, OrdersService, AdminService, MediaService, RolesService, StaffService, PostsService, ContentService, CouponsService, ContactService, EventsGateway,
+    UsersService, AuthService, CatalogService, OrdersService, PaymentsService, AdminService, MediaService, RolesService, StaffService, PostsService, ContentService, CouponsService, ContactService, EventsGateway,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

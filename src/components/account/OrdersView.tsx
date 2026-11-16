@@ -1,15 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import { AlertCircle, ArrowRight, Calendar, Car, Check, ChevronDown, MapPin, Package, Phone, Receipt, RefreshCw, RotateCcw, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Calendar, Car, Check, ChevronDown, MapPin, Package, Phone, Receipt, RefreshCw, RotateCcw, Smartphone, X } from "lucide-react";
+import ProductImage from "@/components/common/ProductImage";
+import { mediaUrl } from "@/lib/api";
 import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToCart, setQty } from "@/store/slices/cartSlice";
 import type { Order, OrderStatus } from "@/store/slices/ordersSlice";
-import { errorMessage, useCancelOrderMutation, useMyOrdersQuery } from "@/store/apiSlice";
+import { errorMessage, useCancelOrderMutation, useMyOrdersQuery, usePayBkashMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
 import AccountShell, { CARD } from "./AccountShell";
 
@@ -19,18 +21,18 @@ const STEPS: { key: OrderStatus; label: string }[] = [
   { key: "scheduled", label: "Installation" },
   { key: "active", label: "Tracking live" },
 ];
-const STATUS_STYLE: Record<OrderStatus, string> = {
+export const STATUS_STYLE: Record<OrderStatus, string> = {
   received: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
   confirmed: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
   scheduled: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   active: "bg-green-500/15 text-green-700 dark:text-green-300",
   cancelled: "bg-red-500/15 text-red-700 dark:text-red-300",
 };
-const STATUS_LABEL: Record<OrderStatus, string> = { received: "Received", confirmed: "Confirmed", scheduled: "Installation scheduled", active: "Active", cancelled: "Cancelled" };
+export const STATUS_LABEL: Record<OrderStatus, string> = { received: "Received", confirmed: "Confirmed", scheduled: "Installation scheduled", active: "Active", cancelled: "Cancelled" };
 type Filter = "all" | "open" | "cancelled";
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-function Tracker({ status }: { status: OrderStatus }) {
+export function Tracker({ status }: { status: OrderStatus }) {
   const cur = STEPS.findIndex((s) => s.key === status);
   return (
     <ol className="grid grid-cols-4 gap-2" aria-label="Order progress">
@@ -53,6 +55,7 @@ function OrderCard({ o }: { o: Order }) {
   const site = useSite();
   const dispatch = useAppDispatch();
   const [cancel, { isLoading: cancelling }] = useCancelOrderMutation();
+  const [payBkash, { isLoading: paying }] = usePayBkashMutation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const count = o.items.reduce((n, i) => n + i.qty, 0);
@@ -71,10 +74,18 @@ function OrderCard({ o }: { o: Order }) {
       <div className="flex flex-wrap items-start justify-between gap-3 p-5">
         <div>
           <p className="text-xs text-slate-500">Order · {fmtDate(o.createdAt)}</p>
-          <h3 className="text-lg font-black tracking-tight text-ink">{o.id}</h3>
+          <h3 className="text-lg font-black tracking-tight text-ink"><Link href={`/order/${o.id}`} className="hover:text-brand-600 hover:underline">{o.id}</Link></h3>
         </div>
         <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", STATUS_STYLE[o.status])}>{STATUS_LABEL[o.status]}</span>
       </div>
+      {o.payment === "bKash" && o.status !== "cancelled" && (
+        <div className="mx-5 mb-1 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-pink-500/10 px-3 py-2 text-sm">
+          <span className="font-medium text-ink">{o.paymentStatus === "paid" ? <>Paid with bKash{o.paymentTrxId ? <span className="text-xs text-body"> · Trx {o.paymentTrxId}</span> : null}</> : o.paymentStatus === "failed" ? "bKash payment did not complete" : "bKash payment pending"}</span>
+          {o.paymentStatus !== "paid" && (
+            <button disabled={paying} onClick={() => { payBkash(o.id).unwrap().then((r) => window.location.assign(r.bkashURL)).catch((e) => toast.error(errorMessage(e, "Could not open bKash"))); }} className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-pink-600 px-3 text-xs font-semibold text-white hover:bg-pink-700 disabled:opacity-60"><Smartphone className="h-3.5 w-3.5" />{paying ? "Opening…" : "Pay with bKash"}</button>
+          )}
+        </div>
+      )}
 
       {o.status !== "cancelled" && <div className="px-5"><Tracker status={o.status} /></div>}
 
@@ -91,8 +102,9 @@ function OrderCard({ o }: { o: Order }) {
             <div className="grid gap-4 bg-black/[0.02] p-5 dark:bg-white/[0.02] md:grid-cols-2">
               <ul className="space-y-2">
                 {o.items.map((i) => (
-                  <li key={i.id} className="flex items-center justify-between gap-3 rounded-lg bg-surface p-3 text-sm dark:bg-navy-950/70">
-                    <span className="min-w-0"><span className="block truncate font-semibold text-ink">{i.name}</span><span className="text-xs text-slate-500">{i.qty} × {formatBDT(i.price)}{i.monthly ? ` + ${formatBDT(i.monthly)}/mo` : ""}</span></span>
+                  <li key={i.id} className="flex items-center gap-3 rounded-lg bg-surface p-3 text-sm dark:bg-navy-950/70">
+                    {i.image && <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-softer/80 dark:bg-navy-900"><ProductImage src={mediaUrl(i.image)} alt={i.name} fill sizes="40px" className="object-contain p-0.5" /></span>}
+                    <span className="min-w-0 flex-1"><span className="block truncate font-semibold text-ink">{i.name}</span><span className="text-xs text-slate-500">{i.qty} × {formatBDT(i.price)}{i.monthly ? ` + ${formatBDT(i.monthly)}/mo` : ""}</span></span>
                     <span className="font-bold tabular-nums text-ink">{formatBDT(i.price * i.qty)}</span>
                   </li>
                 ))}
@@ -108,6 +120,7 @@ function OrderCard({ o }: { o: Order }) {
             </div>
             <div className="flex flex-wrap gap-2 p-5 pt-0">
               <button onClick={reorder} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-500 px-4 text-xs font-semibold text-white hover:bg-brand-600"><RotateCcw className="h-3.5 w-3.5" />Order again</button>
+              <Link href={`/order/${o.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><ArrowRight className="h-3.5 w-3.5" />Full page</Link>
               <Link href={`/orders/${o.id}/invoice`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><Receipt className="h-3.5 w-3.5" />Invoice</Link>
               <a href={`tel:${site.phone}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><Phone className="h-3.5 w-3.5" />Call support</a>
               {o.status === "received" && (
@@ -123,6 +136,12 @@ function OrderCard({ o }: { o: Order }) {
 
 export default function OrdersView() {
   const user = useAppSelector((s) => s.auth.user);
+  const params = useSearchParams();
+  const pay = params.get("pay"), payOrder = params.get("order");
+  useEffect(() => {
+    if (pay === "success") toast.success(`bKash payment received${payOrder ? ` for ${payOrder}` : ""}`);
+    else if (pay === "failed") toast.error("bKash payment was not completed. You can try again from the order below.");
+  }, [pay, payOrder]);
   // statuses change when our team confirms or schedules an order, so refresh whenever the page opens
   const q = useMyOrdersQuery(undefined, { skip: !user, refetchOnMountOrArgChange: true });
   const orders = q.data ?? [];

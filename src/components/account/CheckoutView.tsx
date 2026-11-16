@@ -16,7 +16,7 @@ import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { removeFromCart, setQty } from "@/store/slices/cartSlice";
 import type { Order, PaymentMethod } from "@/store/slices/ordersSlice";
-import { errorMessage, useCreateOrderMutation, useQuoteOrderMutation, useUpdateProfileMutation } from "@/store/apiSlice";
+import { errorMessage, useCreateOrderMutation, usePayBkashMutation, useQuoteOrderMutation, useUpdateProfileMutation } from "@/store/apiSlice";
 import { clearCart } from "@/store/slices/cartSlice";
 import { cn, formatBDT } from "@/utils/format";
 import { CARD, GateSkeleton, LoginGate, Pill } from "./AccountShell";
@@ -139,6 +139,7 @@ export default function CheckoutView() {
   }, [profile, user]);
 
   const [createOrder] = useCreateOrderMutation();
+  const [payBkash] = usePayBkashMutation();
   // discount code: checked with the server; cleared whenever the cart changes so the shown discount is never stale
   const [quote] = useQuoteOrderMutation();
   const [couponInput, setCouponInput] = useState("");
@@ -175,6 +176,11 @@ export default function CheckoutView() {
       dispatch(clearCart());
       if (v.saveProfile) void updateProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division, company: v.company ?? "", taxId: v.taxId ?? "", ...(v.sameBilling ? {} : { billingAddress: v.billingAddress, billingDivision: v.billingDivision, billingPostcode: v.billingPostcode ?? "" }) }).unwrap().catch(() => { /* best effort */ });
       setPlaced(order);
+      // bKash: hand the customer to the (sandbox) bKash page; if that fails the order still exists and can be paid from My orders
+      if (order.payment === "bKash" && order.deviceTotal - order.discount > 0) {
+        try { const { bkashURL } = await payBkash(order.id).unwrap(); window.location.assign(bkashURL); return; }
+        catch (e) { toast.error(errorMessage(e, "Could not open bKash. You can pay from My orders.")); }
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast.success(`Order ${order.id} placed`);
     } catch (e) {
@@ -229,7 +235,7 @@ export default function CheckoutView() {
                 <Link href="/orders" className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white transition-colors hover:bg-brand-600"><Package className="h-4 w-4" />View my orders</Link>
                 <Link href="/products" className="inline-flex h-11 items-center gap-2 rounded-lg bg-softer/80 px-5 text-sm font-semibold text-ink transition-colors hover:text-brand-600 dark:bg-navy-900/90">Continue shopping</Link>
               </div>
-              <p className="mt-4 text-xs text-slate-500">Our team will contact you to confirm. No payment has been taken.</p>
+              <p className="mt-4 text-xs text-slate-500">Our team will contact you to confirm.</p>
             </div>
           ) : items.length === 0 ? (
             /* ---------------- empty ---------------- */
@@ -303,7 +309,7 @@ export default function CheckoutView() {
                       );
                     })}
                   </div>
-                  <p className="mt-3 text-xs text-slate-500">{payment === "Cash on installation" ? "Pay the device price to the technician after installation." : "You'll get a payment link after our team confirms the order."}</p>
+                  <p className="mt-3 text-xs text-slate-500">{payment === "Cash on installation" ? "Pay the device price to the technician after installation." : payment === "bKash" ? "You'll be taken to bKash to pay securely after you place the order." : "You'll get a payment link after our team confirms the order."}</p>
                 </Section>
 
                 <div className="space-y-2 text-sm">
@@ -361,7 +367,7 @@ export default function CheckoutView() {
                   <button type="submit" disabled={isSubmitting} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-bold text-white transition-all hover:bg-brand-600 active:scale-[.98] disabled:opacity-70">
                     {isSubmitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />Placing order…</> : <><Lock className="h-4 w-4" />Place order</>}
                   </button>
-                  <p className="mt-3 text-center text-xs text-slate-500">No payment is taken online. Our team confirms by phone. Questions? Call <a href={`tel:${site.phone}`} className="font-semibold text-ink">{site.phone}</a></p>
+                  <p className="mt-3 text-center text-xs text-slate-500">bKash orders are paid on the bKash page; other methods are confirmed by our team by phone. Questions? Call <a href={`tel:${site.phone}`} className="font-semibold text-ink">{site.phone}</a></p>
                 </div>
               </aside>
             </form>

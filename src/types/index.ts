@@ -144,6 +144,8 @@ export interface FaqItem {
 
 export interface CartItem {
   id: string;
+  /** Product picture (only on items read back from an order). */
+  image?: string;
   kind: "plan" | "device";
   name: string;
   price: number;

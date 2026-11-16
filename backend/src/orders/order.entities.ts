@@ -28,6 +28,18 @@ export class Order {
   @Column({ type: "varchar", length: 30 })
   payment: PaymentMethod;
 
+  /** "paid" once bKash confirms the money. Other methods stay "unpaid" until staff collect it. */
+  @Column({ name: "payment_status", type: "varchar", length: 10, default: "unpaid" })
+  paymentStatus: "unpaid" | "paid" | "failed";
+
+  /** bKash paymentID of the latest attempt, and the transaction id once it completes. */
+  @Index()
+  @Column({ name: "payment_id", type: "varchar", length: 64, nullable: true })
+  paymentId: string | null;
+
+  @Column({ name: "payment_trx_id", type: "varchar", length: 64, nullable: true })
+  paymentTrxId: string | null;
+
   @Column({ name: "device_total", type: "int" })
   deviceTotal: number;
 
