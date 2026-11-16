@@ -777,33 +777,56 @@ export function EnquiryBlock() {
 
 
 /* ======================================================== 8. innovation */
-const INNOVATIONS: { icon: LucideIcon; t: string; d: string }[] = [
-  { icon: MapPin, t: "Live in 10 seconds", d: "Positions refresh about every 10 seconds on the map." },
-  { icon: Lock, t: "Remote engine lock", d: "Lock the engine from the app on supported packages." },
-  { icon: Bell, t: "Alerts you choose", d: "Ignition, geo-fence, device removal and panic — only the ones you need." },
-  { icon: Smartphone, t: "Android, iOS & web", d: "One platform, the same vehicles on every screen." },
-  { icon: CalendarCheck, t: "Smart reminders", d: "BRTA paper, insurance and engine-oil reminders before they expire." },
-  { icon: BarChart3, t: "Reports that save money", d: "Daily mileage, stops and working hours in one place." },
+type Inno = { icon: LucideIcon; t: string; d: string; cat: string; points: string[] };
+const INNO_TABS = ["All", "Tracking", "Security", "Management"] as const;
+const INNOVATIONS: Inno[] = [
+  { cat: "Tracking", icon: MapPin, t: "Live in 10 seconds", d: "Positions refresh about every 10 seconds on the map.", points: ["Needs GPS and mobile coverage", "Android, iOS and web"] },
+  { cat: "Tracking", icon: Route, t: "Route & travel history", d: "Replay past trips and see where a vehicle stopped.", points: ["Replay any past trip", "Stops and parking time"] },
+  { cat: "Tracking", icon: Fence, t: "Geo-fencing", d: "Draw a boundary and get an alert when it is crossed.", points: ["Alert on enter, leave or both", "Great for sites and depots"] },
+  { cat: "Security", icon: Lock, t: "Remote engine lock", d: "Lock the engine from the app on supported packages.", points: ["Use only when it is safe", "Helpline can advise"] },
+  { cat: "Security", icon: Bell, t: "Alerts you choose", d: "Ignition, geo-fence, device removal and panic alerts.", points: ["Pick only what you need", "Device-removal alert"] },
+  { cat: "Security", icon: ShieldCheck, t: "Panic button", d: "An urgent alert that reaches you and your team at once.", points: ["Emergency situations", "24×7 helpline backup"] },
+  { cat: "Management", icon: CalendarCheck, t: "Smart reminders", d: "BRTA paper, insurance and engine-oil reminders.", points: ["Enter dates once", "Reminder before expiry"] },
+  { cat: "Management", icon: BarChart3, t: "Reports that save money", d: "Daily mileage, stops and working hours in one place.", points: ["Owners and managers see the same data", "Spot unexplained mileage"] },
+  { cat: "Management", icon: Smartphone, t: "One platform, three screens", d: "Android, iOS and web show the same vehicles.", points: ["Many vehicles, one map", "Switch phone and desktop"] },
 ];
 
 export function InnovationGrid() {
+  const [tab, setTab] = useState<(typeof INNO_TABS)[number]>("All");
+  const list = INNOVATIONS.filter((i) => tab === "All" || i.cat === tab);
   return (
-    <section className="bg-white py-16 dark:bg-navy-950 sm:py-24">
+    <section className="relative isolate overflow-hidden bg-white py-12 dark:bg-navy-950 sm:py-24">
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-brand-500/10 blur-3xl" />
       <Container>
         <div className="text-center">
           <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Innovation</span>
-          <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Built To Keep Getting Smarter</h2>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-4xl">Built To Keep Getting Smarter</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-body">Practical features designed around how vehicles are really used.</p>
+          <div className="mt-6 inline-flex flex-wrap justify-center gap-1.5 rounded-full bg-softer/80 p-1 dark:bg-navy-900/90">
+            {INNO_TABS.map((k) => (
+              <button key={k} onClick={() => setTab(k)} className={cn("h-8 rounded-full px-3.5 text-xs font-semibold transition-colors", tab === k ? "bg-brand-500 text-white" : "text-body hover:text-ink")}>{k}</button>
+            ))}
+          </div>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {INNOVATIONS.map((c) => (
-            <div key={c.t} className="group rounded-md bg-slate-100/80 p-5 transition-all hover:-translate-y-1 dark:bg-navy-900/90">
-              <span className="grid h-11 w-11 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
-              <h3 className="mt-3 text-base font-bold text-ink">{c.t}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-body">{c.d}</p>
-            </div>
-          ))}
-        </div>
+        <motion.div layout className="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          <AnimatePresence mode="popLayout">
+            {list.map((c) => (
+              <motion.div key={c.t} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.25 }}
+                className="group relative overflow-hidden rounded-xl bg-slate-100/80 p-4 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 dark:bg-navy-900/90 sm:p-5">
+                <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-brand-500/10 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
+                <div className="flex items-center justify-between">
+                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
+                  <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-body dark:bg-navy-950/60">{c.cat}</span>
+                </div>
+                <h3 className="mt-3 text-base font-bold text-ink">{c.t}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-body">{c.d}</p>
+                <ul className="mt-3 space-y-1 border-t border-line/30 pt-3 text-xs text-body">
+                  {c.points.map((x) => <li key={x} className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-brand-500" />{x}</li>)}
+                </ul>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       </Container>
     </section>
   );
