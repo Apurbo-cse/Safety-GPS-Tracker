@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Search, Users } from "lucide-react";
 import { useAdminCustomersQuery } from "@/store/apiSlice";
 import ExportButton from "./ExportButton";
@@ -35,7 +36,7 @@ export default function CustomersAdminView() {
                 <tbody>
                   {data.customers.map((c) => (
                     <tr key={c.id}>
-                      <td className="px-5 py-3"><span className="flex items-center gap-2 font-semibold text-ink">{c.name}{c.role === "admin" && <span className="rounded bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-brand-600 dark:text-brand-400">Admin</span>}</span></td>
+                      <td className="px-5 py-3"><span className="flex items-center gap-2 font-semibold text-ink"><Link href={`/admin/customers/${c.id}`} className="hover:text-brand-600 hover:underline">{c.name}</Link>{c.role === "admin" && <span className="rounded bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-brand-600 dark:text-brand-400">Admin</span>}</span></td>
                       <td className="px-3 py-3 text-body"><span className="block">{c.email}</span><span className="block text-xs text-slate-500">{c.phone ?? "—"}</span></td>
                       <td className="px-3 py-3 text-body">{c.division}</td>
                       <td className="px-3 py-3 text-right font-bold tabular-nums text-ink">{c.orders}</td>

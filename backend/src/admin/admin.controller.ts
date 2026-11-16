@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post, Put, Query } from "@nestjs/common";
 import { AdminProductsQuery, CategoryDto, DeviceDto, FaqDto, HeroSlideDto, PlanDto } from "../catalog/catalog.dto";
 import { CatalogService } from "../catalog/catalog.service";
 import { AnyPermission, CurrentUser, Permissions, Roles } from "../common/decorators";
 import { SlugPipe } from "../common/slug.pipe";
-import { AdminOrdersQuery, UpdateStatusDto } from "../orders/orders.dto";
+import { AdminOrdersQuery, UpdateOrderDto, UpdateStatusDto } from "../orders/orders.dto";
 import { OrdersService } from "../orders/orders.service";
+import { PaymentsService } from "../payments/payments.service";
 import { AdminPostsQuery, PostDto } from "../posts/posts.dto";
 import { PostsService } from "../posts/posts.service";
 import { PageDto, SiteDto } from "../content/content.dto";
@@ -27,7 +28,7 @@ const hideCost = <T extends { cost?: number | null }>(rows: T[]) => rows.map(({ 
  */
 @Roles("admin") @Controller("admin")
 export class AdminController {
-  constructor(private orders: OrdersService, private catalog: CatalogService, private admin: AdminService, private posts: PostsService, private roles: RolesService, private content: ContentService, private coupons: CouponsService, private contact: ContactService) {}
+  constructor(private orders: OrdersService, private catalog: CatalogService, private admin: AdminService, private posts: PostsService, private roles: RolesService, private content: ContentService, private coupons: CouponsService, private contact: ContactService, private payments: PaymentsService) {}
 
   private async finance(user: User) { return (await this.roles.permissionsFor(user)).includes("finance.view"); }
 
@@ -45,6 +46,8 @@ export class AdminController {
   @Permissions("orders.view") @Get("export/orders.csv") @Header("Content-Type", "text/csv; charset=utf-8") @Header("Content-Disposition", 'attachment; filename="orders.csv"')
   async exportOrders(@CurrentUser() me: User, @Query() q: ExportRange) { const r = await this.admin.exportOrders(q, await this.finance(me)); return toCsv(r.headers, r.rows); }
 
+  @Permissions("customers.view") @Get("customers/:id") customer(@Param("id") id: string) { return this.admin.customer(id.slice(0, 64)); }
+
   @Permissions("customers.view") @Get("export/customers.csv") @Header("Content-Type", "text/csv; charset=utf-8") @Header("Content-Disposition", 'attachment; filename="customers.csv"')
   async exportCustomers() { const r = await this.admin.exportCustomers(); return toCsv(r.headers, r.rows); }
 
@@ -54,6 +57,16 @@ export class AdminController {
   /* ------------------------------------------------------------- orders */
   @Permissions("orders.view") @Get("orders")
   async listOrders(@CurrentUser() me: User, @Query() q: AdminOrdersQuery) { return this.orders.adminList(q, await this.finance(me)); }
+
+  @Permissions("orders.view") @Get("orders/:id")
+  async getOrder(@CurrentUser() me: User, @Param("id") id: string) { return this.orders.adminOne(id, await this.finance(me)); }
+
+  @Permissions("orders.manage") @Patch("orders/:id")
+  updateOrder(@Param("id") id: string, @Body() dto: UpdateOrderDto) { return this.orders.adminUpdate(id.slice(0, 16), dto); }
+
+  /** Send the money back through bKash, then mark the order refunded. */
+  @Permissions("orders.manage") @HttpCode(200) @Post("orders/:id/refund")
+  refundOrder(@Param("id") id: string) { return this.payments.refund(id.slice(0, 16)); }
 
   @Permissions("orders.manage") @Patch("orders/:id/status")
   setStatus(@Param("id") id: string, @Body() dto: UpdateStatusDto) { return this.orders.adminSetStatus(id, dto.status); }
@@ -71,6 +84,13 @@ export class AdminController {
   async products(@CurrentUser() me: User, @Query() q: AdminProductsQuery) {
     const r = await this.catalog.adminProducts(q);
     return (await this.finance(me)) ? r : { ...r, items: hideCost(r.items) };
+  }
+
+  @Permissions("products.manage") @Get("products/:id")
+  async product(@CurrentUser() me: User, @Param("id", SlugPipe) id: string) {
+    const r = await this.catalog.adminProduct(id);
+    const fin = await this.finance(me);
+    return { ...r, device: fin ? r.device : hideCost([r.device])[0], sales: fin ? r.sales : { ...r.sales, profit: undefined } };
   }
 
   @Permissions("products.manage") @Put("catalog/categories/:id") putCategory(@Param("id", SlugPipe) id: string, @Body() dto: CategoryDto) { return this.catalog.upsertCategory(id, dto); }

@@ -16,20 +16,24 @@ import { cn, formatBDT } from "@/utils/format";
 import AccountShell, { CARD } from "./AccountShell";
 
 const STEPS: { key: OrderStatus; label: string }[] = [
-  { key: "received", label: "Received" },
+  { key: "pending", label: "Pending" },
   { key: "confirmed", label: "Confirmed" },
   { key: "scheduled", label: "Installation" },
-  { key: "active", label: "Tracking live" },
+  { key: "delivered", label: "Delivered" },
 ];
 export const STATUS_STYLE: Record<OrderStatus, string> = {
-  received: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  pending: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
   confirmed: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
   scheduled: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
-  active: "bg-green-500/15 text-green-700 dark:text-green-300",
+  delivered: "bg-green-500/15 text-green-700 dark:text-green-300",
+  returned: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  refunded: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
   cancelled: "bg-red-500/15 text-red-700 dark:text-red-300",
 };
-export const STATUS_LABEL: Record<OrderStatus, string> = { received: "Received", confirmed: "Confirmed", scheduled: "Installation scheduled", active: "Active", cancelled: "Cancelled" };
-type Filter = "all" | "open" | "cancelled";
+export const STATUS_LABEL: Record<OrderStatus, string> = { pending: "Pending", confirmed: "Confirmed", scheduled: "Installation scheduled", delivered: "Delivered", returned: "Returned", refunded: "Refunded", cancelled: "Cancelled" };
+type Filter = "all" | "open" | "closed";
+const CLOSED: OrderStatus[] = ["cancelled", "returned", "refunded"];
+const NO_TRACKER: OrderStatus[] = CLOSED;
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export function Tracker({ status }: { status: OrderStatus }) {
@@ -72,13 +76,16 @@ function OrderCard({ o }: { o: Order }) {
   return (
     <article className={`${CARD} overflow-hidden`}>
       <div className="flex flex-wrap items-start justify-between gap-3 p-5">
-        <div>
+        <div className="flex items-center gap-3">
+          <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-surface dark:bg-navy-950/70">{o.items[0]?.image ? <ProductImage src={mediaUrl(o.items[0].image)} alt={o.items[0].name} fill sizes="56px" className="object-contain p-1" /> : <Package className="m-auto mt-4 h-6 w-6 text-slate-400" />}</span>
+          <div>
           <p className="text-xs text-slate-500">Order · {fmtDate(o.createdAt)}</p>
           <h3 className="text-lg font-black tracking-tight text-ink"><Link href={`/order/${o.id}`} className="hover:text-brand-600 hover:underline">{o.id}</Link></h3>
+          </div>
         </div>
         <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", STATUS_STYLE[o.status])}>{STATUS_LABEL[o.status]}</span>
       </div>
-      {o.payment === "bKash" && o.status !== "cancelled" && (
+      {o.payment === "bKash" && !CLOSED.includes(o.status) && (
         <div className="mx-5 mb-1 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-pink-500/10 px-3 py-2 text-sm">
           <span className="font-medium text-ink">{o.paymentStatus === "paid" ? <>Paid with bKash{o.paymentTrxId ? <span className="text-xs text-body"> · Trx {o.paymentTrxId}</span> : null}</> : o.paymentStatus === "failed" ? "bKash payment did not complete" : "bKash payment pending"}</span>
           {o.paymentStatus !== "paid" && (
@@ -87,7 +94,7 @@ function OrderCard({ o }: { o: Order }) {
         </div>
       )}
 
-      {o.status !== "cancelled" && <div className="px-5"><Tracker status={o.status} /></div>}
+      {!NO_TRACKER.includes(o.status) && <div className="px-5"><Tracker status={o.status} /></div>}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 px-5 pb-5">
         <p className="text-sm text-body"><b className="text-ink">{count}</b> item{count === 1 ? "" : "s"} · <b className="text-ink">{formatBDT(o.deviceTotal - o.discount)}</b>{o.discount > 0 && <span className="text-green-600"> (−{formatBDT(o.discount)} {o.couponCode})</span>} + {formatBDT(o.monthlyTotal)}/mo · {o.payment}</p>
@@ -110,11 +117,11 @@ function OrderCard({ o }: { o: Order }) {
                 ))}
               </ul>
               <dl className="space-y-2.5 text-sm">
-                <div className="flex gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><span><dt className="sr-only">Address</dt><dd className="text-ink">{o.contact.address}, {o.contact.division}</dd></span></div>
+                <div className="flex gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><span><dt className="sr-only">Address</dt><dd className="text-ink">{o.contact.address}, {o.contact.district ?? o.contact.division}{o.contact.thana ? ` · ${o.contact.thana}` : ""}{o.contact.postcode ? ` ${o.contact.postcode}` : ""}{o.contact.area && o.contact.area !== "Outside Dhaka" ? ` (${o.contact.area})` : ""}</dd></span></div>
                 <div className="flex gap-2.5"><Car className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><dd className="text-ink">{o.contact.vehicleType} · {o.contact.vehicleReg}</dd></div>
                 <div className="flex gap-2.5"><Calendar className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><dd className="text-ink">Preferred installation: {fmtDate(o.contact.preferredDate)}</dd></div>
                 <div className="flex gap-2.5"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><dd className="text-ink">{o.contact.name} · {o.contact.phone}</dd></div>
-                <div className="flex gap-2.5"><Receipt className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><span><dt className="sr-only">Billing</dt><dd className="text-ink">Billed to {o.billing.name}{o.billing.company ? `, ${o.billing.company}` : ""}, {o.billing.address}, {o.billing.division}{o.billing.taxId ? ` · BIN/TIN ${o.billing.taxId}` : ""}</dd></span></div>
+                <div className="flex gap-2.5"><Receipt className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /><span><dt className="sr-only">Billing</dt><dd className="text-ink">Billed to {o.billing.name}{o.billing.company ? `, ${o.billing.company}` : ""}, {o.billing.address}, {o.billing.district ?? o.billing.division}{o.billing.taxId ? ` · BIN/TIN ${o.billing.taxId}` : ""}</dd></span></div>
                 {o.contact.note && <p className="rounded-lg bg-surface p-3 text-xs text-body dark:bg-navy-950/70">“{o.contact.note}”</p>}
               </dl>
             </div>
@@ -123,7 +130,7 @@ function OrderCard({ o }: { o: Order }) {
               <Link href={`/order/${o.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><ArrowRight className="h-3.5 w-3.5" />Full page</Link>
               <Link href={`/orders/${o.id}/invoice`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><Receipt className="h-3.5 w-3.5" />Invoice</Link>
               <a href={`tel:${site.phone}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-surface px-4 text-xs font-semibold text-ink hover:text-brand-600 dark:bg-navy-950/70"><Phone className="h-3.5 w-3.5" />Call support</a>
-              {o.status === "received" && (
+              {o.status === "pending" && (
                 <button disabled={cancelling} onClick={() => { cancel(o.id).unwrap().then(() => toast.success(`Order ${o.id} cancelled`)).catch((e) => toast.error(errorMessage(e, "Could not cancel the order"))); }} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-semibold text-red-600 hover:bg-red-500/10"><X className="h-3.5 w-3.5" />Cancel order</button>
               )}
             </div>
@@ -148,14 +155,14 @@ export default function OrdersView() {
   const status = q.isError ? "error" : q.isFetching ? "loading" : "idle";
   const reloadOrders = () => void q.refetch();
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = orders.filter((o) => filter === "all" || (filter === "cancelled" ? o.status === "cancelled" : o.status !== "cancelled"));
-  const counts = { all: orders.length, open: orders.filter((o) => o.status !== "cancelled").length, cancelled: orders.filter((o) => o.status === "cancelled").length };
+  const shown = orders.filter((o) => filter === "all" || (filter === "closed" ? CLOSED.includes(o.status) : !CLOSED.includes(o.status)));
+  const counts = { all: orders.length, open: orders.filter((o) => !CLOSED.includes(o.status)).length, closed: orders.filter((o) => CLOSED.includes(o.status)).length };
 
   return (
     <AccountShell title="My orders" subtitle="Track installation progress and reorder in one tap." what="your orders">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Filter orders" className="inline-flex rounded-full bg-softer/80 p-1 dark:bg-navy-900/90">
-          {(["all", "open", "cancelled"] as const).map((f) => (
+          {(["all", "open", "closed"] as const).map((f) => (
             <button key={f} role="tab" aria-selected={filter === f} onClick={() => setFilter(f)}
               className={cn("rounded-full px-4 py-1.5 text-xs font-semibold capitalize transition-colors", filter === f ? "bg-brand-500 text-white" : "text-body hover:text-ink")}>
               {f} <span className="opacity-70">{counts[f]}</span>

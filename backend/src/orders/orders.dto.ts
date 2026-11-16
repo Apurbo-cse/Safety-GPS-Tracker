@@ -1,7 +1,8 @@
 import { Transform, Type } from "class-transformer";
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEmail, IsISO8601, IsIn, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { DISTRICTS } from "../common/districts";
 import { IsBdMobile } from "../common/bd-mobile";
-import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type PaymentMethod } from "./order.entities";
+import { AREAS, ORDER_STATUSES, PAYMENT_METHODS, type Area, type OrderStatus, type PaymentMethod } from "./order.entities";
 
 const trim = ({ value }: { value: unknown }) => (typeof value === "string" ? value.trim() : value);
 
@@ -10,15 +11,13 @@ export class CartLineDto {
   @IsInt() @Min(1) @Max(50) qty: number;
 }
 
-const DIVISIONS = ["Dhaka", "Chattogram", "Rajshahi", "Khulna", "Barishal", "Sylhet", "Rangpur", "Mymensingh"];
-
 /** Billing details. Leave the whole block out to bill the person named in the order. */
 export class BillingDto {
   @Transform(trim) @IsString() @Length(2, 120) name: string;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(120) company?: string;
   @IsOptional() @Transform(trim) @IsString() @Matches(/^[A-Za-z0-9-]{0,30}$/, { message: "Tax / BIN number can only have letters, digits and dashes" }) taxId?: string;
   @Transform(trim) @IsString() @Length(6, 240) address: string;
-  @IsIn(DIVISIONS) division: string;
+  @IsIn(DISTRICTS) district: string;
   @IsOptional() @Transform(trim) @IsString() @Matches(/^\d{0,10}$/, { message: "Postcode must be digits" }) postcode?: string;
   @IsBdMobile() phone: string;
   @Transform(({ value }) => (typeof value === "string" ? value.trim().toLowerCase() : value)) @IsEmail() @MaxLength(254) email: string;
@@ -34,7 +33,12 @@ export class CreateOrderDto {
   @IsBdMobile() phone: string;
   @Transform(({ value }) => (typeof value === "string" ? value.trim().toLowerCase() : value)) @IsEmail() @MaxLength(254) email: string;
   @Transform(trim) @IsString() @Length(6, 240) address: string;
-  @IsIn(["Dhaka", "Chattogram", "Rajshahi", "Khulna", "Barishal", "Sylhet", "Rangpur", "Mymensingh"]) division: string;
+  @IsIn(DISTRICTS) district: string;
+  /** DNCC / DSCC (both are in Dhaka district) or Outside Dhaka. */
+  @IsIn(AREAS as unknown as string[]) area: Area;
+  /** Required for DNCC / DSCC, must be one of that corporation's thanas. */
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(60) thana?: string;
+  @IsOptional() @Transform(trim) @IsString() @Matches(/^\d{0,10}$/, { message: "Postal code must be digits" }) postcode?: string;
   @Transform(trim) @IsString() @Length(3, 60) vehicleReg: string;
   @Transform(trim) @IsString() @Length(2, 60) vehicleType: string;
   /** YYYY-MM-DD */
@@ -64,6 +68,20 @@ export class CouponDto {
 
 export class UpdateStatusDto {
   @IsIn(ORDER_STATUSES as unknown as string[]) status: OrderStatus;
+}
+
+/** Staff fix an order's installation details (for example after a call with the customer). Anything left out stays as it is. */
+export class UpdateOrderDto {
+  @IsOptional() @IsBdMobile() phone?: string;
+  @IsOptional() @Transform(trim) @IsString() @Length(6, 240) address?: string;
+  @IsOptional() @IsIn(DISTRICTS) district?: string;
+  @IsOptional() @IsIn(AREAS as unknown as string[]) area?: Area;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(60) thana?: string;
+  @IsOptional() @Transform(trim) @IsString() @Matches(/^\d{0,10}$/, { message: "Postal code must be digits" }) postcode?: string;
+  @IsOptional() @Transform(trim) @IsString() @Length(3, 60) vehicleReg?: string;
+  @IsOptional() @Transform(trim) @IsString() @Length(2, 60) vehicleType?: string;
+  @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "preferredDate must be YYYY-MM-DD" }) preferredDate?: string;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(300) note?: string;
 }
 
 export class AdminOrdersQuery {

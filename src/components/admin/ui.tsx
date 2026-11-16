@@ -7,13 +7,15 @@ export const CARD = "rounded-lg bg-softer/80 dark:bg-navy-900/90";
 export const ROW = "rounded-lg bg-surface dark:bg-navy-950/70";
 
 export const STATUS: Record<OrderStatus, { label: string; cls: string; dot: string }> = {
-  received: { label: "Received", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
+  pending: { label: "Pending", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
   confirmed: { label: "Confirmed", cls: "bg-sky-500/15 text-sky-700 dark:text-sky-300", dot: "bg-sky-500" },
   scheduled: { label: "Scheduled", cls: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300", dot: "bg-indigo-500" },
-  active: { label: "Active", cls: "bg-green-500/15 text-green-700 dark:text-green-300", dot: "bg-green-500" },
+  delivered: { label: "Delivered", cls: "bg-green-500/15 text-green-700 dark:text-green-300", dot: "bg-green-500" },
+  returned: { label: "Returned", cls: "bg-orange-500/15 text-orange-700 dark:text-orange-300", dot: "bg-orange-500" },
+  refunded: { label: "Refunded", cls: "bg-purple-500/15 text-purple-700 dark:text-purple-300", dot: "bg-purple-500" },
   cancelled: { label: "Cancelled", cls: "bg-red-500/15 text-red-700 dark:text-red-300", dot: "bg-red-500" },
 };
-export const STATUS_ORDER: OrderStatus[] = ["received", "confirmed", "scheduled", "active", "cancelled"];
+export const STATUS_ORDER: OrderStatus[] = ["pending", "confirmed", "scheduled", "delivered", "returned", "refunded", "cancelled"];
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   const m = STATUS[status];

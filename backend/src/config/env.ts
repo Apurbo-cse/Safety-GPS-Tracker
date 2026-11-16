@@ -15,6 +15,19 @@ export interface Env {
   BKASH_APP_SECRET: string;
   /** Public URL of this API (with /api/v1) — bKash sends the customer back to it. */
   API_PUBLIC_URL: string;
+  /** Order emails. Off until SMTP_HOST and MAIL_FROM are both set. */
+  SMTP_HOST: string;
+  SMTP_PORT: number;
+  SMTP_SECURE: boolean;
+  SMTP_USER: string;
+  SMTP_PASS: string;
+  MAIL_FROM: string;
+  MAIL_SITE_NAME: string;
+  MAIL_SITE_PHONE: string;
+  /** Web Push. Off until both keys are set. */
+  VAPID_PUBLIC_KEY: string;
+  VAPID_PRIVATE_KEY: string;
+  VAPID_SUBJECT: string;
 }
 
 const flag = (v: unknown) => v === "1" || v === "true";
@@ -48,6 +61,17 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     BKASH_PASSWORD: String(raw.BKASH_PASSWORD ?? ""),
     BKASH_APP_KEY: String(raw.BKASH_APP_KEY ?? ""),
     BKASH_APP_SECRET: String(raw.BKASH_APP_SECRET ?? ""),
+    SMTP_HOST: String(raw.SMTP_HOST ?? ""),
+    SMTP_PORT: Number(raw.SMTP_PORT ?? 587) || 587,
+    SMTP_SECURE: flag(raw.SMTP_SECURE),
+    SMTP_USER: String(raw.SMTP_USER ?? ""),
+    SMTP_PASS: String(raw.SMTP_PASS ?? ""),
+    MAIL_FROM: String(raw.MAIL_FROM ?? ""),
+    MAIL_SITE_NAME: String(raw.MAIL_SITE_NAME ?? "Safety GPS Tracker"),
+    MAIL_SITE_PHONE: String(raw.MAIL_SITE_PHONE ?? ""),
+    VAPID_PUBLIC_KEY: String(raw.VAPID_PUBLIC_KEY ?? ""),
+    VAPID_PRIVATE_KEY: String(raw.VAPID_PRIVATE_KEY ?? ""),
+    VAPID_SUBJECT: String(raw.VAPID_SUBJECT ?? ""),
     API_PUBLIC_URL: String(raw.API_PUBLIC_URL ?? `http://localhost:${PORT}/api/v1`).replace(/\/+$/, ""),
   };
 }

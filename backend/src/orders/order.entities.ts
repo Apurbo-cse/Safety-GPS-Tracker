@@ -1,12 +1,17 @@
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../users/user.entity";
 
-export const ORDER_STATUSES = ["received", "confirmed", "scheduled", "active", "cancelled"] as const;
+export const ORDER_STATUSES = ["pending", "confirmed", "scheduled", "delivered", "returned", "refunded", "cancelled"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
+/** Where the vehicle is: inside Dhaka (north or south city corporation) or anywhere else. */
+export const AREAS = ["DNCC", "DSCC", "Outside Dhaka"] as const;
+export type Area = (typeof AREAS)[number];
 export const PAYMENT_METHODS = ["bKash", "Nagad", "Rocket", "Card", "Cash on installation"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 @Index("IDX_orders_created_at", ["createdAt"])
+@Index("IDX_orders_user_created", ["userId", "createdAt"])
+@Index("IDX_orders_status_created", ["status", "createdAt"])
 @Entity("orders")
 export class Order {
   /** Human-friendly reference, e.g. SGT-7K2QXM. */
@@ -22,15 +27,15 @@ export class Order {
   user: User;
 
   @Index()
-  @Column({ type: "varchar", length: 20, default: "received" })
+  @Column({ type: "varchar", length: 20, default: "pending" })
   status: OrderStatus;
 
   @Column({ type: "varchar", length: 30 })
   payment: PaymentMethod;
 
-  /** "paid" once bKash confirms the money. Other methods stay "unpaid" until staff collect it. */
+  /** "paid" once bKash confirms the money; "refunded" once the order is marked refunded. Other methods stay "unpaid" until staff collect it. */
   @Column({ name: "payment_status", type: "varchar", length: 10, default: "unpaid" })
-  paymentStatus: "unpaid" | "paid" | "failed";
+  paymentStatus: "unpaid" | "paid" | "failed" | "refunded";
 
   /** bKash paymentID of the latest attempt, and the transaction id once it completes. */
   @Index()
@@ -39,6 +44,10 @@ export class Order {
 
   @Column({ name: "payment_trx_id", type: "varchar", length: 64, nullable: true })
   paymentTrxId: string | null;
+
+  /** bKash transaction id of the refund, once staff refunded the payment. */
+  @Column({ name: "payment_refund_trx_id", type: "varchar", length: 64, nullable: true })
+  paymentRefundTrxId: string | null;
 
   @Column({ name: "device_total", type: "int" })
   deviceTotal: number;
@@ -68,6 +77,22 @@ export class Order {
   @Column({ type: "varchar", length: 40 })
   division: string;
 
+  /** District of the installation address (division is worked out from it). null on older orders. */
+  @Column({ type: "varchar", length: 40, nullable: true })
+  district: string | null;
+
+  /** Optional postal code of the installation address. */
+  @Column({ type: "varchar", length: 10, nullable: true })
+  postcode: string | null;
+
+  /** Thana, asked only inside Dhaka (DNCC / DSCC). */
+  @Column({ type: "varchar", length: 60, nullable: true })
+  thana: string | null;
+
+  /** null on orders placed before this was asked. */
+  @Column({ type: "varchar", length: 20, nullable: true })
+  area: Area | null;
+
   @Column({ name: "vehicle_reg", type: "varchar", length: 60 })
   vehicleReg: string;
 
@@ -93,6 +118,9 @@ export class Order {
 
   @Column({ name: "billing_division", type: "varchar", length: 40 })
   billingDivision: string;
+
+  @Column({ name: "billing_district", type: "varchar", length: 40, nullable: true })
+  billingDistrict: string | null;
 
   @Column({ name: "billing_postcode", type: "varchar", length: 10, default: "" })
   billingPostcode: string;
@@ -130,6 +158,7 @@ export class OrderItem {
   order: Order;
 
   /** Cart id as the website uses it: "plan-<planId>" or "dev-<deviceId>". */
+  @Index("IDX_order_items_item_ref")
   @Column({ name: "item_ref", type: "varchar", length: 80 })
   itemRef: string;
 

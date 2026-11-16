@@ -1,9 +1,12 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Lets verification builds run in a separate folder without disturbing `next dev`.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {
+    // Pins the project root, so a stray package-lock.json in a parent folder is not picked up.
+    root: path.resolve("."),
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],

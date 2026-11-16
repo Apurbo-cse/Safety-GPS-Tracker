@@ -52,15 +52,15 @@ export default function DashboardView() {
   return (
     <>
       <PageHeader title="Dashboard" subtitle="What's happening with orders and customers." actions={
-        <Link href="/admin/orders?status=received" className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600">
-          {s?.orders.byStatus.received ? `${s.orders.byStatus.received} new order${s.orders.byStatus.received === 1 ? "" : "s"} to confirm` : "Review orders"}<ArrowRight className="h-4 w-4" />
+        <Link href="/admin/orders?status=pending" className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600">
+          {s?.orders.byStatus.pending ? `${s.orders.byStatus.pending} new order${s.orders.byStatus.pending === 1 ? "" : "s"} to confirm` : "Review orders"}<ArrowRight className="h-4 w-4" />
         </Link>} />
 
       {stats.error ? <ErrorState message={stats.error} onRetry={stats.reload} /> : !s ? <Skeleton rows={2} /> : (
         <>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatCard icon={Banknote} label="Device sales" value={formatBDT(s.revenue)} hint="Orders not cancelled" />
-            <StatCard icon={Package} label="Orders" value={String(s.orders.total)} hint={`${s.orders.byStatus.active ?? 0} active`} tone="sky" />
+            <StatCard icon={Banknote} label="Device sales" value={formatBDT(s.revenue)} hint="Excludes cancelled, returned, refunded" />
+            <StatCard icon={Package} label="Orders" value={String(s.orders.total)} hint={`${s.orders.byStatus.delivered ?? 0} delivered`} tone="sky" />
             <StatCard icon={Repeat} label="Monthly recurring" value={formatBDT(s.monthlyActive)} hint={`+ ${formatBDT(s.monthlyPipeline)}/mo in the pipeline`} tone="green" />
             {s.customers != null && <StatCard icon={Users} label="Customers" value={String(s.customers)} hint={`${s.newCustomers7d ?? 0} new this week`} tone="amber" />}
             {s.profit != null && <StatCard icon={PiggyBank} label="Profit on devices" value={formatBDT(s.profit)} hint="Sales minus cost price" tone="green" />}

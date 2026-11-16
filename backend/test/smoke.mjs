@@ -21,7 +21,7 @@ const phone = () => "017" + String(Math.floor(Math.random() * 1e8)).padStart(8, 
 const A = { name: "Rahim Uddin", mobile: phone(), email: `a.${stamp}@example.com`, password: "Passw0rdA1", vehicleType: "Private Car" };
 const B = { name: "Karim Ali", mobile: phone(), email: `b.${stamp}@example.com`, password: "Passw0rdB2" };
 const order = (items, over = {}) => ({
-  items, payment: "bKash", name: "Rahim Uddin", phone: A.mobile, email: A.email, address: "House 12, Road 5, Dhanmondi", division: "Dhaka",
+  items, payment: "bKash", name: "Rahim Uddin", phone: A.mobile, email: A.email, address: "House 12, Road 5, Dhanmondi", district: "Dhaka", area: "DSCC", thana: "Dhanmondi",
   vehicleReg: "Dhaka Metro Ga 12-3456", vehicleType: "Private car", preferredDate: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10), ...over,
 });
 
@@ -89,7 +89,7 @@ r = await call("GET", "/admin/orders", { token: tokA }); ok(r.status === 403, "c
 r = await call("PUT", "/admin/catalog/plans/gps-1", { token: tokA, body: {} }); ok(r.status === 403, "customer can't edit the catalogue");
 r = await call("POST", "/auth/login", { body: ADMIN }); ok(r.status === 200 && r.json.user.role === "admin", "admin logs in"); const tokAdmin = r.json.accessToken;
 r = await call("GET", `/admin/orders?q=${orderId}`, { token: tokAdmin }); ok(r.status === 200 && r.json.total === 1 && r.json.orders[0].customer.email === A.email, "admin finds the order by reference");
-r = await call("GET", "/admin/orders?status=received", { token: tokAdmin }); ok(r.status === 200 && r.json.counts.received >= 1, "admin status counts");
+r = await call("GET", "/admin/orders?status=pending", { token: tokAdmin }); ok(r.status === 200 && r.json.counts.pending >= 1, "admin status counts");
 r = await call("PATCH", `/admin/orders/${orderId}/status`, { token: tokAdmin, body: { status: "confirmed" } }); ok(r.status === 200 && r.json.status === "confirmed", "admin confirms the order");
 r = await call("PATCH", `/admin/orders/${orderId}/status`, { token: tokAdmin, body: { status: "shipped" } }); ok(r.status === 400, "invalid status → 400");
 r = await call("GET", "/orders", { token: tokA }); ok(r.json[0].status === "confirmed", "customer sees the new status");
@@ -271,12 +271,12 @@ const makeStaff = async (roleId, label) => {
   return { add, id: add.json?.id, email, token: lg.json?.accessToken, user: lg.json?.user };
 };
 r = await call("GET", "/admin/staff", { token: tokA }); ok(r.status === 403, "customer can't list staff");
-r = await call("GET", "/admin/roles", { token: tokAdmin }); ok(r.status === 200 && r.json.roles.length >= 6 && r.json.permissions.length === 7 && r.json.roles.find((x) => x.id === "owner").permissions.length === 7, "owner sees the 6 built-in roles and 7 permissions");
-r = await call("GET", "/me", { token: tokAdmin }); ok(r.json.permissions.length === 7 && r.json.staffRoleId === "owner", "/me gives the owner every permission");
+r = await call("GET", "/admin/roles", { token: tokAdmin }); ok(r.status === 200 && r.json.roles.length >= 6 && r.json.permissions.length === 8 && r.json.roles.find((x) => x.id === "owner").permissions.length === 8, "owner sees the 6 built-in roles and 8 permissions");
+r = await call("GET", "/me", { token: tokAdmin }); ok(r.json.permissions.length === 8 && r.json.staffRoleId === "owner", "/me gives the owner every permission");
 r = await call("GET", "/me", { token: tokA }); ok(Array.isArray(r.json.permissions) && r.json.permissions.length === 0, "/me gives a customer no permissions");
 const sales = await makeStaff("sales", "sales"), support = await makeStaff("support", "support"), content = await makeStaff("content", "content"), inventory = await makeStaff("inventory", "inventory");
 ok([sales, support, content, inventory].every((x) => x.add.status === 201 && x.token), "owner adds four staff accounts (sales, support, content, inventory)");
-ok(sales.user.permissions.sort().join() === ["customers.view", "orders.manage", "orders.view"].join(), "a staff login carries exactly the role's permissions");
+ok(sales.user.permissions.sort().join() === ["customers.view", "messages.manage", "orders.manage", "orders.view"].join(), "a staff login carries exactly the role's permissions");
 r = await call("POST", "/admin/staff", { token: tokAdmin, body: { email: sales.email, roleId: "sales" } }); ok(r.status === 409, "adding someone who is already staff → 409");
 r = await call("POST", "/admin/staff", { token: tokAdmin, body: { email: `nobody.${stamp}@example.com`, roleId: "sales" } }); ok(r.status === 400, "a new person needs a name, mobile and password");
 r = await call("POST", "/admin/staff", { token: tokAdmin, body: { email: `x.${stamp}@example.com`, name: "X Y", mobile: phone(), password: staffPw, roleId: "no-such-role" } }); ok(r.status === 400, "unknown role → 400");
@@ -386,7 +386,7 @@ ok((await call("GET", "/admin/stats", { token: tokAdmin })).json.inventory.lowIt
 console.log("billing");
 r = await call("POST", "/orders", { token: tokA, body: order([{ id: "plan-gps-1", qty: 1 }]) });
 ok(r.status === 201 && r.json.billing.name === "Rahim Uddin" && r.json.billing.address === "House 12, Road 5, Dhanmondi" && r.json.billing.phone === A.mobile, "no billing block → billed to the customer at the installation address");
-const bill = { name: "Rahim Transport Ltd", company: "Rahim Transport Ltd", taxId: "BIN-123456789", address: "Level 4, Motijheel C/A", division: "Dhaka", postcode: "1000", phone: A.mobile, email: "accounts@rahim.example" };
+const bill = { name: "Rahim Transport Ltd", company: "Rahim Transport Ltd", taxId: "BIN-123456789", address: "Level 4, Motijheel C/A", district: "Dhaka", postcode: "1000", phone: A.mobile, email: "accounts@rahim.example" };
 r = await call("POST", "/orders", { token: tokA, body: { ...order([{ id: "plan-gps-1", qty: 1 }]), billing: bill } }); const bo = r.json;
 ok(r.status === 201 && bo.billing.company === "Rahim Transport Ltd" && bo.billing.taxId === "BIN-123456789" && bo.billing.postcode === "1000" && bo.billing.email === "accounts@rahim.example", "a separate billing address, company and BIN are saved with the order");
 r = await call("POST", "/orders", { token: tokA, body: { ...order([{ id: "plan-gps-1", qty: 1 }]), billing: { ...bill, taxId: "<script>" } } }); ok(r.status === 400, "bad BIN rejected");

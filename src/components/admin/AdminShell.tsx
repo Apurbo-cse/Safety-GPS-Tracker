@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Boxes, ExternalLink, FolderTree, HelpCircle, Images, FileText, Inbox, Percent, LayoutDashboard, Settings2, LockKeyhole, LogIn, LogOut, Menu, Newspaper, Package, ShieldAlert, ShieldCheck, Tags, Users, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/common/Logo";
+import PushToggle from "@/components/common/PushToggle";
+import SoundToggle from "@/components/common/SoundToggle";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signOut } from "@/store/thunks";
@@ -131,6 +133,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <button onClick={() => setOpen(true)} aria-label="Open menu" className="grid h-10 w-10 place-items-center rounded-lg text-ink hover:bg-softer lg:hidden"><Menu className="h-5 w-5" /></button>
           <p className="hidden text-sm font-semibold text-body lg:block">Safety GPS Tracker · Control panel</p>
           <div className="flex items-center gap-2">
+            <SoundToggle staff compact />
+            <PushToggle staff compact />
             <ThemeToggle />
             <span className="hidden text-right sm:block"><span className="block text-sm font-semibold leading-tight text-ink">{user.name}</span><span className="block text-xs text-slate-500">{user.staffRoleId ? user.staffRoleId.replace(/-/g, " ") : "Owner"}</span></span>
             <button onClick={() => { void dispatch(signOut()); toast.success("Logged out"); }} aria-label="Log out" className="grid h-10 w-10 place-items-center rounded-lg text-body hover:bg-softer hover:text-ink"><LogOut className="h-4 w-4" /></button>

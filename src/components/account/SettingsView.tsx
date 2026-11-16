@@ -17,6 +17,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { resetSettings, toggleAlert, toggleChannel, updateSettings, type AlertKey, type Channel } from "@/store/slices/accountSlice";
 import { deleteAccount } from "@/store/thunks";
 import { errorMessage, useChangePasswordMutation, useUpdateSettingsMutation } from "@/store/apiSlice";
+import PushToggle from "@/components/common/PushToggle";
+import SoundToggle from "@/components/common/SoundToggle";
 import AccountShell, { CARD, Pill, Toggle } from "./AccountShell";
 
 const ALERTS: { key: AlertKey; icon: LucideIcon; t: string; d: string }[] = [
@@ -122,6 +124,7 @@ export default function SettingsView() {
         </Card>
 
         <Card icon={Smartphone} pill="Delivery" title="How should alerts reach you?">
+          <div className="mb-2.5 grid gap-2.5 sm:grid-cols-2"><PushToggle /><SoundToggle /></div>
           <div className="grid gap-2.5 sm:grid-cols-3">
             {CHANNELS.map((c) => <Row key={c.key} icon={c.icon} t={c.t}><Toggle on={s.channels[c.key]} onChange={() => dispatch(toggleChannel(c.key))} label={c.t} /></Row>)}
           </div>

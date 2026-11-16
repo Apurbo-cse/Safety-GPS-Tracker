@@ -2,13 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { normalizePhone } from "../common/phone";
+import { PushService } from "../push/push.service";
 import { EventsGateway } from "../events/events.gateway";
 import { ContactMessage } from "./contact.entity";
 import type { ContactDto, MessagesQuery } from "./contact.dto";
 
 @Injectable()
 export class ContactService {
-  constructor(@InjectRepository(ContactMessage) private repo: Repository<ContactMessage>, private events: EventsGateway) {}
+  constructor(@InjectRepository(ContactMessage) private repo: Repository<ContactMessage>, private events: EventsGateway, private push: PushService) {}
 
   /** Save a message from the website and tell the staff who handle messages, live. */
   async create(dto: ContactDto) {
@@ -17,6 +18,7 @@ export class ContactService {
       fleet: dto.fleet ?? "", subject: dto.subject ?? (dto.kind === "lead" ? "Call-back request" : ""), message: dto.message,
     }));
     this.events.toPermission("messages.manage", "message:created", { id: saved.id, kind: saved.kind, name: saved.name, subject: saved.subject, department: saved.department, createdAt: saved.createdAt });
+    this.push.toPermission("messages.manage", { title: saved.kind === "lead" ? `Call-back request from ${saved.name}` : `New message from ${saved.name}`, body: saved.subject || saved.message.slice(0, 80), url: "/admin/messages", tag: `message-${saved.id}` });
     return { ok: true };
   }
 

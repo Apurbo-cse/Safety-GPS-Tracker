@@ -213,4 +213,19 @@ export class CatalogService {
     const [items, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
     return { items, total, page, limit, pages: Math.max(1, Math.ceil(total / limit)) };
   }
+
+  /** One product for staff, with how well it sells. Returned / refunded / cancelled orders don't count as sales. */
+  async adminProduct(id: string) {
+    const device = await this.devices.findOne({ where: { id } });
+    if (!device) throw new NotFoundException("Product not found");
+    const [sales] = await this.db.query<{ orders: number; units: number; revenue: number; profit: number }[]>(
+      `SELECT COUNT(DISTINCT o.id)::int AS orders, COALESCE(SUM(oi.qty),0)::int AS units,
+              COALESCE(SUM(oi.unit_price * oi.qty),0)::int AS revenue, COALESCE(SUM((oi.unit_price - oi.unit_cost) * oi.qty),0)::int AS profit
+         FROM order_items oi JOIN orders o ON o.id = oi.order_id
+        WHERE oi.item_ref = $1 AND o.status NOT IN ('cancelled', 'returned', 'refunded')`, [`dev-${id}`]);
+    const recent = await this.db.query<{ id: string; status: string; qty: number; created_at: string; name: string }[]>(
+      `SELECT o.id, o.status, oi.qty, o.created_at, o.contact_name AS name FROM order_items oi JOIN orders o ON o.id = oi.order_id
+        WHERE oi.item_ref = $1 ORDER BY o.created_at DESC LIMIT 8`, [`dev-${id}`]);
+    return { device, sales, recent: recent.map((r) => ({ id: r.id, status: r.status, qty: r.qty, customer: r.name, createdAt: r.created_at })) };
+  }
 }

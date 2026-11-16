@@ -1,7 +1,10 @@
 "use client";
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
+import { toast } from "sonner";
 import { useSite } from "@/components/providers/SiteProvider";
+import { mediaUrl } from "@/lib/api";
 import { useAppSelector } from "@/store/hooks";
 import { errorMessage, useMyOrderQuery } from "@/store/apiSlice";
 import { formatBDT } from "@/utils/format";
@@ -15,6 +18,33 @@ export default function InvoiceView({ id }: { id: string }) {
   const user = useAppSelector((s) => s.auth.user);
   const ready = useAppSelector((s) => s.auth.ready);
   const q = useMyOrderQuery(id, { skip: !user });
+  const sheet = useRef<HTMLElement>(null);
+  const [making, setMaking] = useState(false);
+
+  /** Draws the invoice (pictures included) onto A4 pages and saves it as a PDF — nothing is sent anywhere. */
+  const downloadPdf = async () => {
+    if (!sheet.current || !q.data) return;
+    setMaking(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas-pro"), import("jspdf")]);
+      const node = sheet.current;
+      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: Math.max(node.scrollWidth, 760) });
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+      const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight(), margin = 8;
+      const w = pageW - margin * 2;
+      const pxPerMm = canvas.width / w;
+      const sliceH = Math.floor((pageH - margin * 2) * pxPerMm);
+      for (let y = 0, page = 0; y < canvas.height; y += sliceH, page++) {
+        const part = document.createElement("canvas");
+        part.width = canvas.width; part.height = Math.min(sliceH, canvas.height - y);
+        part.getContext("2d")!.drawImage(canvas, 0, y, canvas.width, part.height, 0, 0, canvas.width, part.height);
+        if (page > 0) pdf.addPage();
+        pdf.addImage(part.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, w, part.height / pxPerMm);
+      }
+      pdf.save(`invoice-${q.data.id}.pdf`);
+    } catch { toast.error("Could not make the PDF. Use Print / Save as PDF instead."); }
+    finally { setMaking(false); }
+  };
 
   if (!ready) return <p className="p-10 text-center text-sm text-slate-500">Loading…</p>;
   if (!user) return <div className="mx-auto max-w-xl px-4"><LoginGate what="this invoice" next={`/orders/${id}/invoice`} /></div>;
@@ -34,10 +64,13 @@ export default function InvoiceView({ id }: { id: string }) {
     <div className="mx-auto max-w-3xl px-4 print:max-w-none print:px-0">
       <div className="mb-4 flex items-center justify-between print:hidden">
         <Link href="/orders" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900"><ArrowLeft className="h-4 w-4" />My orders</Link>
-        <button onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-5 text-sm font-bold text-white hover:bg-brand-600"><Printer className="h-4 w-4" />Print / Save as PDF</button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => window.print()} className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-100 px-3.5 text-xs font-semibold text-slate-800 hover:bg-slate-200 sm:h-10 sm:text-sm"><Printer className="h-4 w-4" />Print</button>
+          <button onClick={() => void downloadPdf()} disabled={making} className="inline-flex h-9 items-center gap-2 rounded-lg bg-brand-500 px-4 text-xs font-bold text-white hover:bg-brand-600 disabled:opacity-60 sm:h-10 sm:px-5 sm:text-sm"><Download className="h-4 w-4" />{making ? "Making PDF…" : "Download PDF"}</button>
+        </div>
       </div>
 
-      <article className="rounded-lg bg-white p-8 text-slate-900 shadow-sm print:rounded-none print:p-0 print:shadow-none sm:p-10">
+      <article ref={sheet} className="rounded-lg bg-white p-8 text-slate-900 shadow-sm print:rounded-none print:p-0 print:shadow-none sm:p-10">
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-slate-200 pb-6">
           <div>
             <p className="text-xl font-black tracking-tight">{site.name}</p>
@@ -58,14 +91,14 @@ export default function InvoiceView({ id }: { id: string }) {
             <h2 className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Bill to</h2>
             <p className="font-bold">{b.name}</p>
             {b.company && <p>{b.company}</p>}
-            <p className="text-slate-700">{b.address}, {b.division}{b.postcode ? ` ${b.postcode}` : ""}</p>
+            <p className="text-slate-700">{b.address}, {b.district ?? b.division}{b.postcode ? ` ${b.postcode}` : ""}</p>
             <p className="text-slate-700">{b.phone} · {b.email}</p>
             {b.taxId && <p className="mt-1 text-slate-700">BIN / TIN: <b>{b.taxId}</b></p>}
           </div>
           <div>
             <h2 className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Installation</h2>
             <p className="font-bold">{o.contact.name}</p>
-            <p className="text-slate-700">{o.contact.address}, {o.contact.division}</p>
+            <p className="text-slate-700">{o.contact.address}, {o.contact.district ?? o.contact.division}{o.contact.thana ? ` · ${o.contact.thana}` : ""}{o.contact.postcode ? ` ${o.contact.postcode}` : ""}{o.contact.area && o.contact.area !== "Outside Dhaka" ? ` (${o.contact.area})` : ""}</p>
             <p className="text-slate-700">{o.contact.vehicleType} · {o.contact.vehicleReg}</p>
             <p className="text-slate-700">Preferred date: {o.contact.preferredDate}</p>
           </div>
@@ -80,7 +113,16 @@ export default function InvoiceView({ id }: { id: string }) {
           <tbody>
             {lines.map((l) => (
               <tr key={l.id} className="border-b border-slate-100 align-top">
-                <td className="py-2.5 pr-3"><span className="font-semibold">{l.name}</span><span className="block text-xs text-slate-500">{l.kind === "plan" ? "Package" : "Device"}</span></td>
+                <td className="py-2.5 pr-3">
+                  <div className="flex items-center gap-3">
+                    {l.image && (
+                      // a plain <img> (not next/image) so the PDF capture sees it
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={mediaUrl(l.image)} alt="" crossOrigin="anonymous" className="h-12 w-12 shrink-0 rounded border border-slate-200 bg-white object-contain p-0.5" />
+                    )}
+                    <span><span className="font-semibold">{l.name}</span><span className="block text-xs text-slate-500">{l.kind === "plan" ? "Package" : "Device"}</span></span>
+                  </div>
+                </td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{l.qty}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatBDT(l.price)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{l.monthly ? `${formatBDT(l.monthly / l.qty)}/mo` : "—"}</td>

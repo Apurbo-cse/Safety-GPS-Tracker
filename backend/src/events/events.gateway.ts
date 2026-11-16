@@ -42,6 +42,15 @@ export class EventsGateway implements OnGatewayConnection {
   /** Tell one person (all their open tabs). */
   toUser(userId: string, event: string, payload: unknown) { this.server?.to(`user:${userId}`).emit(event, payload); }
 
+  /**
+   * Tell the order's customer AND the staff who watch orders in ONE emit. Socket.IO sends it once per connection even when
+   * a socket is in both rooms (a staff member who ordered something themselves), so nothing arrives twice.
+   */
+  orderChanged(userId: string, event: string, payload: unknown) { this.server?.to([`user:${userId}`, "perm:orders.view"]).emit(event, payload); }
+
+  /** Tell the staff who hold ANY of these permissions (once per connection, even if they hold several). */
+  toAnyPermission(permissions: Permission[], event: string, payload: unknown) { this.server?.to(permissions.map((p) => `perm:${p}`)).emit(event, payload); }
+
   /** Tell every staff member who holds `permission`. */
   toPermission(permission: Permission, event: string, payload: unknown) { this.server?.to(`perm:${permission}`).emit(event, payload); }
 

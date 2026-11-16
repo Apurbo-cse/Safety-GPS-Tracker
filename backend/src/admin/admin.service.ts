@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min } from "class-validator";
@@ -35,7 +35,7 @@ export class AdminService {
       this.db.query<{ date: string; orders: number; revenue: number }[]>(
         `SELECT to_char(d::date, 'YYYY-MM-DD') AS date,
                 COUNT(o.id)::int AS orders,
-                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS revenue
+                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status NOT IN ('cancelled', 'returned', 'refunded')), 0)::int AS revenue
            FROM generate_series((now() AT TIME ZONE 'Asia/Dhaka')::date - 13, (now() AT TIME ZONE 'Asia/Dhaka')::date, interval '1 day') d
            LEFT JOIN orders o ON (o.created_at AT TIME ZONE 'Asia/Dhaka')::date = d::date
           GROUP BY d ORDER BY d`),
@@ -45,19 +45,19 @@ export class AdminService {
                 COUNT(*) FILTER (WHERE stock > 0 AND stock <= ${LOW_STOCK})::int AS low, COUNT(*) FILTER (WHERE stock = 0)::int AS out,
                 COALESCE(SUM(stock * cost),0)::int AS value FROM devices WHERE active`),
       this.db.query<{ id: string; name: string; stock: number }[]>(`SELECT id, name, stock FROM devices WHERE stock IS NOT NULL AND stock <= ${LOW_STOCK} ORDER BY stock ASC, name ASC LIMIT 6`),
-      can.finance ? this.db.query<{ profit: number }[]>(`SELECT (COALESCE(SUM((oi.unit_price - oi.unit_cost) * oi.qty),0) - COALESCE((SELECT SUM(discount) FROM orders WHERE status <> 'cancelled'),0))::int AS profit FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status <> 'cancelled'`) : Promise.resolve(null),
+      can.finance ? this.db.query<{ profit: number }[]>(`SELECT (COALESCE(SUM((oi.unit_price - oi.unit_cost) * oi.qty),0) - COALESCE((SELECT SUM(discount) FROM orders WHERE status NOT IN ('cancelled', 'returned', 'refunded')),0))::int AS profit FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status NOT IN ('cancelled', 'returned', 'refunded')`) : Promise.resolve(null),
     ]);
     const get = (s: string) => byStatus.find((r) => r.status === s);
-    const open = byStatus.filter((r) => r.status !== "cancelled");
+    const open = byStatus.filter((r) => !["cancelled", "returned", "refunded"].includes(r.status));
     return {
       customers: customers ? customers[0].n : null,
       newCustomers7d: customers ? customers[0].week : null,
       orders: { total: byStatus.reduce((n, r) => n + r.n, 0), byStatus: Object.fromEntries(byStatus.map((r) => [r.status, r.n])) },
       /** Device sales from orders that haven't been cancelled. */
       revenue: open.reduce((n, r) => n + r.device, 0),
-      /** Monthly subscriptions: live now (active) and signed but not yet installed. */
-      monthlyActive: get("active")?.monthly ?? 0,
-      monthlyPipeline: (get("received")?.monthly ?? 0) + (get("confirmed")?.monthly ?? 0) + (get("scheduled")?.monthly ?? 0),
+      /** Monthly subscriptions: live now (delivered) and signed but not yet installed. */
+      monthlyActive: get("delivered")?.monthly ?? 0,
+      monthlyPipeline: (get("pending")?.monthly ?? 0) + (get("confirmed")?.monthly ?? 0) + (get("scheduled")?.monthly ?? 0),
       /** Sales minus what the devices cost us, from orders that haven't been cancelled (finance only). */
       profit: profit ? profit[0].profit : null,
       inventory: { tracked: inv[0].tracked, units: inv[0].units, lowStock: inv[0].low, outOfStock: inv[0].out, value: can.finance ? inv[0].value : null, lowItems: low, lowThreshold: LOW_STOCK },
@@ -86,7 +86,7 @@ export class AdminService {
   async exportCustomers() {
     const rows = await this.db.query<Record<string, string | number | null>[]>(
       `SELECT u.name, u.email, u.phone, u.division, u.company, to_char(u.created_at AT TIME ZONE 'Asia/Dhaka', 'YYYY-MM-DD') AS joined,
-              COUNT(o.id)::int AS orders, COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS spent
+              COUNT(o.id)::int AS orders, COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status NOT IN ('cancelled', 'returned', 'refunded')), 0)::int AS spent
          FROM users u LEFT JOIN orders o ON o.user_id = u.id WHERE u.role = 'customer' GROUP BY u.id ORDER BY u.created_at DESC LIMIT 20000`);
     const cols = ["name", "email", "phone", "division", "company", "joined", "orders", "spent"];
     return { headers: cols, rows: rows.map((r) => cols.map((c) => r[c])) };
@@ -108,7 +108,7 @@ export class AdminService {
       this.db.query(
         `SELECT u.id, u.name, u.email, u.phone, u.role, u.division, u.created_at AS "createdAt",
                 COUNT(o.id)::int AS orders,
-                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status <> 'cancelled'), 0)::int AS spent
+                COALESCE(SUM(o.device_total - o.discount) FILTER (WHERE o.status NOT IN ('cancelled', 'returned', 'refunded')), 0)::int AS spent
            FROM users u LEFT JOIN orders o ON o.user_id = u.id
            ${where}
           GROUP BY u.id ORDER BY u.created_at DESC
@@ -116,5 +116,28 @@ export class AdminService {
       this.db.query<{ n: number }[]>(`SELECT COUNT(*)::int AS n FROM users u ${where}`, args),
     ]);
     return { page, limit, total: total[0].n, customers: rows };
+  }
+
+  /** One account for staff: profile, how much they have bought, and their orders (newest first). */
+  async customer(id: string) {
+    const [u] = await this.db.query<Record<string, unknown>[]>(
+      `SELECT id, name, email, phone, role, disabled, vehicle_type AS "vehicleType", company, address, division, tax_id AS "taxId",
+              billing_address AS "billingAddress", billing_division AS "billingDivision", billing_postcode AS "billingPostcode", created_at AS "createdAt"
+         FROM users WHERE id::text = $1`, [id]);
+    if (!u) throw new NotFoundException("Customer not found");
+    const [stats] = await this.db.query<{ orders: number; spent: number; open: number; monthly: number }[]>(
+      `SELECT COUNT(*)::int AS orders,
+              COALESCE(SUM(device_total - discount) FILTER (WHERE status NOT IN ('cancelled', 'returned', 'refunded')), 0)::int AS spent,
+              COUNT(*) FILTER (WHERE status IN ('pending', 'confirmed', 'scheduled'))::int AS open,
+              COALESCE(SUM(monthly_total) FILTER (WHERE status = 'delivered'), 0)::int AS monthly
+         FROM orders WHERE user_id::text = $1`, [id]);
+    const orders = await this.db.query(
+      `SELECT o.id, o.status, o.payment, o.payment_status AS "paymentStatus", o.device_total - o.discount AS total, o.monthly_total AS monthly, o.created_at AS "createdAt",
+              (SELECT COUNT(*)::int FROM order_items i WHERE i.order_id = o.id) AS items,
+              (SELECT COALESCE(p.image, d.images->>0, d.image) FROM order_items i
+                 LEFT JOIN plans p ON i.item_ref = 'plan-' || p.id LEFT JOIN devices d ON i.item_ref = 'dev-' || d.id
+                WHERE i.order_id = o.id LIMIT 1) AS image
+         FROM orders o WHERE o.user_id::text = $1 ORDER BY o.created_at DESC LIMIT 50`, [id]);
+    return { customer: u, stats, orders };
   }
 }

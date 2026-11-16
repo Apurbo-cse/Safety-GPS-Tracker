@@ -36,6 +36,10 @@ import { ContactMessage } from "./contact/contact.entity";
 import { ContactService } from "./contact/contact.service";
 import { EventsGateway } from "./events/events.gateway";
 import { CouponsService } from "./orders/coupons.service";
+import { PushController } from "./push/push.controller";
+import { PushSubscriptionRow } from "./push/push.entity";
+import { PushService } from "./push/push.service";
+import { NotificationsService } from "./notifications/notifications.service";
 import { PaymentsController } from "./payments/payments.controller";
 import { PaymentsService } from "./payments/payments.service";
 import { OrdersController } from "./orders/orders.controller";
@@ -60,7 +64,7 @@ import { UsersService } from "./users/users.service";
         migrations: [join(__dirname, "database", "migrations", "*.{js,ts}")],
       }),
     }),
-    TypeOrmModule.forFeature([User, Plan, Device, Faq, Category, HeroSlide, MediaFile, Post, StaffRole, Order, OrderItem, SiteContent, Page, Coupon, ContactMessage]),
+    TypeOrmModule.forFeature([User, Plan, Device, Faq, Category, HeroSlide, MediaFile, Post, StaffRole, Order, OrderItem, SiteContent, Page, Coupon, ContactMessage, PushSubscriptionRow]),
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
@@ -72,9 +76,9 @@ import { UsersService } from "./users/users.service";
     }),
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 60_000, limit: 120 }] }),
   ],
-  controllers: [StaffController, PostsController, ContentController, ContactController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, PaymentsController, AdminController, HealthController],
+  controllers: [StaffController, PostsController, ContentController, ContactController, AuthController, MeController, CatalogController, ProductsController, MediaController, OrdersController, PaymentsController, PushController, AdminController, HealthController],
   providers: [
-    UsersService, AuthService, CatalogService, OrdersService, PaymentsService, AdminService, MediaService, RolesService, StaffService, PostsService, ContentService, CouponsService, ContactService, EventsGateway,
+    UsersService, AuthService, CatalogService, OrdersService, PaymentsService, NotificationsService, PushService, AdminService, MediaService, RolesService, StaffService, PostsService, ContentService, CouponsService, ContactService, EventsGateway,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

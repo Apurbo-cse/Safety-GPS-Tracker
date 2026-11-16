@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -58,7 +59,7 @@ function F({ label, hint, children, wide }: { label: string; hint?: string; chil
 }
 
 /* ---------------------------------------------------------------- forms */
-type FormProps<T> = { initial: T | null; categories: string[]; catTree: AdminCategory[]; plans: AdminPlan[]; onSaved: () => void; onCancel: () => void };
+export type FormProps<T> = { initial: T | null; categories: string[]; catTree: AdminCategory[]; plans: AdminPlan[]; onSaved: () => void; onCancel: () => void };
 
 function useSave<T extends Item>(kind: Kind, isNew: boolean, onSaved: () => void) {
   const [saving, setSaving] = useState(false);
@@ -135,7 +136,7 @@ function PlanForm({ initial, onSaved, onCancel }: FormProps<AdminPlan>) {
   );
 }
 
-function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormProps<AdminDevice>) {
+export function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormProps<AdminDevice>) {
   const tops = catTree.filter((c) => !c.parentId);
   const isNew = !initial;
   const startImages = initial?.images?.length ? initial.images : initial?.image ? [initial.image] : [];
@@ -424,7 +425,7 @@ export default function CatalogAdminView({ kind: tab }: { kind: Kind }) {
                 <div className="relative h-12 w-14 shrink-0 overflow-hidden rounded-md bg-surface dark:bg-navy-950/70">{pic ? <ProductImage src={mediaUrl(pic)} alt="" fill sizes="56px" className="object-contain p-0.5" /> : <span className="grid h-full place-items-center text-[10px] text-slate-400">No photo</span>}</div>
               ); })()}
               <div className="min-w-0 flex-1 basis-60">
-                <p className="truncate text-sm font-bold text-ink">{title}</p>
+                <p className="truncate text-sm font-bold text-ink">{tab === "devices" ? <Link href={`/admin/products/${item.id}`} className="hover:text-brand-600 hover:underline">{title}</Link> : title}</p>
                 <p className="truncate text-xs text-slate-500">{sub} · <span className="font-mono">{item.id}</span></p>
               </div>
               {meta && <p className="text-sm font-semibold tabular-nums text-ink">{meta}</p>}

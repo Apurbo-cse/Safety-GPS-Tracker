@@ -5,9 +5,11 @@ import { Repository } from "typeorm";
 import type { Env } from "../config/env";
 import { EventsGateway } from "../events/events.gateway";
 import { Order } from "../orders/order.entities";
+import { OrdersService } from "../orders/orders.service";
+import { PushService } from "../push/push.service";
 import type { User } from "../users/user.entity";
 
-interface BkashJson { statusCode?: string; statusMessage?: string; id_token?: string; expires_in?: number | string; paymentID?: string; bkashURL?: string; transactionStatus?: string; trxID?: string; amount?: string; merchantInvoiceNumber?: string }
+interface BkashJson { statusCode?: string; statusMessage?: string; id_token?: string; expires_in?: number | string; paymentID?: string; bkashURL?: string; transactionStatus?: string; trxID?: string; refundTrxId?: string; amount?: string; merchantInvoiceNumber?: string }
 
 /** bKash tokenized checkout. The amount is always read from our own order — never from the browser. */
 @Injectable()
@@ -18,6 +20,8 @@ export class PaymentsService {
     private cfg: ConfigService<Env, true>,
     @InjectRepository(Order) private orders: Repository<Order>,
     private events: EventsGateway,
+    private ordersService: OrdersService,
+    private push: PushService,
   ) {}
 
   private get enabled() { return !!(this.cfg.get("BKASH_USERNAME", { infer: true }) && this.cfg.get("BKASH_APP_KEY", { infer: true })); }
@@ -47,7 +51,7 @@ export class PaymentsService {
     const order = await this.orders.findOne({ where: { id: orderId, userId: user.id } });
     if (!order) throw new NotFoundException("Order not found");
     if (order.payment !== "bKash") throw new BadRequestException("This order is not a bKash order");
-    if (order.status === "cancelled") throw new ConflictException("This order was cancelled");
+    if (["cancelled", "returned", "refunded"].includes(order.status)) throw new ConflictException(`This order was ${order.status}`);
     if (order.paymentStatus === "paid") throw new ConflictException("This order is already paid");
     const amount = order.deviceTotal - order.discount;
     if (amount <= 0) throw new BadRequestException("Nothing to pay on this order");
@@ -76,9 +80,29 @@ export class PaymentsService {
     if (paid) order.paymentTrxId = j.trxID ?? null;
     await this.orders.save(order);
     if (paid) {
-      this.events.toUser(order.userId, "order:updated", { id: order.id, status: order.status });
-      this.events.toPermission("orders.view", "order:updated", { id: order.id, status: order.status });
+      this.events.orderChanged(order.userId, "order:updated", { id: order.id, status: order.status, payment: order.paymentStatus });
+      this.push.toUser(order.userId, { title: `Payment received for ${order.id}`, body: `৳${(order.deviceTotal - order.discount).toLocaleString("en-US")} paid with bKash. Thank you!`, url: `/order/${order.id}`, tag: `order-${order.id}` });
     }
     return { orderId: order.id, ok: paid };
+  }
+
+  /**
+   * Staff refund a paid bKash order: the money goes back through bKash first; only when bKash says it is done is the order marked
+   * refunded (which also gives stock and the coupon back). The amount is always the full amount that was paid.
+   */
+  async refund(orderId: string) {
+    if (!this.enabled) throw new ServiceUnavailableException("bKash payment is not set up yet");
+    const order = await this.orders.findOne({ where: { id: orderId } });
+    if (!order) throw new NotFoundException("Order not found");
+    if (order.payment !== "bKash" || order.paymentStatus !== "paid" || !order.paymentId || !order.paymentTrxId) throw new ConflictException("Only a paid bKash order can be refunded through bKash");
+    const amount = order.deviceTotal - order.discount;
+    const j = await this.call("/tokenized/checkout/payment/refund", {
+      paymentID: order.paymentId, trxID: order.paymentTrxId, amount: amount.toFixed(2), reason: `Refund of ${order.id}`, sku: order.id,
+    });
+    if (j.transactionStatus !== "Completed" || !j.refundTrxId) throw new BadRequestException(j.statusMessage || "bKash did not complete the refund");
+    order.paymentStatus = "refunded";
+    order.paymentRefundTrxId = j.refundTrxId;
+    await this.orders.save(order);
+    return this.ordersService.adminSetStatus(order.id, "refunded");
   }
 }

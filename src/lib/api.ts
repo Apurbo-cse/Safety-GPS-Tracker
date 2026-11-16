@@ -68,21 +68,22 @@ export interface ApiUser {
   /** What this person may do in the admin panel (empty for customers). */
   permissions: Permission[];
 }
-export interface Billing { name: string; company?: string; taxId?: string; address: string; division: string; postcode?: string; phone: string; email: string }
-export type OrderStatus = "received" | "confirmed" | "scheduled" | "active" | "cancelled";
+export interface Billing { name: string; company?: string; taxId?: string; address: string; division?: string; district?: string; postcode?: string; phone: string; email: string }
+export type OrderStatus = "pending" | "confirmed" | "scheduled" | "delivered" | "returned" | "refunded" | "cancelled";
+export type Area = "DNCC" | "DSCC" | "Outside Dhaka";
 export type PaymentMethod = "bKash" | "Nagad" | "Rocket" | "Card" | "Cash on installation";
 export interface ApiOrder {
-  id: string; createdAt: string; status: OrderStatus; payment: PaymentMethod; paymentStatus?: "unpaid" | "paid" | "failed"; paymentTrxId?: string; deviceTotal: number; monthlyTotal: number;
+  id: string; createdAt: string; status: OrderStatus; payment: PaymentMethod; paymentStatus?: "unpaid" | "paid" | "failed" | "refunded"; paymentTrxId?: string; paymentRefundTrxId?: string; deviceTotal: number; monthlyTotal: number;
   /** Taken off deviceTotal by a coupon (what is due now is deviceTotal − discount). */
   discount: number; couponCode?: string;
   items: CartItem[];
   billing: Billing;
-  contact: { name: string; phone: string; email: string; address: string; division: string; vehicleReg: string; vehicleType: string; preferredDate: string; note?: string };
+  contact: { name: string; phone: string; email: string; address: string; division: string; district?: string; thana?: string; postcode?: string; area?: Area; vehicleReg: string; vehicleType: string; preferredDate: string; note?: string };
 }
 /** `profit` and each item's `cost` are only sent to staff who may see finance. */
 export interface AdminOrder extends Omit<ApiOrder, "items"> { items: (CartItem & { cost?: number })[]; profit?: number; customer: { id: string; name: string; email: string } }
 export interface CreateOrderBody {
-  items: { id: string; qty: number }[]; payment: PaymentMethod; name: string; phone: string; email: string; address: string; division: string;
+  items: { id: string; qty: number }[]; payment: PaymentMethod; name: string; phone: string; email: string; address: string; district: string; thana?: string; postcode?: string; area: Area;
   vehicleReg: string; vehicleType: string; preferredDate: string; note?: string;
   /** Leave out to bill the person ordering, at the installation address. */
   billing?: Billing;
@@ -110,6 +111,21 @@ export const qs = (o: Record<string, unknown>) => {
 
 export interface AdminPlan { id: string; name: string; description: string; cost?: number | null; devicePrice: number; monthlyCharge: number; features: string[]; highlight: string | null; image: string | null; siteTitle: string | null; sourceNo: number; vehicles: string[]; sort: number; active: boolean }
 export interface AdminDevice { id: string; name: string; description: string; cost?: number | null; stock: number | null; category: string; subcategory: string; visual: string; image: string | null; images: string[]; siteTitle: string | null; summary: string; specs: { label: string; value: string }[]; features: string[]; price: number | null; monthly: number | null; planId: string | null; priceNote: string; sort: number; active: boolean }
+export interface AdminCustomerDetail {
+  customer: { id: string; name: string; email: string; phone: string | null; role: "customer" | "admin"; disabled: boolean; vehicleType: string | null; company: string; address: string; division: string; taxId: string; billingAddress: string; billingDivision: string; billingPostcode: string; createdAt: string };
+  stats: { orders: number; spent: number; open: number; monthly: number };
+  orders: { id: string; status: OrderStatus; payment: PaymentMethod; paymentStatus: string; total: number; monthly: number; createdAt: string; items: number; image: string | null }[];
+}
+export interface UpdateOrderBody {
+  phone?: string; address?: string; district?: string; area?: Area; thana?: string; postcode?: string;
+  vehicleReg?: string; vehicleType?: string; preferredDate?: string; note?: string;
+}
+export interface AdminProductDetail {
+  device: AdminDevice;
+  /** Orders that were not cancelled, returned or refunded. `profit` only for staff who may see finance. */
+  sales: { orders: number; units: number; revenue: number; profit?: number };
+  recent: { id: string; status: OrderStatus; qty: number; customer: string; createdAt: string }[];
+}
 export interface AdminFaq { id: string; category: string; q: string; a: string; tag: string; sort: number; active: boolean }
 export interface AdminCategory { id: string; name: string; parentId: string | null; sort: number; active: boolean }
 export interface AdminHeroSlide { id: string; tab: string; badge: string; badgeIcon: string; titleMain: string; titleHighlight: string; text: string; bgImage: string; accent: string; ctaLabel: string; ctaHref: string; telematics: { vehicle: string; plate: string; place: string; speed: string; ignition: "ON" | "OFF" | "LOCKED"; status: string; route: string; sensor: string; fuel: string }; sort: number; active: boolean }

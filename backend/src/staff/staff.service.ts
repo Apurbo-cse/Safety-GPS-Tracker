@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcryptjs";
 import { Repository } from "typeorm";
 import { normalizePhone } from "../common/phone";
-import { isPermission, OWNER_ROLE, PERMISSIONS } from "../common/permissions";
+import { ALL_PERMISSIONS, isPermission, OWNER_ROLE, PERMISSIONS } from "../common/permissions";
 import { User } from "../users/user.entity";
 import { UsersService } from "../users/users.service";
 import type { AddStaffDto, RoleDto, UpdateStaffDto } from "./staff.dto";
@@ -94,7 +94,7 @@ export class StaffService {
     const [roles, staff] = await Promise.all([this.roles.find({ order: { system: "DESC", name: "ASC" } }), this.users.find({ where: { role: "admin" } })]);
     return {
       permissions: Object.entries(PERMISSIONS).map(([id, label]) => ({ id, label })),
-      roles: roles.map((r) => ({ id: r.id, name: r.name, description: r.description, permissions: r.permissions.filter(isPermission), system: r.system, staff: staff.filter((s) => (s.staffRoleId ?? OWNER_ROLE) === r.id).length })),
+      roles: roles.map((r) => ({ id: r.id, name: r.name, description: r.description, permissions: r.id === OWNER_ROLE ? ALL_PERMISSIONS : r.permissions.filter(isPermission), system: r.system, staff: staff.filter((s) => (s.staffRoleId ?? OWNER_ROLE) === r.id).length })),
     };
   }
 

@@ -1,7 +1,7 @@
 import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import {
   ApiError, qs, request,
-  type AdminCatalog, type AdminCoupon, type AdminMessage, type ContactBody, type Quote, type AdminPageFull, type AdminPageRow, type SiteDetails, type AdminCustomer, type AdminDevice, type AdminOrder, type AdminPost, type AdminStats, type ApiOrder, type ApiSettings, type ApiUser,
+  type AdminCatalog, type AdminCoupon, type AdminMessage, type ContactBody, type Quote, type AdminPageFull, type AdminPageRow, type SiteDetails, type AdminCustomer, type AdminDevice, type UpdateOrderBody, type AdminCustomerDetail, type AdminProductDetail, type AdminOrder, type AdminPost, type AdminStats, type ApiOrder, type ApiSettings, type ApiUser,
   type CreateOrderBody, type OrderStatus, type Paged, type Permission, type PostFull, type PostSummary, type ProductsQuery, type RoleRow, type StaffMember,
 } from "@/lib/api";
 import type { Device } from "@/types";
@@ -136,6 +136,28 @@ export const baseApi = createApi({
     adminOrders: b.query<AdminOrdersResult, AdminOrdersArg>({
       query: (q) => ({ path: `/admin/orders${qs({ ...q })}` }),
       providesTags: ["AdminOrders"],
+    }),
+    adminProduct: b.query<AdminProductDetail, string>({
+      query: (id) => ({ path: `/admin/products/${encodeURIComponent(id)}` }),
+      providesTags: ["AdminProducts", "AdminOrders"],
+    }),
+    /** Sends the money back through bKash, then the order becomes "refunded". */
+    refundBkash: b.mutation<ApiOrder, string>({
+      query: (id) => ({ method: "POST", path: `/admin/orders/${encodeURIComponent(id)}/refund` }),
+      invalidatesTags: ["AdminOrders", "Stats", "AdminProducts", "Products", "MyOrders"],
+    }),
+    /** Staff change an order's installation details (date, place, phone, vehicle, note). */
+    updateOrder: b.mutation<AdminOrder, { id: string; body: UpdateOrderBody }>({
+      query: ({ id, body }) => ({ method: "PATCH", path: `/admin/orders/${encodeURIComponent(id)}`, body }),
+      invalidatesTags: ["AdminOrders", "MyOrders"],
+    }),
+    adminOrder: b.query<AdminOrder, string>({
+      query: (id) => ({ path: `/admin/orders/${encodeURIComponent(id)}` }),
+      providesTags: ["AdminOrders"],
+    }),
+    adminCustomer: b.query<AdminCustomerDetail, string>({
+      query: (id) => ({ path: `/admin/customers/${encodeURIComponent(id)}` }),
+      providesTags: ["Customers", "AdminOrders"],
     }),
     adminCustomers: b.query<{ page: number; limit: number; total: number; customers: AdminCustomer[] }, Page>({
       query: (q) => ({ path: `/admin/customers${qs({ ...q })}` }),
@@ -377,7 +399,7 @@ export const {
   useProductsQuery, useProductQuery, usePostsQuery, usePostQuery,
   useLoginMutation, useRegisterMutation, useMeQuery, useDeleteAccountMutation, useUploadImageMutation, useDiscardImageMutation,
   useMyOrdersQuery, useMyOrderQuery, useCreateOrderMutation, usePayBkashMutation, useCancelOrderMutation, useUpdateProfileMutation, useUpdateSettingsMutation, useChangePasswordMutation,
-  useAdminCatalogQuery, useAdminProductsQuery, useAdminStatsQuery, useAdminOrdersQuery, useAdminCustomersQuery, useSetOrderStatusMutation,
+  useAdminCatalogQuery, useAdminProductsQuery, useAdminStatsQuery, useAdminOrdersQuery, useAdminOrderQuery, useUpdateOrderMutation, useRefundBkashMutation, useAdminCustomerQuery, useAdminProductQuery, useAdminCustomersQuery, useSetOrderStatusMutation,
   useSaveCatalogItemMutation, useDeleteCatalogItemMutation,
   useStaffQuery, useAddStaffMutation, useUpdateStaffMutation, useRemoveStaffMutation, useSetStaffPasswordMutation,
   useRolesQuery, useSaveRoleMutation, useDeleteRoleMutation,

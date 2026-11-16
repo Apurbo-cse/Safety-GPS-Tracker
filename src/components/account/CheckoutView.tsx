@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import {
 import Container from "@/components/common/Container";
 import { Field, Select, inputCls, textareaCls } from "@/components/forms/Field";
 import { emailSchema, mobileSchema } from "@/lib/validation";
+import { DISTRICTS, THANAS, divisionOf } from "@/lib/districts";
 import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { removeFromCart, setQty } from "@/store/slices/cartSlice";
@@ -22,6 +23,11 @@ import { cn, formatBDT } from "@/utils/format";
 import { CARD, GateSkeleton, LoginGate, Pill } from "./AccountShell";
 
 export const DIVISIONS = ["Dhaka", "Chattogram", "Rajshahi", "Khulna", "Barishal", "Sylhet", "Rangpur", "Mymensingh"] as const;
+const AREAS = [
+  { id: "DNCC", label: "Inside Dhaka", hint: "Dhaka North (DNCC)" },
+  { id: "DSCC", label: "Inside Dhaka", hint: "Dhaka South (DSCC)" },
+  { id: "Outside Dhaka", label: "Outside Dhaka", hint: "Any other district" },
+] as const;
 const VEHICLES = ["Private car", "Motorcycle", "Microbus / van", "Truck / covered van", "Bus", "CNG auto-rickshaw", "Construction equipment", "Other"] as const;
 const PAYMENTS: { id: PaymentMethod; hint: string; icon: typeof Smartphone }[] = [
   { id: "bKash", hint: "Mobile wallet", icon: Smartphone },
@@ -36,7 +42,10 @@ const schema = z.object({
   phone: mobileSchema,
   email: emailSchema,
   address: z.string().trim().min(6, "Enter the installation address"),
-  division: z.enum(DIVISIONS),
+  district: z.string().refine((d) => DISTRICTS.includes(d), "Choose a district"),
+  thana: z.string().optional(),
+  postcode: z.string().trim().regex(/^\d{0,10}$/, "Digits only").optional(),
+  area: z.enum(["DNCC", "DSCC", "Outside Dhaka"]),
   vehicleReg: z.string().trim().min(3, "Enter the registration number"),
   vehicleType: z.enum(VEHICLES),
   preferredDate: z.string().min(1, "Pick a preferred date"),
@@ -50,7 +59,7 @@ const schema = z.object({
   taxId: z.string().trim().regex(/^[A-Za-z0-9-]{0,30}$/, "Letters, digits and dashes only").optional(),
   billingName: z.string().trim().optional(),
   billingAddress: z.string().trim().optional(),
-  billingDivision: z.enum(DIVISIONS),
+  billingDistrict: z.string().refine((d) => DISTRICTS.includes(d), "Choose a district"),
   billingPostcode: z.string().trim().regex(/^\d{0,10}$/, "Digits only").optional(),
   billingPhone: z.string().trim().optional(),
   billingEmail: z.string().trim().optional(),
@@ -60,8 +69,9 @@ type In = z.input<typeof schema>;
 
 /** The billing party's fields only count when "same as above" is off. Checked here (not in the schema) so every problem shows in one pass. */
 const billingProblems = (v: In): Partial<Record<keyof In, { type: string; message: string }>> => {
-  if (v.sameBilling) return {};
   const out: Partial<Record<keyof In, { type: string; message: string }>> = {};
+  if (v.area !== "Outside Dhaka" && !(THANAS[v.area] as readonly string[]).includes(v.thana ?? "")) out.thana = { type: "custom", message: "Choose your thana" };
+  if (v.sameBilling) return out;
   const need = (k: keyof In, ok: boolean, message: string) => { if (!ok) out[k] = { type: "custom", message }; };
   need("billingName", (v.billingName ?? "").trim().length >= 2, "Enter the name on the invoice");
   need("billingAddress", (v.billingAddress ?? "").trim().length >= 6, "Enter the billing address");
@@ -111,7 +121,10 @@ export default function CheckoutView() {
     phone: profile.phone,
     email: profile.email,
     address: profile.address,
-    division: (DIVISIONS as readonly string[]).includes(profile.division) ? (profile.division as In["division"]) : "Dhaka",
+    district: DISTRICTS.includes(profile.division) ? profile.division : "Dhaka",
+    thana: "",
+    postcode: "",
+    area: "Outside Dhaka",
     vehicleReg: "",
     vehicleType: "Private car",
     preferredDate: tomorrow(),
@@ -124,18 +137,28 @@ export default function CheckoutView() {
     taxId: profile.taxId,
     billingName: profile.name || user?.name || "",
     billingAddress: profile.billingAddress,
-    billingDivision: (DIVISIONS as readonly string[]).includes(profile.billingDivision) ? (profile.billingDivision as In["billingDivision"]) : "Dhaka",
+    billingDistrict: DISTRICTS.includes(profile.billingDivision) ? profile.billingDivision : "Dhaka",
     billingPostcode: profile.billingPostcode,
     billingPhone: profile.phone,
     billingEmail: profile.email,
   });
 
-  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting, isDirty } } = useForm<In, unknown, Out>({ resolver, defaultValues: defaults() });
+  const { register, handleSubmit, control, reset, setValue, getValues, formState: { errors, isSubmitting, isDirty } } = useForm<In, unknown, Out>({ resolver, defaultValues: defaults() });
   const payment = useWatch({ control, name: "payment" });
   const sameBilling = useWatch({ control, name: "sameBilling" });
+  const area = useWatch({ control, name: "area" });
+  const insideDhaka = area !== "Outside Dhaka";
+  const thanas = useMemo<readonly string[]>(() => (area === "DNCC" || area === "DSCC" ? THANAS[area] : []), [area]);
+  // DNCC and DSCC are both in Dhaka district; the thana must belong to the chosen corporation
+  useEffect(() => {
+    if (!insideDhaka) return;
+    setValue("district", "Dhaka");
+    if (!thanas.includes(getValues("thana") ?? "")) setValue("thana", "");
+  }, [insideDhaka, thanas, setValue, getValues]);
 
   // fill in saved profile once it loads from this browser (unless the visitor already typed)
-  useEffect(() => { if (!isDirty) reset(defaults()); // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isDirty) reset(defaults()); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, user]);
 
   const [createOrder] = useCreateOrderMutation();
@@ -165,16 +188,18 @@ export default function CheckoutView() {
       // Only ids and quantities are sent — the server prices the order from its own catalogue.
       const order = await createOrder({
         items: items.map((i) => ({ id: i.id, qty: i.qty })),
-        payment: v.payment, name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division,
-        vehicleReg: v.vehicleReg, vehicleType: v.vehicleType, preferredDate: v.preferredDate, note: v.note?.trim() || undefined,
+        payment: v.payment, name: v.name, phone: v.phone, email: v.email, address: v.address, district: v.district,
+        area: v.area, thana: insideDhaka ? v.thana : undefined, postcode: v.postcode || undefined, vehicleReg: v.vehicleReg, vehicleType: v.vehicleType, preferredDate: v.preferredDate, note: v.note?.trim() || undefined,
         ...(applied ? { coupon: applied.code } : {}),
         // left out, the server bills the contact at the installation address
-        ...(v.sameBilling && !v.company && !v.taxId ? {} : { billing: v.sameBilling
-          ? { name: v.name, company: v.company || undefined, taxId: v.taxId || undefined, address: v.address, division: v.division, phone: v.phone, email: v.email }
-          : { name: v.billingName!, company: v.company || undefined, taxId: v.taxId || undefined, address: v.billingAddress!, division: v.billingDivision, postcode: v.billingPostcode || undefined, phone: v.billingPhone!, email: v.billingEmail! } }),
+        ...(v.sameBilling && !v.company && !v.taxId ? {} : {
+          billing: v.sameBilling
+            ? { name: v.name, company: v.company || undefined, taxId: v.taxId || undefined, address: v.address, district: v.district, phone: v.phone, email: v.email }
+            : { name: v.billingName!, company: v.company || undefined, taxId: v.taxId || undefined, address: v.billingAddress!, district: v.billingDistrict, postcode: v.billingPostcode || undefined, phone: v.billingPhone!, email: v.billingEmail! }
+        }),
       }).unwrap();
       dispatch(clearCart());
-      if (v.saveProfile) void updateProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: v.division, company: v.company ?? "", taxId: v.taxId ?? "", ...(v.sameBilling ? {} : { billingAddress: v.billingAddress, billingDivision: v.billingDivision, billingPostcode: v.billingPostcode ?? "" }) }).unwrap().catch(() => { /* best effort */ });
+      if (v.saveProfile) void updateProfile({ name: v.name, phone: v.phone, email: v.email, address: v.address, division: divisionOf(v.district), company: v.company ?? "", taxId: v.taxId ?? "", ...(v.sameBilling ? {} : { billingAddress: v.billingAddress, billingDivision: divisionOf(v.billingDistrict), billingPostcode: v.billingPostcode ?? "" }) }).unwrap().catch(() => { /* best effort */ });
       setPlaced(order);
       // bKash: hand the customer to the (sandbox) bKash page; if that fails the order still exists and can be paid from My orders
       if (order.payment === "bKash" && order.deviceTotal - order.discount > 0) {
@@ -267,7 +292,28 @@ export default function CheckoutView() {
                 <Section n={2} icon={Wrench} title="Installation">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2"><Field label="Installation address" required icon={MapPin} error={errors.address?.message}><input {...register("address")} autoComplete="street-address" className={inputCls} placeholder="House, road, area" aria-invalid={!!errors.address} /></Field></div>
-                    <Field label="Division" required><Select {...register("division")}>{DIVISIONS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
+                    <div className="sm:col-span-2">
+                      <span className="mb-1.5 block text-sm font-semibold text-ink">Where is the Location? <span className="text-red-500">*</span></span>
+                      <div role="radiogroup" aria-label="Installation area" className="grid gap-2 sm:grid-cols-3">
+                        {AREAS.map((a) => {
+                          const on = area === a.id;
+                          return (
+                            <label key={a.id} className={cn("flex cursor-pointer items-center gap-2.5 rounded-lg p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/40", on ? "bg-brand-500/10 ring-2 ring-brand-500" : "bg-surface hover:-translate-y-0.5 dark:bg-navy-950/70")}>
+                              <input type="radio" value={a.id} {...register("area")} className="sr-only" />
+                              <MapPin className={cn("h-4 w-4 shrink-0", on ? "text-brand-600" : "text-slate-400")} />
+                              <span className="min-w-0"><span className="block text-sm font-semibold text-ink">{a.label}</span><span className="block text-xs text-slate-500">{a.hint}</span></span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <Field label="District" required error={errors.district?.message}><Select {...register("district")} disabled={insideDhaka}>{DISTRICTS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
+                    {insideDhaka && (
+                      <Field label={`Thana (${area})`} required error={errors.thana?.message}>
+                        <Select {...register("thana")}><option value="">Select thana</option>{thanas.map((t) => <option key={t}>{t}</option>)}</Select>
+                      </Field>
+                    )}
+                    <Field label="Postal code (optional)" error={errors.postcode?.message}><input {...register("postcode")} inputMode="numeric" autoComplete="postal-code" className={inputCls} placeholder="1207" aria-invalid={!!errors.postcode} /></Field>
                     <Field label="Preferred date" required icon={Calendar} error={errors.preferredDate?.message}><input {...register("preferredDate")} type="date" min={tomorrow()} className={inputCls} aria-invalid={!!errors.preferredDate} /></Field>
                     <Field label="Vehicle type" required><Select {...register("vehicleType")}>{VEHICLES.map((v) => <option key={v}>{v}</option>)}</Select></Field>
                     <Field label="Registration number" required icon={Car} error={errors.vehicleReg?.message}><input {...register("vehicleReg")} className={inputCls} placeholder="Dhaka Metro Ga 12-3456" aria-invalid={!!errors.vehicleReg} /></Field>
@@ -287,7 +333,7 @@ export default function CheckoutView() {
                         <Field label="Billing mobile" required icon={Phone} error={errors.billingPhone?.message}><input {...register("billingPhone")} type="tel" className={inputCls} placeholder="01XXXXXXXXX" aria-invalid={!!errors.billingPhone} /></Field>
                         <div className="sm:col-span-2"><Field label="Billing email" required icon={Mail} error={errors.billingEmail?.message}><input {...register("billingEmail")} type="email" className={inputCls} aria-invalid={!!errors.billingEmail} /></Field></div>
                         <div className="sm:col-span-2"><Field label="Billing address" required icon={MapPin} error={errors.billingAddress?.message}><input {...register("billingAddress")} className={inputCls} placeholder="House, road, area" aria-invalid={!!errors.billingAddress} /></Field></div>
-                        <Field label="Division" required><Select {...register("billingDivision")}>{DIVISIONS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
+                        <Field label="District" required error={errors.billingDistrict?.message}><Select {...register("billingDistrict")}>{DISTRICTS.map((d) => <option key={d}>{d}</option>)}</Select></Field>
                         <Field label="Postcode (optional)" error={errors.billingPostcode?.message}><input {...register("billingPostcode")} inputMode="numeric" className={inputCls} placeholder="1207" aria-invalid={!!errors.billingPostcode} /></Field>
                       </>
                     )}
