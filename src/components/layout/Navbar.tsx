@@ -102,7 +102,7 @@ export default function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -130,7 +130,10 @@ export default function Navbar() {
       ref={headerRef}
       onMouseLeave={leave}
       className={cn(
-        "sticky top-0 z-50 bg-surface/90 backdrop-blur-xl dark:bg-navy-950/85",
+        "sticky top-0 z-50 bg-surface/90 backdrop-blur-xl dark:bg-navy-950/85 transition-[border-color,background-color] duration-200",
+        scrolled
+          ? "border-b border-slate-200 dark:border-slate-800"
+          : "border-b border-transparent",
         // phones/tablets: full navbar only on the home page; inner pages use MobilePageBar
         pathname !== "/" && "max-lg:hidden",
       )}

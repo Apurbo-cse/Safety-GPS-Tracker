@@ -159,7 +159,7 @@ export function PlatformTour() {
   const [tab, setTab] = useState<TourId>("map");
   const cur = TOUR.find((t) => t.id === tab)!;
   return (
-    <section className="bg-surface py-16 sm:py-24">
+    <section className="py-16 sm:py-24 bg-statled-50 dark:bg-[#00122b]">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <Pill>Platform tour</Pill>
@@ -169,25 +169,34 @@ export function PlatformTour() {
         <div role="tablist" aria-label="Platform features" className="mt-8 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] sm:justify-center">
           {TOUR.map((t) => (
             <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-              className={cn("inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors", tab === t.id ? "bg-brand-500 text-white" : `${SOFT} text-body hover:text-ink`)}>
-              <t.icon className="h-4 w-4" />{t.label}
+              className={cn("inline-flex shrink-0 items-center gap-2 rounded-md px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-colors", tab === t.id ? "bg-brand-500 text-white font-bold" : "border border-slate-200 dark:border-slate-800 bg-slate-50 text-slate-600 hover:text-slate-900 dark:bg-[#00224f] dark:text-slate-300 dark:hover:text-white")}>
+              <t.icon className="h-3.5 w-3.5" />{t.label}
             </button>
           ))}
         </div>
         <div className="mt-8 grid items-stretch gap-6 lg:grid-cols-2">
           <AnimatePresence mode="wait">
-            <motion.div key={cur.id} role="tabpanel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className={`${SOFT} flex flex-col justify-center p-6 sm:p-9`}>
+            <motion.div key={cur.id} role="tabpanel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="flex flex-col justify-center rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] p-6 sm:p-9">
               <span className="grid h-12 w-12 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400"><cur.icon className="h-6 w-6" /></span>
-              <h3 className="mt-4 text-2xl font-black tracking-tight text-ink">{cur.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-body">{cur.text}</p>
+              <h3 className="mt-4 text-xl sm:text-2xl font-bold tracking-tight text-[#0c1f38] dark:text-white">{cur.title}</h3>
+              <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-slate-500 dark:text-slate-400">{cur.text}</p>
               <ul className="mt-5 space-y-2.5">
-                {cur.points.map((p) => <li key={p} className="flex items-center gap-2.5 text-sm font-medium text-ink"><span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-500/15 text-emerald-600"><Check className="h-3 w-3" /></span>{p}</li>)}
+                {cur.points.map((p) => (
+                  <li key={p} className="flex items-center gap-2.5 text-xs sm:text-[13px] font-medium text-slate-700 dark:text-slate-200">
+                    <span className="grid h-5 w-5 place-items-center rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"><Check className="h-3 w-3" /></span>
+                    {p}
+                  </li>
+                ))}
               </ul>
-              <Link href="/features" className="mt-6 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">All features <ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/features" className="mt-6 inline-flex w-fit items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600 hover:text-brand-700 dark:text-brand-400">
+                All features <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </motion.div>
           </AnimatePresence>
           <AnimatePresence mode="wait">
-            <motion.div key={`s-${cur.id}`} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}><Screen id={cur.id} /></motion.div>
+            <motion.div key={`s-${cur.id}`} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-800 bg-[#0c1f38]">
+              <Screen id={cur.id} />
+            </motion.div>
           </AnimatePresence>
         </div>
       </Container>

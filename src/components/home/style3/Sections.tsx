@@ -14,16 +14,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import {
-  ArrowRight, BarChart3, Bell, Bike, CalendarCheck, ChevronDown, Fence, Fuel, Globe,
-  Lock, Mail, MapPin, Phone, Route, Shield, ShieldCheck, Smartphone, Truck, Car, Unlock, User, type LucideIcon,
+  ArrowRight, Award, BarChart3, Bell, Bike, CalendarCheck, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Fence, FileText, Fuel, Globe,
+  Lock, Mail, MapPin, Navigation, Phone, Route, ShieldCheck, Smartphone, Truck, Car, User, Wrench, type LucideIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 import Container from "@/components/common/Container";
 import ContactForm from "@/components/forms/ContactForm";
 import { DeviceTile } from "@/components/devices/ProductTile";
 import PlanTile from "@/components/pricing/PlanTile";
 import { useCatalog } from "@/components/providers/CatalogProvider";
-import type { HeroIcon, HeroSlide as HeroSlideT, HeroTelematics } from "@/data/hero";
+import type { HeroSlide as HeroSlideT } from "@/data/hero";
 import { categoryUrl } from "@/data/catalogue";
 import DeviceVisual from "@/components/devices/DeviceVisual";
 import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS } from "@/lib/site";
@@ -31,83 +30,14 @@ import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 import { cn, formatBDT } from "@/utils/format";
+import { solutions } from "@/data/solutions";
+import { DynIcon } from "@/lib/icons";
 
 const clean = (l: string) => l.replace("/img/partners/", "/img/partners/clean/");
 
 
 
 /* ================================================================ 1. hero */
-const HERO_ICONS: Record<HeroIcon, LucideIcon> = { shield: Shield, bike: Bike, truck: Truck };
-
-function SimpleTelematicsCard({ t }: { t: HeroTelematics }) {
-  const [locked, setLocked] = useState(t.ignition === "LOCKED");
-
-  const handleToggleLock = () => {
-    if (!locked) {
-      setLocked(true);
-      toast.error(`Engine Locked: Immobilizer command sent to ${t.plate}`);
-    } else {
-      setLocked(false);
-      toast.success(`Engine Restored: Normal ignition enabled for ${t.plate}`);
-    }
-  };
-
-  return (
-    <div className="w-full max-w-[340px] rounded-md border border-white/15 bg-[#091524]/90 p-5 text-white backdrop-blur-xl">
-      {/* Live status header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-75", locked ? "bg-amber-400" : "bg-emerald-400")} />
-            <span className={cn("relative inline-flex h-2 w-2 rounded-full", locked ? "bg-amber-400" : "bg-emerald-400")} />
-          </span>
-          <span className="text-xs font-semibold text-slate-200">Live Protection</span>
-        </div>
-        <span className={cn(
-          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border",
-          locked
-            ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
-            : "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
-        )}>
-          {locked ? "Locked" : "Online"}
-        </span>
-      </div>
-
-      {/* Vehicle Info */}
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-base font-bold text-white truncate">{t.vehicle}</p>
-          <p className="font-mono text-xs text-slate-400">{t.plate}</p>
-        </div>
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/10 bg-white/5 text-brand-400">
-          {/bike|motorcycle|yamaha|honda/i.test(t.vehicle) ? <Bike className="h-4.5 w-4.5" /> : /truck|van|isuzu|covered/i.test(t.vehicle) ? <Truck className="h-4.5 w-4.5" /> : <Car className="h-4.5 w-4.5" />}
-        </div>
-      </div>
-
-      {/* Location */}
-      <div className="mt-3.5 flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs text-slate-300">
-        <MapPin className="h-4 w-4 shrink-0 text-brand-400" />
-        <span className="truncate">{t.place}</span>
-      </div>
-
-      {/* Single Clean Action Button */}
-      <button
-        onClick={handleToggleLock}
-        type="button"
-        className={cn(
-          "mt-4 flex w-full items-center justify-center gap-2 rounded-md py-2.5 text-xs font-bold transition-all active:scale-[0.98]",
-          locked
-            ? "bg-emerald-600 text-white hover:bg-emerald-500"
-            : "bg-red-600/90 text-white hover:bg-red-600"
-        )}
-      >
-        {locked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-        <span>{locked ? "Unlock Engine" : "Lock Engine"}</span>
-      </button>
-    </div>
-  );
-}
-
 export function HeroDark() {
   const { heroSlides: slides } = useCatalog();
   if (!slides.length) return null;
@@ -120,124 +50,610 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="relative bg-[#0a1628] text-white" aria-roledescription="carousel" aria-label="Hero highlights">
+    <section className="relative w-full h-[64vh] sm:h-[60vh] min-h-[440px] max-h-[580px] bg-[#0c1f38] overflow-hidden" aria-roledescription="carousel" aria-label="Hero highlights">
       <Swiper
         modules={[Autoplay, EffectFade]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
         loop={slides.length > 1}
-        speed={600}
+        speed={700}
         autoplay={{ delay: 6500, disableOnInteraction: false, pauseOnMouseEnter: true }}
         onSwiper={(sw) => { swiperRef.current = sw; }}
         onSlideChange={(sw) => setActive(sw.realIndex)}
+        className="h-full w-full"
       >
-        {slides.map((s, idx) => {
-          const BadgeIcon = HERO_ICONS[s.badgeIcon] ?? Shield;
-          return (
-            <SwiperSlide key={s.id}>
-              <div className="relative isolate flex min-h-[480px] items-center overflow-hidden bg-[#0a1628] sm:min-h-[520px]">
-                <ProductImage
-                  src={s.bgImage}
-                  alt=""
-                  fill
-                  priority={idx === 0}
-                  sizes="100vw"
-                  className="-z-20 object-cover object-center opacity-85"
-                />
-                <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0a1628]/90 via-[#0a1628]/55 to-[#0a1628]/20" />
-                <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-[#0a1628] to-transparent" />
+        {slides.map((s, idx) => (
+          <SwiperSlide key={s.id} className="relative h-full w-full overflow-hidden">
+            {/* Background image & gradient overlays */}
+            <div className="absolute inset-0 z-0">
+              <ProductImage
+                src={s.bgImage}
+                alt={s.titleMain}
+                fill
+                priority={idx === 0}
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#0c1f38]/95 via-[#0c1f38]/70 to-[#0c1f38]/20" />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0c1f38]/85 via-transparent to-transparent" />
+            </div>
 
-                <Container className="grid items-center gap-10 pb-20 pt-12 lg:grid-cols-12">
-                  <div className="lg:col-span-7">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-brand-400 backdrop-blur-md">
-                      <BadgeIcon className="h-3.5 w-3.5" />
-                      {s.badge}
-                    </span>
+            {/* Foreground content */}
+            <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+              <div className="max-w-2xl space-y-4">
+                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-white/20 bg-white/10 backdrop-blur-md text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-white">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+                  {s.badge}
+                </span>
 
-                    <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-[52px]">
-                      {s.titleMain}{" "}
-                      <span className="text-brand-500">{s.titleHighlight}</span>
-                    </h1>
-                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-                      {s.text}
-                    </p>
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.1] tracking-tight">
+                  {s.titleMain}{" "}
+                  <span className="text-brand-400">{s.titleHighlight}</span>
+                </h1>
 
-                    <div className="mt-7 flex flex-wrap gap-3">
-                      {s.ctaHref.startsWith("https://") ? (
-                        <a
-                          href={s.ctaHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:bg-brand-600"
-                        >
-                          {s.ctaLabel}
-                          <ArrowRight className="h-4 w-4" />
-                        </a>
-                      ) : (
-                        <Link
-                          href={s.ctaHref}
-                          className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md bg-brand-500 px-4 sm:px-6 text-xs sm:text-sm font-bold text-white transition-all hover:bg-brand-600"
-                        >
-                          {s.ctaLabel}
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => dispatch(openDemoModal("Hero live demo"))}
-                        className="inline-flex h-9 sm:h-11 items-center gap-2 rounded-md border border-white/15 bg-white/5 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10"
-                      >
-                        <CalendarCheck className="h-4 w-4 text-brand-400" />
-                        Book a demo
-                      </button>
-                    </div>
-                  </div>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-xl line-clamp-4">
+                  {s.text}
+                </p>
 
-                  <div className="flex justify-center lg:col-span-5 lg:justify-end">
-                    <SimpleTelematicsCard t={s.telematics} />
-                  </div>
-                </Container>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  {s.ctaHref.startsWith("https://") ? (
+                    <a
+                      href={s.ctaHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors active:scale-95"
+                    >
+                      <span>{s.ctaLabel}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <Link
+                      href={s.ctaHref}
+                      className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors active:scale-95"
+                    >
+                      <span>{s.ctaLabel}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => dispatch(openDemoModal("Hero live demo"))}
+                    className="inline-flex items-center gap-2 border border-white/30 bg-white/10 hover:bg-white hover:text-navy-950 backdrop-blur-md text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer active:scale-95"
+                  >
+                    <CalendarCheck className="h-3.5 w-3.5" />
+                    <span>Book a Demo</span>
+                  </button>
+                </div>
               </div>
-            </SwiperSlide>
-          );
-        })}
+            </div>
+          </SwiperSlide>
+        ))}
       </Swiper>
 
-      {/* slide tabs with vehicle category icons */}
-      {slides.length > 1 && (
-        <div className="absolute inset-x-0 bottom-4 z-20">
-          <Container>
-            <div role="tablist" aria-label="Choose vehicle type" className="flex flex-wrap items-center gap-2 sm:gap-3">
-              {slides.map((s, i) => {
-                const TabIcon = i === 0 ? Car : i === 1 ? Bike : Truck;
-                const isSel = active === i;
-                return (
-                  <button
-                    key={s.id}
-                    role="tab"
-                    aria-selected={isSel}
-                    onClick={() => swiperRef.current?.slideToLoop(i)}
-                    className={cn(
-                      "group flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all backdrop-blur-md",
-                      isSel
-                        ? "border-brand-500/60 bg-brand-500/20 text-white"
-                        : "border-white/10 bg-black/30 text-slate-400 hover:border-white/20 hover:text-slate-200"
-                    )}
-                  >
-                    <TabIcon className={cn("h-3.5 w-3.5", isSel ? "text-brand-400" : "text-slate-400 group-hover:text-slate-300")} />
-                    <span>{s.tab}</span>
-                    {isSel && (
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-400" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </Container>
+      {/* Bottom slide controls */}
+      <div className="absolute bottom-5 left-0 right-0 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between pointer-events-none">
+        {/* Indicators on the left */}
+        <div className="flex items-center gap-1.5 pointer-events-auto">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => swiperRef.current?.slideToLoop(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all cursor-pointer",
+                active === i
+                  ? "w-7 bg-brand-500"
+                  : "w-2.5 bg-white/40 hover:bg-white/70"
+              )}
+            />
+          ))}
         </div>
+
+        {/* Previous / Next chevrons on the right */}
+        {slides.length > 1 && (
+          <div className="hidden sm:flex items-center gap-2 pointer-events-auto">
+            <button
+              type="button"
+              aria-label="Previous slide"
+              onClick={() => swiperRef.current?.slidePrev()}
+              className="w-8 h-8 rounded-full border border-white/30 bg-white/10 text-white hover:bg-brand-500 hover:border-brand-500 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next slide"
+              onClick={() => swiperRef.current?.slideNext()}
+              className="w-8 h-8 rounded-full border border-white/30 bg-white/10 text-white hover:bg-brand-500 hover:border-brand-500 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Header */
+export function SectionHeader({
+  badge,
+  title,
+  description,
+  link,
+  center,
+}: {
+  badge: string;
+  title: string;
+  description?: string;
+  link?: { label: string; href: string };
+  center?: boolean;
+}) {
+  return (
+    <div className={cn("flex flex-col gap-3 mb-8 sm:mb-10", center ? "items-center text-center max-w-2xl mx-auto" : "md:flex-row md:items-end md:justify-between")}>
+      <div className="max-w-2xl">
+        <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 mb-2">
+          <span className="w-5 h-[2px] bg-brand-500" />
+          {badge}
+        </span>
+        <h2 className="text-xl sm:text-3xl font-extrabold text-[#0c1f38] dark:text-white tracking-tight leading-snug">
+          {title}
+        </h2>
+        {description && (
+          <p className="mt-2 text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            {description}
+          </p>
+        )}
+      </div>
+      {link && (
+        <Link
+          href={link.href}
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600 hover:text-brand-700 dark:text-brand-400 shrink-0"
+        >
+          <span>{link.label}</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       )}
+    </div>
+  );
+}
+
+/* ================================================================ NovasBD Section 1: Capability Snapshot */
+export function CapabilitySnapshot() {
+  return (
+    <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
+      <Container>
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <span className="inline-flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+              <span className="w-5 h-[2px] bg-brand-500" /> Established 2018
+            </span>
+            <h2 className="text-xl sm:text-3xl font-extrabold text-[#0c1f38] dark:text-white tracking-tight leading-snug">
+              Precision Telematics &amp; Fleet Security
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Safety GPS Tracker is Bangladesh&apos;s leading vehicle telematics and anti-theft security platform. We provide certified GPS tracking hardware, live software platforms, and 24/7 human emergency assistance across all 64 districts.
+            </p>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Our core mission is protecting vehicle owners from theft, cutting fleet operational waste, and automating BRTA compliance with ultrasonic fuel monitoring, 10-second updates, and remote engine shut-off.
+            </p>
+
+            <div className="grid sm:grid-cols-3 gap-3 pt-2">
+              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
+                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">2018</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Founded in Dhaka</p>
+              </div>
+              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
+                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">64</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Districts Installed</p>
+              </div>
+              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
+                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">BRTA / BTRC</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Approved Hardware</p>
+              </div>
+            </div>
+
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 hover:text-brand-700 dark:text-brand-400 pt-2"
+            >
+              Read full company story <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="rounded-md border border-white/10 bg-gradient-to-br from-[#0c1f38] to-[#071322] p-5 sm:p-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-400">
+                  Capability snapshot
+                </span>
+                <span className="text-[10px] text-slate-300">Live Telematics</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
+                  <div className="text-2xl sm:text-3xl font-extrabold">50,000+</div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Active Vehicles</div>
+                </div>
+                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
+                  <div className="text-2xl sm:text-3xl font-extrabold">10s</div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Refresh Latency</div>
+                </div>
+                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
+                  <div className="text-2xl sm:text-3xl font-extrabold">99.8%</div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Recovery Rate</div>
+                </div>
+                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
+                  <div className="text-2xl sm:text-3xl font-extrabold">24/7</div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Human Helpline</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 2: Four Fundamental Commitments */
+export function FundamentalCommitments() {
+  const COMMITMENTS = [
+    {
+      icon: ShieldCheck,
+      code: "BEST RECOVERY",
+      title: "99.8% Vehicle Recovery",
+      desc: "Instant remote engine shut-off and direct coordination with law enforcement to locate and recover stolen vehicles nationwide.",
+    },
+    {
+      icon: Navigation,
+      code: "BEST ACCURACY",
+      title: "10-Second Live Sync",
+      desc: "Dual-band GPS and BDS satellite positioning delivering true live vehicle movement, speed violations, and route playback.",
+    },
+    {
+      icon: Wrench,
+      code: "BEST INSTALLATION",
+      title: "64 Districts Doorstep Fit",
+      desc: "Our verified certified electrical technicians travel to your doorstep, garage, or fleet depot anywhere in Bangladesh.",
+    },
+    {
+      icon: Phone,
+      code: "BEST SUPPORT",
+      title: "24/7 Human Helpline",
+      desc: "Round-the-clock emergency assistance, instant immobilizer execution, and billing support available 365 days a year.",
+    },
+  ];
+
+  return (
+    <section className="py-12 sm:py-16 bg-[#f9f8fb] dark:bg-[#00162f]">
+      <Container>
+        <SectionHeader
+          badge="Commitments"
+          title="Four fundamental commitments"
+          description="What sets Safety GPS Tracker apart in precision tracking, anti-theft defense, and fleet peace of mind."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {COMMITMENTS.map((c) => (
+            <div
+              key={c.code}
+              className="group rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] p-5 hover:border-brand-500 transition-all flex flex-col"
+            >
+              <span className="inline-flex p-2.5 rounded-md bg-[#0c1f38] text-white group-hover:bg-brand-500 transition-colors w-fit">
+                <c.icon className="h-5 w-5" />
+              </span>
+              <p className="mt-3 text-[10px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                {c.code}
+              </p>
+              <h3 className="mt-1 text-sm font-bold text-[#0c1f38] dark:text-white">
+                {c.title}
+              </h3>
+              <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed flex-1">
+                {c.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 3: Where We Deliver (Sectors) */
+export function SectorsDeliver() {
+  return (
+    <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
+      <Container>
+        <SectionHeader
+          badge="Sectors"
+          title="Where we deliver"
+          description="Certified tracking systems and remote control engineering across six strategic transportation sectors."
+          link={{ label: "All solutions", href: "/solutions" }}
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {solutions.map((s) => (
+            <Link
+              key={s.id}
+              href={`/solutions#${s.id}`}
+              className="group relative bg-white dark:bg-[#00224f] border border-slate-200 dark:border-slate-800/80 rounded-md overflow-hidden hover:border-brand-500 transition-all duration-300 flex flex-col"
+            >
+              <div className="relative h-48 sm:h-56 overflow-hidden">
+                <ProductImage
+                  src={s.image}
+                  alt={s.title}
+                  fill
+                  sizes="(min-width:1024px) 33vw, 100vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0c1f38]/90 via-[#0c1f38]/30 to-transparent" />
+                <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-md bg-white/20 text-white backdrop-blur-md">
+                    <DynIcon name={s.icon} className="h-4 w-4" />
+                  </span>
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    {s.title}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 flex flex-col flex-1">
+                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                  {s.description}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {s.features.slice(0, 3).map((f) => (
+                    <span
+                      key={f}
+                      className="rounded bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300"
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+                <span className="mt-4 pt-2 border-t border-slate-100 dark:border-white/5 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 group-hover:text-brand-700">
+                  Explore solution <ArrowRight className="h-3 w-3" />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 4: Hardware Catalogue */
+export function HardwareCatalogueSection() {
+  const { devices } = useCatalog();
+  const featured = devices.slice(0, 4);
+
+  return (
+    <section className="py-12 sm:py-16 bg-[#f9f8fb] dark:bg-[#00162f]">
+      <Container>
+        <SectionHeader
+          badge="Hardware catalogue"
+          title="Featured tracking equipment"
+          description="High-precision GPS trackers, ultrasonic fuel sensors, and remote immobilizer relays."
+          link={{ label: "View full directory", href: "/products" }}
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featured.map((d) => (
+            <div
+              key={d.id}
+              className="group rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] overflow-hidden hover:border-brand-500 transition-all flex flex-col"
+            >
+              <div className="relative aspect-[4/3] bg-slate-50 dark:bg-navy-950/40 p-4 flex items-center justify-center">
+                {d.image && (
+                  <ProductImage
+                    src={d.image}
+                    alt={d.name}
+                    width={240}
+                    height={180}
+                    className="object-contain max-h-36 group-hover:scale-105 transition-transform"
+                  />
+                )}
+                <span className="absolute top-2.5 left-2.5 rounded bg-brand-500/15 border border-brand-500/30 px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                  {d.category || "GPS Hardware"}
+                </span>
+              </div>
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="text-sm font-bold text-[#0c1f38] dark:text-white line-clamp-1">
+                  {d.name}
+                </h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {d.summary || "10s live satellite tracking, remote engine immobilizer, and instant anti-theft notifications."}
+                </p>
+                <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-100 dark:border-white/5">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Device Price</span>
+                    <span className="text-sm font-extrabold text-[#0c1f38] dark:text-white">
+                      {d.price ? formatBDT(d.price) : "Contact Sales"}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/products/${d.id}`}
+                    className="inline-flex items-center gap-1 rounded bg-[#0c1f38] hover:bg-brand-500 text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
+                  >
+                    <span>Specs</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 5: Telematics Blueprint */
+export function BlueprintSection() {
+  const BLUEPRINTS = [
+    {
+      num: "01",
+      title: "Package Selection",
+      desc: "Choose the tracker and monthly service plan tailored for private car, motorcycle, or commercial fleet requirements.",
+    },
+    {
+      num: "02",
+      title: "Doorstep Fitting",
+      desc: "Certified electrical technicians concealed-fit and test the immobilizer relay at your doorstep across 64 districts.",
+    },
+    {
+      num: "03",
+      title: "App & Web Onboarding",
+      desc: "Instant account activation with live access on Android, iOS, and Web platforms for continuous real-time monitoring.",
+    },
+    {
+      num: "04",
+      title: "24/7 Human Security",
+      desc: "Continuous automated BRTA alerts, geofence trigger notifications, and emergency hotline engine cut-off support.",
+    },
+  ];
+
+  return (
+    <section className="py-12 sm:py-16 bg-[#0c1f38] text-white relative overflow-hidden">
+      <div className="absolute -left-20 -bottom-20 w-72 h-72 rounded-full bg-brand-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-sky-500/20 blur-3xl pointer-events-none" />
+      <Container className="relative z-10">
+        <div className="flex flex-col gap-3 mb-8 sm:mb-10 items-center text-center">
+          <div className="max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-brand-400 mb-2">
+              <span className="w-5 h-[2px] bg-brand-500" />
+              Telematics blueprint
+            </span>
+            <h2 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+              From order to 24/7 sustained protection
+            </h2>
+            <p className="mt-2 text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+              Our proven 4-stage operational process ensures seamless device installation and permanent vehicle security.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {BLUEPRINTS.map((b) => (
+            <div key={b.num} className="rounded-md border border-white/15 bg-white/10 p-5 backdrop-blur-md">
+              <span className="text-2xl font-extrabold text-brand-400">{b.num}</span>
+              <h3 className="mt-2 text-sm font-bold text-white">{b.title}</h3>
+              <p className="mt-1.5 text-[11px] text-slate-200 leading-relaxed">{b.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 6: Quality & Certifications */
+export function CertificationsSection() {
+  const CERTS = [
+    {
+      title: "BRTA & BTRC Compliant",
+      subtitle: "Government Approved",
+      desc: "Fully compliant with Bangladesh Road Transport Authority standards and BTRC radio frequency spectrum regulations.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "ISO 9001:2015 Certified",
+      subtitle: "Quality Management",
+      desc: "Strict quality control on wiring harnesses, concealed placement, and high-temp battery safety verification.",
+      icon: CheckCircle2,
+    },
+    {
+      title: "IP67 / IP68 Rated",
+      subtitle: "Waterproof Hardware",
+      desc: "Rugged waterproof enclosure engineered for heavy monsoon rains, flood road wash, and engine-bay vibrations.",
+      icon: Award,
+    },
+    {
+      title: "64 Districts Network",
+      subtitle: "Doorstep Support",
+      desc: "Dedicated roaming technical staff and 24/7 central emergency monitoring helpline across all 64 administrative districts.",
+      icon: MapPin,
+    },
+  ];
+
+  return (
+    <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
+      <Container>
+        <SectionHeader
+          badge="Quality & standards"
+          title="Certified telematics & vehicle security"
+          description="Built to national standards and trusted by leading logistics, corporate, and private vehicle owners."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {CERTS.map((c) => (
+            <div
+              key={c.title}
+              className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-5 flex flex-col"
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400">
+                  <c.icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#0c1f38] dark:text-white leading-tight">
+                    {c.title}
+                  </h3>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                    {c.subtitle}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed flex-1">
+                {c.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ================================================================ NovasBD Section 7: Direct Procurement Closing CTA */
+export function TenderCtaSection() {
+  const site = useSite();
+  const dispatch = useAppDispatch();
+
+  return (
+    <section className="py-12 sm:py-16 bg-[#f9f8fb] dark:bg-[#00162f]">
+      <Container>
+        <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] p-6 sm:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 mb-2">
+              <span className="w-5 h-[2px] bg-brand-500" />
+              Direct procurement & installation
+            </span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#0c1f38] dark:text-white tracking-tight">
+              Need a formal fleet proposal or doorstep device installation?
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Call our sales &amp; engineering desk directly or submit your vehicle requirements. Our certified technicians cover all 64 districts.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <a
+              href={`tel:${site.phone}`}
+              className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors"
+            >
+              <Phone className="h-3.5 w-3.5" />
+              <span>Call Helpline ({site.phone})</span>
+            </a>
+            <button
+              type="button"
+              onClick={() => dispatch(openDemoModal("Home Novas tender request"))}
+              className="inline-flex items-center gap-2 border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-[#0c1f38] dark:text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Request Quote</span>
+            </button>
+          </div>
+        </div>
+      </Container>
     </section>
   );
 }
@@ -627,7 +1043,7 @@ export function WhyChecklist() {
 /* ========================================================== 8. partners */
 function LogoTile({ p }: { p: { name: string; logo: string } }) {
   return (
-    <li title={p.name} className="group grid h-20 place-items-center rounded-md bg-slate-50 px-4 ring-1 ring-line/20 transition-all hover:-translate-y-0.5 dark:bg-navy-950/70">
+    <li title={p.name} className="group grid h-20 place-items-center rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 px-4 transition-all hover:border-brand-500 dark:bg-[#001838]">
       <Image src={clean(p.logo)} alt={p.name} width={140} height={50} className="h-auto max-h-9 w-auto max-w-full object-contain opacity-70 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0" />
     </li>
   );
@@ -640,25 +1056,24 @@ export function PartnerBorderGrid() {
     { icon: Globe, t: "Network partners", d: "Mobile networks that carry your vehicle's data.", items: TELECOM_PARTNER_LOGOS, cols: "grid-cols-2" },
   ];
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/80 dark:from-navy-950 dark:via-navy-900/70 dark:to-navy-950 py-16 sm:py-24 border-y border-line/40">
-      <div aria-hidden className="pointer-events-none absolute right-0 top-10 -z-0 h-72 w-72 rounded-full bg-brand-500/5 blur-3xl" />
+    <section className="relative overflow-hidden bg-white dark:bg-[#00122b] py-16 sm:py-24 border-t border-slate-200 dark:border-slate-800">
       <Container className="relative z-10">
-        <div className="text-center">
-          <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">Ecosystem · {all.length} partners</span>
-          <h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Our Device &amp; Network Partners</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-body">Trusted hardware brands and nationwide mobile networks keep every vehicle connected.</p>
-        </div>
+        <SectionHeader
+          badge="INFRASTRUCTURE"
+          title="National telecom & global GPS partners"
+          description="Direct data routing via Tier-1 Bangladesh telco APNs paired with European-certified telematics hardware manufacturers."
+        />
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.5fr_1fr]">
           {groups.map((g) => (
-            <div key={g.t} className="rounded-md bg-white p-5 ring-1 ring-line/40 dark:bg-navy-900/90 sm:p-6">
+            <div key={g.t} className="rounded-md border border-slate-200 dark:border-slate-800 bg-white p-5 dark:bg-[#00224f] sm:p-6">
               <div className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400"><g.icon className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-bold text-ink">{g.t}</h3>
-                  <p className="text-xs text-body">{g.d}</p>
+                  <h3 className="text-base font-bold text-[#0c1f38] dark:text-white">{g.t}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{g.d}</p>
                 </div>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-ink dark:bg-navy-950/70">{g.items.length}</span>
+                <span className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 px-2.5 py-0.5 text-xs font-mono font-bold text-slate-700 dark:bg-slate-900 dark:text-slate-300">{g.items.length}</span>
               </div>
               <ul className={cn("mt-5 grid gap-3", g.cols)}>
                 {g.items.map((p) => <LogoTile key={p.name} p={p} />)}
@@ -668,10 +1083,10 @@ export function PartnerBorderGrid() {
         </div>
 
         {/* scrolling strip */}
-        <div className="marquee-mask mt-8 overflow-hidden" aria-hidden>
+        <div className="marquee-mask mt-10 overflow-hidden" aria-hidden>
           <div className="marquee-track flex w-max gap-10 py-2">
             {[...all, ...all].map((p, i) => (
-              <Image key={i} src={clean(p.logo)} alt="" width={120} height={40} className="h-7 w-auto object-contain opacity-50 grayscale" />
+              <Image key={i} src={clean(p.logo)} alt="" width={120} height={40} className="h-7 w-auto object-contain opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all" />
             ))}
           </div>
         </div>
@@ -687,28 +1102,28 @@ export function FaqGrid() {
   const [open, setOpen] = useState<string | null>(null);
   const cols = [items.filter((_, i) => i % 2 === 0), items.filter((_, i) => i % 2 === 1)];
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50/60 to-slate-100/40 dark:from-navy-950 dark:via-navy-900/30 dark:to-navy-950 py-16 sm:py-24">
+    <section className="py-16 sm:py-24 bg-[#f9f8fb] dark:bg-[#00162f] border-t border-slate-200 dark:border-slate-800">
       <Container>
-        <div className="flex items-center gap-4">
-          <span className="h-px flex-1 bg-line" />
-          <h2 className="text-center text-2xl font-bold tracking-tight text-ink sm:text-4xl">Frequently Asked Question</h2>
-          <span className="h-px flex-1 bg-line" />
-        </div>
-        <p className="mt-2 text-center text-sm text-body">Get answers to your questions about GPS tracking, devices and packages.</p>
-        <div className="mt-8 grid gap-3 lg:grid-cols-2">
+        <SectionHeader
+          badge="HELP CENTRE"
+          title="Frequently asked procurement & operational questions"
+          description="Direct answers regarding tender requirements, installation logistics, data privacy, warranty coverage, and BRTA compliance."
+          link={{ label: "SUPPORT DESK", href: "/faq" }}
+        />
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
           {cols.map((col, ci) => (
             <div key={ci} className="space-y-3">
               {col.map((f) => {
                 const on = open === f.id;
                 return (
-                  <div key={f.id} className="rounded-md bg-white ring-1 ring-line/50 dark:bg-navy-900/90 overflow-hidden transition-all">
-                    <button onClick={() => setOpen(on ? null : f.id)} aria-expanded={on} className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-semibold text-ink">
-                      {f.q}<ChevronDown className={cn("h-5 w-5 shrink-0 text-slate-400 transition-transform", on && "rotate-180")} />
+                  <div key={f.id} className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] overflow-hidden transition-all">
+                    <button onClick={() => setOpen(on ? null : f.id)} aria-expanded={on} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left text-sm font-bold text-slate-800 dark:text-slate-100">
+                      {f.q}<ChevronDown className={cn("h-4 w-4 shrink-0 text-slate-400 transition-transform", on && "rotate-180")} />
                     </button>
                     <AnimatePresence initial={false}>
                       {on && (
                         <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                          <p className="px-4 pb-4 text-sm leading-relaxed text-body">{f.a}</p>
+                          <p className="px-5 pb-5 text-xs sm:text-[13px] leading-relaxed text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 pt-3">{f.a}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>

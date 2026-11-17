@@ -16,7 +16,6 @@ export default function HomePage() {
   return (
     <>
       <HeroDark />
-      <StatsBand />
       <ProductWheel />
       <PlatformTour />
       <SoftwareBlock />
@@ -28,6 +27,7 @@ export default function HomePage() {
       <IndustriesSlider />
       <WhyChecklist />
       <InnovationGrid />
+      <StatsBand />
       <PartnerBorderGrid />
       <LatestNews />
       <FaqGrid />
