@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, GitCompare } from "lucide-react";
 import { toast } from "sonner";
@@ -58,7 +58,7 @@ export default function PlanCard({
               {plan.highlight}
             </span>
           )}
-          <Image
+          <ProductImage
             src={plan.image}
             alt={plan.siteTitle ?? plan.name}
             fill

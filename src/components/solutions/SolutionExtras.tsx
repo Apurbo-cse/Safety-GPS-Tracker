@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { solutionDetails } from "@/data/solutionDetails";
@@ -31,7 +31,7 @@ export default function SolutionExtras({ id }: { id: string }) {
               <div className="mt-4 flex items-center gap-4">
                 <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-surface/90 dark:bg-navy-950/70 p-1">
                   {plan.image ? (
-                    <Image
+                    <ProductImage
                       src={plan.image}
                       alt={plan.siteTitle ?? plan.name}
                       fill

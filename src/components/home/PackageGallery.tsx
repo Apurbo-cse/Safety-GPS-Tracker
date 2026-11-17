@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Container from "@/components/common/Container";
@@ -16,7 +16,7 @@ export default function PackageGallery() {
             <Link key={p.id} href="/pricing" className="group glass relative overflow-hidden rounded-md border border-line transition-all hover:-translate-y-0.5 hover:border-brand-400">
               {p.highlight && <span className="absolute left-2 top-2 z-10 rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold text-white md:text-xs">{p.highlight}</span>}
               <div className="relative aspect-square bg-white">
-                <Image quality={90} src={p.image!} alt={p.siteTitle!} fill sizes="(min-width:768px) 25vw, 50vw" className="object-contain p-3 transition-transform duration-500 group-hover:scale-105" />
+                <ProductImage quality={90} src={p.image!} alt={p.siteTitle!} fill sizes="(min-width:768px) 25vw, 50vw" className="object-contain p-3 transition-transform duration-500 group-hover:scale-105" />
               </div>
               <div className="p-3">
                 <p className="truncate text-sm font-bold text-ink">{p.siteTitle}</p>

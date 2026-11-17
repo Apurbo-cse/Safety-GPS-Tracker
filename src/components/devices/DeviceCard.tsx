@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { motion } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import DeviceVisual from "./DeviceVisual";
@@ -17,7 +17,7 @@ export default function DeviceCard({ device }: { device: Device }) {
     >
       {device.image ? (
         <div className="relative aspect-[858/600] w-full overflow-hidden bg-transparent">
-          <Image
+          <ProductImage
             src={device.image}
             alt={device.siteTitle ?? device.name}
             fill

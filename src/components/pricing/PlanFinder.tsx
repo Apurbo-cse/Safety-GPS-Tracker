@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Bike, Car, Check, HardHat, HelpCircle, RotateCcw, ShoppingCart, Truck, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -113,7 +113,7 @@ export default function PlanFinder() {
                   <div className="mt-2 grid gap-5 sm:grid-cols-[200px_1fr]">
                     <div className="relative aspect-[858/600] w-full overflow-hidden rounded-md bg-surface/50 dark:bg-navy-950/60 sm:min-w-[200px]">
                       {result.best.image && (
-                        <Image
+                        <ProductImage
                           quality={90}
                           src={result.best.image}
                           alt={result.best.siteTitle ?? result.best.name}
@@ -139,7 +139,7 @@ export default function PlanFinder() {
                       <div className="grid gap-2 sm:grid-cols-2">
                         {result.alts.map((a) => (
                           <button key={a.id} onClick={() => { dispatch(setCompare([result.best.id, a.id])); document.getElementById("compare")?.scrollIntoView({ behavior: "smooth" }); }} className="flex items-center gap-3 rounded-md bg-surface p-2.5 text-left transition-all hover:-translate-y-0.5 dark:bg-navy-950/70">
-                            <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded bg-transparent">{a.image && <Image quality={90} src={a.image} alt="" fill sizes="56px" className="object-contain" />}</span>
+                            <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded bg-transparent">{a.image && <ProductImage quality={90} src={a.image} alt="" fill sizes="56px" className="object-contain" />}</span>
                             <span className="min-w-0"><span className="block truncate text-sm font-semibold text-ink">{a.name}</span><span className="block text-xs text-body">{formatBDT(a.devicePrice)} + {formatBDT(a.monthlyCharge)}/mo · compare →</span></span>
                           </button>
                         ))}

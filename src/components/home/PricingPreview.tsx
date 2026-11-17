@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import Link from "next/link";
 import { animate } from "framer-motion";
 import { ArrowRight, Check, Minus, Plus, ShoppingCart } from "lucide-react";
@@ -75,7 +75,7 @@ export default function PricingPreview() {
                 {p.highlight && <span className="absolute left-2 top-2 z-10 max-w-[calc(100%-2.75rem)] truncate rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white">{p.highlight}</span>}
                 <span className={cn("absolute right-2 top-2 z-10 grid h-5 w-5 place-items-center rounded-full border transition-colors", on ? "border-brand-600 bg-brand-600 text-white" : "border-line-strong bg-surface")}>{on && <Check className="h-3 w-3" />}</span>
                 <span className="relative block h-24 overflow-hidden rounded-md bg-white">
-                  {p.image && <Image quality={90} src={p.image} alt="" fill sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 176px" className="object-contain p-1.5 transition-transform duration-300 group-hover:scale-105" />}
+                  {p.image && <ProductImage quality={90} src={p.image} alt="" fill sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 176px" className="object-contain p-1.5 transition-transform duration-300 group-hover:scale-105" />}
                 </span>
                 <span className="mt-2.5 block truncate text-sm font-bold text-ink">{p.name}</span>
                 <span className="mt-1 flex items-baseline gap-1">
@@ -94,7 +94,7 @@ export default function PricingPreview() {
 
             <div className="mt-4 flex gap-4">
               <span className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md border border-line bg-white sm:h-24 sm:w-32">
-                {plan.image && <Image quality={90} src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="128px" className="object-contain p-1.5" />}
+                {plan.image && <ProductImage quality={90} src={plan.image} alt={plan.siteTitle ?? plan.name} fill sizes="128px" className="object-contain p-1.5" />}
               </span>
               <div className="min-w-0">
                 <h3 className="text-lg font-bold text-ink">{plan.name}</h3>

@@ -1,6 +1,6 @@
 "use client";
 import RichText from "@/components/common/RichText";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/common/Modal";
@@ -39,7 +39,7 @@ export default function PlanFeaturesModal() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative aspect-[858/600] w-full shrink-0 overflow-hidden rounded-md bg-surface/50 dark:bg-navy-950/60 sm:w-44">
               {plan.image && (
-                <Image
+                <ProductImage
                   quality={90}
                   src={plan.image}
                   alt={plan.siteTitle ?? plan.name}

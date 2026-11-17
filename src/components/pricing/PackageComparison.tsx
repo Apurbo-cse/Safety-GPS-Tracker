@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import ProductImage from "@/components/common/ProductImage";
 import { ArrowLeftRight, BadgeDollarSign, Check, ChevronDown, Layers, Minus, Pin, ShoppingCart, Trophy, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
@@ -106,7 +106,7 @@ export default function PackageComparison() {
               const on = ids.includes(p.id); return (
                 <button key={p.id} onClick={() => toggle(p.id)} aria-pressed={on}
                   className={cn("flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-xs font-semibold transition-colors", on ? "border-brand-600 bg-brand-50 text-brand-text" : "border-transparent bg-softer/80 dark:bg-navy-900/90 text-body hover:text-ink")}>
-                  <span className="relative h-6 w-8 overflow-hidden rounded-full bg-transparent">{p.image && <Image quality={90} src={p.image} alt="" fill sizes="32px" className="object-contain" />}</span>
+                  <span className="relative h-6 w-8 overflow-hidden rounded-full bg-transparent">{p.image && <ProductImage quality={90} src={p.image} alt="" fill sizes="32px" className="object-contain" />}</span>
                   {p.name}{on && <Check className="h-3.5 w-3.5" />}
                 </button>
               );
@@ -141,7 +141,7 @@ export default function PackageComparison() {
                       <div className="relative">
                         <button onClick={() => setPinned(pinned === p.id ? null : p.id)} aria-label={pinned === p.id ? `Unpin ${p.name}` : `Pin ${p.name}`} aria-pressed={pinned === p.id} className={cn("absolute -left-1 -top-1 grid h-6 w-6 place-items-center rounded-full hover:bg-softer", pinned === p.id ? "text-brand-text" : "text-slate-400")}><Pin className="h-3.5 w-3.5" /></button>
                         {cols.length > 2 && <button onClick={() => toggle(p.id)} aria-label={`Remove ${p.name}`} className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-softer hover:text-ink"><X className="h-3.5 w-3.5" /></button>}
-                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-transparent">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
+                        <span className="relative mx-auto block h-14 w-20 overflow-hidden rounded-md bg-transparent">{p.image && <ProductImage quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="80px" className="object-contain" />}</span>
                         <span className="mt-1.5 block text-sm font-bold leading-tight text-ink">{p.name}</span>
                         {p.siteTitle && <span className="block text-xs font-normal text-body">{p.siteTitle}</span>}
                         <button onClick={() => buy(p)} className="gloss-btn mt-2 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white"><ShoppingCart className="h-3.5 w-3.5" />Buy Now</button>
@@ -209,7 +209,7 @@ export default function PackageComparison() {
               const other = p.id === a.id ? b : a;
               return (
                 <div key={p.id + (p === a ? "a" : "b")} className="rounded-md bg-softer/80 dark:bg-navy-900/90 p-3">
-                  <span className="relative block h-20 overflow-hidden rounded-md bg-transparent">{p.image && <Image quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
+                  <span className="relative block h-20 overflow-hidden rounded-md bg-transparent">{p.image && <ProductImage quality={90} src={p.image} alt={p.siteTitle ?? p.name} fill sizes="45vw" className="object-contain p-1" />}</span>
                   <p className="mt-2 text-sm font-bold leading-tight text-ink">{p.name}</p>
                   <dl className="mt-2 space-y-1 text-xs">
                     <div className="flex justify-between gap-1"><dt className="text-body">Device</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(p.devicePrice)}{p.devicePrice < other.devicePrice && <Best />}</dd></div>

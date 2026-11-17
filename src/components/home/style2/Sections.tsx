@@ -148,7 +148,7 @@ export function ProductStrip() {
             <Link key={p.id} href="/pricing" className="group relative w-44 shrink-0 rounded-md border border-line bg-surface p-3 transition-shadow hover:shadow-md sm:w-auto">
               {p.highlight && <span className="absolute left-2 top-2 z-10 max-w-[80%] truncate rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{p.highlight}</span>}
               <span className="relative block h-28 overflow-hidden rounded bg-transparent">
-                {p.image && <Image src={p.image} alt="" fill sizes="(min-width:1024px) 25vw, 176px" className="object-contain p-2 transition-transform duration-300 group-hover:scale-105" />}
+                {p.image && <ProductImage src={p.image} alt="" fill sizes="(min-width:1024px) 25vw, 176px" className="object-contain p-2 transition-transform duration-300 group-hover:scale-105" />}
               </span>
               <p className="mt-3 truncate text-sm font-semibold text-ink">{p.name}</p>
               <p className="text-xs text-body">{formatBDT(p.devicePrice)} + {formatBDT(p.monthlyCharge)}/mo</p>
