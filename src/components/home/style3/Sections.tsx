@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import {
-  ArrowRight, Award, BarChart3, Bell, Bike, CalendarCheck, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Fence, FileText, Fuel, Globe,
+  ArrowRight, Award, BarChart3, Bell, Bike, CalendarCheck, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Fence, Fuel, Globe,
   Lock, Mail, MapPin, Navigation, Phone, Route, ShieldCheck, Smartphone, Truck, Car, User, Wrench, type LucideIcon,
 } from "lucide-react";
 import Container from "@/components/common/Container";
@@ -220,74 +220,59 @@ export function SectionHeader({
   );
 }
 
-/* ================================================================ NovasBD Section 1: Capability Snapshot */
+/* ================================================================ Capability snapshot (about + live numbers) */
 export function CapabilitySnapshot() {
+  const { plans, devices } = useCatalog();
+  const tiles = [
+    { v: "10s", l: "Live location refresh" },
+    { v: "64", l: "Districts we install in" },
+    { v: "24/7", l: "Helpline" },
+  ];
+  const metrics = [
+    { v: plans.length, l: "Tracking packages" },
+    { v: `${devices.length}+`, l: "Devices & accessories" },
+    { v: "3", l: "Android, iOS & Web apps" },
+    { v: "1-tap", l: "Remote engine lock" },
+  ];
   return (
-    <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
+    <section className="bg-white py-12 dark:bg-[#00122b] sm:py-16">
       <Container>
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          <div className="lg:col-span-7 space-y-4">
+        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="space-y-4 lg:col-span-7">
             <span className="inline-flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
-              <span className="w-5 h-[2px] bg-brand-500" /> Established 2018
+              <span className="h-[2px] w-5 bg-brand-500" /> About Safety GPS Tracker
             </span>
-            <h2 className="text-xl sm:text-3xl font-extrabold text-[#0c1f38] dark:text-white tracking-tight leading-snug">
-              Precision Telematics &amp; Fleet Security
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Safety GPS Tracker is Bangladesh&apos;s leading vehicle telematics and anti-theft security platform. We provide certified GPS tracking hardware, live software platforms, and 24/7 human emergency assistance across all 64 districts.
+            <h2 className="text-xl font-extrabold leading-snug tracking-tight text-[#0c1f38] dark:text-white sm:text-3xl">Real-time vehicle tracking &amp; fleet security</h2>
+            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">
+              We supply GPS tracking devices, a live web and mobile platform, and a 24/7 helpline for cars, motorcycles and fleets across Bangladesh — installed at your doorstep.
             </p>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Our core mission is protecting vehicle owners from theft, cutting fleet operational waste, and automating BRTA compliance with ultrasonic fuel monitoring, 10-second updates, and remote engine shut-off.
+            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">
+              See where a vehicle is every 10 seconds, get speed and geofence alerts, review route history and stop the engine remotely if it is stolen.
             </p>
-
-            <div className="grid sm:grid-cols-3 gap-3 pt-2">
-              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
-                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">2018</p>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Founded in Dhaka</p>
-              </div>
-              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
-                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">64</p>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Districts Installed</p>
-              </div>
-              <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#00224f] p-3">
-                <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">BRTA / BTRC</p>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Approved Hardware</p>
-              </div>
+            <div className="grid gap-3 pt-2 sm:grid-cols-3">
+              {tiles.map((t) => (
+                <div key={t.l} className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#00224f]">
+                  <p className="text-lg font-extrabold text-[#0c1f38] dark:text-white">{t.v}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">{t.l}</p>
+                </div>
+              ))}
             </div>
-
-            <Link
-              href="/about"
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 hover:text-brand-700 dark:text-brand-400 pt-2"
-            >
-              Read full company story <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <Link href="/about" className="inline-flex items-center gap-2 pt-2 text-xs font-bold uppercase tracking-wider text-brand-600 hover:text-brand-700 dark:text-brand-400">Read about us <ArrowRight className="h-3.5 w-3.5" /></Link>
           </div>
 
           <div className="lg:col-span-5">
-            <div className="rounded-md border border-white/10 bg-gradient-to-br from-[#0c1f38] to-[#071322] p-5 sm:p-6 text-white">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-400">
-                  Capability snapshot
-                </span>
-                <span className="text-[10px] text-slate-300">Live Telematics</span>
+            <div className="rounded-md border border-white/10 bg-gradient-to-br from-[#0c1f38] to-[#071322] p-5 text-white sm:p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-400">At a glance</span>
+                <span className="text-[10px] text-slate-300">Safety GPS Tracker</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
-                  <div className="text-2xl sm:text-3xl font-extrabold">50,000+</div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Active Vehicles</div>
-                </div>
-                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
-                  <div className="text-2xl sm:text-3xl font-extrabold">10s</div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Refresh Latency</div>
-                </div>
-                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
-                  <div className="text-2xl sm:text-3xl font-extrabold">99.8%</div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Recovery Rate</div>
-                </div>
-                <div className="rounded-md border border-white/15 bg-white/10 p-4 hover:border-brand-500/80 transition-colors">
-                  <div className="text-2xl sm:text-3xl font-extrabold">24/7</div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">Human Helpline</div>
-                </div>
+                {metrics.map((m) => (
+                  <div key={m.l} className="rounded-md border border-white/15 bg-white/10 p-4 transition-colors hover:border-brand-500/80">
+                    <div className="text-2xl font-extrabold sm:text-3xl">{m.v}</div>
+                    <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-200">{m.l}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -302,27 +287,27 @@ export function FundamentalCommitments() {
   const COMMITMENTS = [
     {
       icon: ShieldCheck,
-      code: "BEST RECOVERY",
-      title: "99.8% Vehicle Recovery",
-      desc: "Instant remote engine shut-off and direct coordination with law enforcement to locate and recover stolen vehicles nationwide.",
+      code: "ENGINE LOCK",
+      title: "Remote Engine Lock",
+      desc: "Stop a stolen vehicle from the app or by calling the helpline, and see where it is while you wait.",
     },
     {
       icon: Navigation,
-      code: "BEST ACCURACY",
+      code: "LIVE TRACKING",
       title: "10-Second Live Sync",
-      desc: "Dual-band GPS and BDS satellite positioning delivering true live vehicle movement, speed violations, and route playback.",
+      desc: "Live vehicle movement every 10 seconds, with speed alerts and route history playback.",
     },
     {
       icon: Wrench,
-      code: "BEST INSTALLATION",
+      code: "INSTALLATION",
       title: "64 Districts Doorstep Fit",
-      desc: "Our verified certified electrical technicians travel to your doorstep, garage, or fleet depot anywhere in Bangladesh.",
+      desc: "Our technicians fit the device at your doorstep, garage or fleet depot.",
     },
     {
       icon: Phone,
-      code: "BEST SUPPORT",
-      title: "24/7 Human Helpline",
-      desc: "Round-the-clock emergency assistance, instant immobilizer execution, and billing support available 365 days a year.",
+      code: "SUPPORT",
+      title: "24/7 Helpline",
+      desc: "Call any time for emergencies, engine lock and billing help.",
     },
   ];
 
@@ -332,7 +317,7 @@ export function FundamentalCommitments() {
         <SectionHeader
           badge="Commitments"
           title="Four fundamental commitments"
-          description="What sets Safety GPS Tracker apart in precision tracking, anti-theft defense, and fleet peace of mind."
+          description="What you can rely on when you track a vehicle with Safety GPS Tracker."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {COMMITMENTS.map((c) => (
@@ -361,15 +346,15 @@ export function FundamentalCommitments() {
 }
 
 /* ================================================================ NovasBD Section 3: Where We Deliver (Sectors) */
-export function SectorsDeliver() {
+export function SectorsDeliver({ showLink = true }: { showLink?: boolean }) {
   return (
     <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
       <Container>
         <SectionHeader
           badge="Sectors"
           title="Where we deliver"
-          description="Certified tracking systems and remote control engineering across six strategic transportation sectors."
-          link={{ label: "All solutions", href: "/solutions" }}
+          description="Tracking for the vehicles and fleets people in Bangladesh actually run."
+          link={showLink ? { label: "All solutions", href: "/solutions" } : undefined}
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {solutions.map((s) => (
@@ -425,62 +410,21 @@ export function SectorsDeliver() {
 /* ================================================================ NovasBD Section 4: Hardware Catalogue */
 export function HardwareCatalogueSection() {
   const { devices } = useCatalog();
-  const featured = devices.slice(0, 4);
+  // featured = the first four with a published price (those can be bought straight away)
+  const featured = [...devices.filter((d) => d.price), ...devices.filter((d) => !d.price)].slice(0, 4);
+  if (!featured.length) return null;
 
   return (
-    <section className="py-12 sm:py-16 bg-[#f9f8fb] dark:bg-[#00162f]">
+    <section className="bg-surface py-12 sm:py-16">
       <Container>
         <SectionHeader
           badge="Hardware catalogue"
-          title="Featured tracking equipment"
-          description="High-precision GPS trackers, ultrasonic fuel sensors, and remote immobilizer relays."
-          link={{ label: "View full directory", href: "/products" }}
+          title="Featured tracking devices"
+          description="GPS trackers, voice and video monitoring devices and engine-lock relays."
+          link={{ label: "View all products", href: "/products" }}
         />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {featured.map((d) => (
-            <div
-              key={d.id}
-              className="group rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#00224f] overflow-hidden hover:border-brand-500 transition-all flex flex-col"
-            >
-              <div className="relative aspect-[4/3] bg-slate-50 dark:bg-navy-950/40 p-4 flex items-center justify-center">
-                {d.image && (
-                  <ProductImage
-                    src={d.image}
-                    alt={d.name}
-                    width={240}
-                    height={180}
-                    className="object-contain max-h-36 group-hover:scale-105 transition-transform"
-                  />
-                )}
-                <span className="absolute top-2.5 left-2.5 rounded bg-brand-500/15 border border-brand-500/30 px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
-                  {d.category || "GPS Hardware"}
-                </span>
-              </div>
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="text-sm font-bold text-[#0c1f38] dark:text-white line-clamp-1">
-                  {d.name}
-                </h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {d.summary || "10s live satellite tracking, remote engine immobilizer, and instant anti-theft notifications."}
-                </p>
-                <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-100 dark:border-white/5">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Device Price</span>
-                    <span className="text-sm font-extrabold text-[#0c1f38] dark:text-white">
-                      {d.price ? formatBDT(d.price) : "Contact Sales"}
-                    </span>
-                  </div>
-                  <Link
-                    href={`/products/${d.id}`}
-                    className="inline-flex items-center gap-1 rounded bg-[#0c1f38] hover:bg-brand-500 text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
-                  >
-                    <span>Specs</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {featured.map((d) => <DeviceTile key={d.id} d={d} />)}
         </div>
       </Container>
     </section>
@@ -498,7 +442,7 @@ export function BlueprintSection() {
     {
       num: "02",
       title: "Doorstep Fitting",
-      desc: "Certified electrical technicians concealed-fit and test the immobilizer relay at your doorstep across 64 districts.",
+      desc: "Our technicians concealed-fit and test the immobilizer relay at your doorstep across 64 districts.",
     },
     {
       num: "03",
@@ -527,7 +471,7 @@ export function BlueprintSection() {
               From order to 24/7 sustained protection
             </h2>
             <p className="mt-2 text-xs sm:text-[13px] text-slate-300 leading-relaxed">
-              Our proven 4-stage operational process ensures seamless device installation and permanent vehicle security.
+              From choosing a package to a tracker that is installed, switched on and watched.
             </p>
           </div>
         </div>
@@ -549,39 +493,19 @@ export function BlueprintSection() {
 /* ================================================================ NovasBD Section 6: Quality & Certifications */
 export function CertificationsSection() {
   const CERTS = [
-    {
-      title: "BRTA & BTRC Compliant",
-      subtitle: "Government Approved",
-      desc: "Fully compliant with Bangladesh Road Transport Authority standards and BTRC radio frequency spectrum regulations.",
-      icon: ShieldCheck,
-    },
-    {
-      title: "ISO 9001:2015 Certified",
-      subtitle: "Quality Management",
-      desc: "Strict quality control on wiring harnesses, concealed placement, and high-temp battery safety verification.",
-      icon: CheckCircle2,
-    },
-    {
-      title: "IP67 / IP68 Rated",
-      subtitle: "Waterproof Hardware",
-      desc: "Rugged waterproof enclosure engineered for heavy monsoon rains, flood road wash, and engine-bay vibrations.",
-      icon: Award,
-    },
-    {
-      title: "64 Districts Network",
-      subtitle: "Doorstep Support",
-      desc: "Dedicated roaming technical staff and 24/7 central emergency monitoring helpline across all 64 administrative districts.",
-      icon: MapPin,
-    },
+    { title: "BTRC Approved Hardware", subtitle: "Approvals", desc: "Tracking hardware that carries BTRC approval for use on Bangladesh mobile networks.", icon: ShieldCheck },
+    { title: "BRTA Document Alerts", subtitle: "Compliance", desc: "Reminders before registration, fitness and tax-token documents expire.", icon: CheckCircle2 },
+    { title: "Android, iOS & Web", subtitle: "Apps", desc: "Track and lock from your phone or the web console with the same account.", icon: Award },
+    { title: "64 Districts Network", subtitle: "Coverage", desc: "Doorstep installation and a 24/7 helpline for vehicles anywhere in Bangladesh.", icon: MapPin },
   ];
 
   return (
     <section className="py-12 sm:py-16 bg-white dark:bg-[#00122b]">
       <Container>
         <SectionHeader
-          badge="Quality & standards"
-          title="Certified telematics & vehicle security"
-          description="Built to national standards and trusted by leading logistics, corporate, and private vehicle owners."
+          badge="Approvals & coverage"
+          title="Approved hardware, nationwide support"
+          description="What backs every tracker we install."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {CERTS.map((c) => (
@@ -613,10 +537,25 @@ export function CertificationsSection() {
   );
 }
 
+/* ================================================================ Solutions served (chips) */
+export function SolutionChips() {
+  return (
+    <section className="border-t border-slate-200 bg-white py-8 dark:border-slate-800 dark:bg-[#00122b]">
+      <Container className="flex flex-wrap items-center gap-2.5">
+        <span className="mr-2 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Vehicles we track</span>
+        {solutions.map((x) => (
+          <Link key={x.id} href={`/solutions#${x.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-500 hover:text-brand-600 dark:border-slate-700 dark:bg-[#00224f] dark:text-slate-200 dark:hover:text-brand-300">
+            <DynIcon name={x.icon} className="h-3.5 w-3.5 text-brand-500" />{x.title}
+          </Link>
+        ))}
+      </Container>
+    </section>
+  );
+}
+
 /* ================================================================ NovasBD Section 7: Direct Procurement Closing CTA */
 export function TenderCtaSection() {
   const site = useSite();
-  const dispatch = useAppDispatch();
 
   return (
     <section className="py-12 sm:py-16 bg-[#f9f8fb] dark:bg-[#00162f]">
@@ -643,14 +582,6 @@ export function TenderCtaSection() {
               <Phone className="h-3.5 w-3.5" />
               <span>Call Helpline ({site.phone})</span>
             </a>
-            <button
-              type="button"
-              onClick={() => dispatch(openDemoModal("Home Novas tender request"))}
-              className="inline-flex items-center gap-2 border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-[#0c1f38] dark:text-white px-5 py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span>Request Quote</span>
-            </button>
           </div>
         </div>
       </Container>
@@ -1041,53 +972,77 @@ export function WhyChecklist() {
 }
 
 /* ========================================================== 8. partners */
-function LogoTile({ p }: { p: { name: string; logo: string } }) {
+type Partner = { name: string; logo: string; kind: "network" | "hardware" };
+const PARTNERS: Partner[] = [
+  ...TELECOM_PARTNER_LOGOS.map((p) => ({ ...p, kind: "network" as const })),
+  ...DEVICE_PARTNER_LOGOS.map((p) => ({ ...p, kind: "hardware" as const })),
+];
+const PARTNER_TABS = [
+  { id: "all", label: "All partners" },
+  { id: "network", label: "Mobile networks" },
+  { id: "hardware", label: "GPS hardware" },
+] as const;
+
+/** One logo cell of the partner wall: hairline borders shared with its neighbours, colour on hover. */
+function LogoCell({ p }: { p: Partner }) {
   return (
-    <li title={p.name} className="group grid h-20 place-items-center rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 px-4 transition-all hover:border-brand-500 dark:bg-[#001838]">
-      <Image src={clean(p.logo)} alt={p.name} width={140} height={50} className="h-auto max-h-9 w-auto max-w-full object-contain opacity-70 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0" />
-    </li>
+    <motion.li layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+      className="group relative flex h-28 flex-col items-center justify-center gap-2 bg-white px-4 transition-colors hover:bg-brand-500/[0.04] dark:bg-[#00224f] dark:hover:bg-brand-500/10 sm:h-32">
+      <Image src={clean(p.logo)} alt={p.name} width={140} height={50} className="h-auto max-h-9 w-auto max-w-[80%] object-contain transition-transform duration-300 group-hover:scale-110" />
+      <span className="text-[11px] font-semibold text-slate-500 transition-colors group-hover:text-ink dark:text-slate-400 dark:group-hover:text-white">{p.name}</span>
+      <span className={cn("absolute right-2 top-2 rounded px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider", p.kind === "network" ? "bg-sky-500/10 text-sky-600 dark:text-sky-300" : "bg-brand-500/10 text-brand-600 dark:text-brand-300")}>{p.kind === "network" ? "Network" : "GPS"}</span>
+      <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-brand-500 transition-transform duration-300 group-hover:scale-x-100" />
+    </motion.li>
   );
 }
 
+/** Partners: a summary card on the left, and a filterable logo wall on the right. */
 export function PartnerBorderGrid() {
-  const all = [...DEVICE_PARTNER_LOGOS, ...TELECOM_PARTNER_LOGOS];
-  const groups = [
-    { icon: Smartphone, t: "Device manufacturers", d: "Certified tracking hardware we install and support.", items: DEVICE_PARTNER_LOGOS, cols: "grid-cols-2 sm:grid-cols-3" },
-    { icon: Globe, t: "Network partners", d: "Mobile networks that carry your vehicle's data.", items: TELECOM_PARTNER_LOGOS, cols: "grid-cols-2" },
-  ];
+  const [tab, setTab] = useState<(typeof PARTNER_TABS)[number]["id"]>("all");
+  const shown = PARTNERS.filter((p) => tab === "all" || p.kind === tab);
+  const networks = TELECOM_PARTNER_LOGOS.length;
+  const hardware = DEVICE_PARTNER_LOGOS.length;
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-[#00122b] py-16 sm:py-24 border-t border-slate-200 dark:border-slate-800">
+    <section className="relative overflow-hidden border-t border-slate-200 bg-[#f9f8fb] py-14 dark:border-slate-800 dark:bg-[#00162f] sm:py-20">
       <Container className="relative z-10">
         <SectionHeader
-          badge="INFRASTRUCTURE"
+          badge="Partners"
           title="National telecom & global GPS partners"
-          description="Direct data routing via Tier-1 Bangladesh telco APNs paired with European-certified telematics hardware manufacturers."
+          description="Mobile networks that carry your vehicle's data, and the tracker brands we install and support."
         />
 
-        <div className="mt-8 grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-          {groups.map((g) => (
-            <div key={g.t} className="rounded-md border border-slate-200 dark:border-slate-800 bg-white p-5 dark:bg-[#00224f] sm:p-6">
-              <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400"><g.icon className="h-5 w-5" /></span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-bold text-[#0c1f38] dark:text-white">{g.t}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{g.d}</p>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="relative isolate overflow-hidden rounded-md bg-gradient-to-br from-[#0c1f38] to-[#071322] p-6 text-white lg:col-span-4 lg:p-7">
+            <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-25" />
+            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 -z-10 h-48 w-48 rounded-full bg-brand-500/25 blur-3xl" />
+            <p className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-400">Connected network</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {[{ n: networks, l: "Mobile networks", i: Globe }, { n: hardware, l: "Tracker brands", i: Smartphone }].map((x) => (
+                <div key={x.l} className="rounded-md border border-white/15 bg-white/10 p-4">
+                  <x.i className="h-4 w-4 text-brand-400" />
+                  <p className="mt-2 text-3xl font-extrabold tabular-nums">{x.n}</p>
+                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-300">{x.l}</p>
                 </div>
-                <span className="rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 px-2.5 py-0.5 text-xs font-mono font-bold text-slate-700 dark:bg-slate-900 dark:text-slate-300">{g.items.length}</span>
-              </div>
-              <ul className={cn("mt-5 grid gap-3", g.cols)}>
-                {g.items.map((p) => <LogoTile key={p.name} p={p} />)}
-              </ul>
+              ))}
             </div>
-          ))}
-        </div>
+            <ul className="mt-5 space-y-2.5 text-xs leading-relaxed text-slate-200">
+              {["Local SIM data on Grameenphone, Banglalink, Robi and more", "Hardware from brands we install and support ourselves", "One number to call for the device, the SIM and the app"].map((t) => (
+                <li key={t} className="flex gap-2"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />{t}</li>
+              ))}
+            </ul>
+            <Link href="/features" className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-400 hover:text-brand-300">How it works <ArrowRight className="h-3.5 w-3.5" /></Link>
+          </div>
 
-        {/* scrolling strip */}
-        <div className="marquee-mask mt-10 overflow-hidden" aria-hidden>
-          <div className="marquee-track flex w-max gap-10 py-2">
-            {[...all, ...all].map((p, i) => (
-              <Image key={i} src={clean(p.logo)} alt="" width={120} height={40} className="h-7 w-auto object-contain opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all" />
-            ))}
+          <div className="lg:col-span-8">
+            <div role="tablist" aria-label="Partner type" className="mb-4 inline-flex rounded-md bg-white p-1 ring-1 ring-slate-200 dark:bg-[#00224f] dark:ring-slate-800">
+              {PARTNER_TABS.map((t) => (
+                <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
+                  className={cn("rounded px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors", tab === t.id ? "bg-[#0c1f38] text-white dark:bg-brand-500" : "text-slate-500 hover:text-ink dark:text-slate-400 dark:hover:text-white")}>{t.label}</button>
+              ))}
+            </div>
+            <motion.ul layout className="grid grid-cols-2 gap-px overflow-hidden rounded-md bg-slate-200 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-800 sm:grid-cols-3 lg:grid-cols-4">
+              <AnimatePresence mode="popLayout" initial={false}>{shown.map((p) => <LogoCell key={p.name} p={p} />)}</AnimatePresence>
+            </motion.ul>
           </div>
         </div>
       </Container>

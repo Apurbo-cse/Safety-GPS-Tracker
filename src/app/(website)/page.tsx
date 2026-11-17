@@ -1,7 +1,8 @@
 import {
-  AppBlock, CategoryGrid, DeviceCatalogue, OtherProducts, FaqGrid, HeroDark, PartnerBorderGrid, ProductWheel, SoftwareBlock, WhyChecklist, InnovationGrid,
+  AppBlock, BlueprintSection, CapabilitySnapshot, CategoryGrid, CertificationsSection, DeviceCatalogue, FaqGrid, FundamentalCommitments, HardwareCatalogueSection,
+  HeroDark, InnovationGrid, OtherProducts, PartnerBorderGrid, ProductWheel, SectorsDeliver, SoftwareBlock, SolutionChips, TenderCtaSection, WhyChecklist,
 } from "@/components/home/style3/Sections";
-import { CtaBand, HowItWorksStepper, IndustriesSlider, PlatformTour, StatsBand } from "@/components/home/style3/More";
+import { HowItWorksStepper, IndustriesSlider, PlatformTour, StatsBand } from "@/components/home/style3/More";
 import LatestNews from "@/components/home/LatestNews";
 import { pageMeta } from "@/lib/metadata";
 
@@ -17,21 +18,28 @@ export default function HomePage() {
     <>
       <HeroDark />
       <ProductWheel />
+      <StatsBand />
+      <CapabilitySnapshot />
+      <FundamentalCommitments />
+      <SectorsDeliver />
       <PlatformTour />
       <SoftwareBlock />
       <AppBlock />
       <CategoryGrid />
+      <HardwareCatalogueSection />
       <DeviceCatalogue />
       <OtherProducts />
       <HowItWorksStepper />
+      <BlueprintSection />
       <IndustriesSlider />
       <WhyChecklist />
+      <CertificationsSection />
       <InnovationGrid />
-      <StatsBand />
       <PartnerBorderGrid />
       <LatestNews />
       <FaqGrid />
-      <CtaBand />
+      <TenderCtaSection />
+      <SolutionChips />
     </>
   );
 }

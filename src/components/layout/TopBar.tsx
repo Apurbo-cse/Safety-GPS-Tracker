@@ -1,29 +1,21 @@
 "use client";
-import { Mail, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { useSite } from "@/components/providers/SiteProvider";
 import Container from "@/components/common/Container";
 
 export default function TopBar() {
   const site = useSite();
-  const items = [
-    { label: "Corporate Sales", value: site.phone },
-    { label: "Sales", value: site.phone },
-    { label: "Support", value: site.phone },
-  ];
   return (
-    <div className="hidden bg-navy-950 text-xs text-slate-300 md:block">
-      <Container className="flex h-9 items-center justify-between">
-        <div className="flex items-center gap-5">
-          {items.map((i) => (
-            <a key={i.label} href={`tel:${i.value}`} className="flex items-center gap-1.5 hover:text-white">
-              <Phone className="h-3 w-3 text-brand-400" />
-              <span className="text-slate-400">{i.label}:</span> {i.value}
-            </a>
-          ))}
+    <div className="hidden bg-navy-950 text-[11px] font-medium uppercase tracking-wide text-slate-300 md:block">
+      <Container className="flex h-9 items-center justify-between gap-6">
+        <div className="flex min-w-0 items-center gap-5">
+          <span className="flex shrink-0 items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-brand-400" />BTRC approved hardware</span>
+          <span className="flex min-w-0 items-center gap-1.5"><MapPin className="h-3 w-3 shrink-0 text-brand-400" /><span className="truncate">Head office: {site.address}</span></span>
         </div>
-        <a href={`mailto:${site.email}`} className="flex items-center gap-1.5 hover:text-white">
-          <Mail className="h-3 w-3 text-brand-400" /> {site.email}
-        </a>
+        <div className="flex shrink-0 items-center gap-5">
+          <a href={`tel:${site.phone}`} className="flex items-center gap-1.5 hover:text-white"><Phone className="h-3 w-3 text-brand-400" />24/7 helpline: {site.phone}</a>
+          <a href={`mailto:${site.email}`} className="flex items-center gap-1.5 normal-case hover:text-white"><Mail className="h-3 w-3 text-brand-400" />{site.email}</a>
+        </div>
       </Container>
     </div>
   );

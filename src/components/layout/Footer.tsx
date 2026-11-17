@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUp, Mail, MapPin, Phone, ShieldCheck, ChevronRight } from "lucide-react";
+import { ArrowUp, Clock, Mail, MapPin, Phone, ShieldCheck, ChevronRight } from "lucide-react";
 import Logo from "@/components/common/Logo";
 import Container from "@/components/common/Container";
 import { AppleAppStoreBadge, GooglePlayStoreBadge } from "@/components/common/AppStoreBadges";
@@ -92,6 +92,12 @@ export default function Footer() {
               </span>
               <span className="leading-snug">{site.address}</span>
             </div>
+            {site.hours && (
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/10 text-emerald-400"><Clock className="h-4 w-4" /></span>
+                <span className="leading-snug">{site.hours}</span>
+              </div>
+            )}
           </div>
         </div>
 

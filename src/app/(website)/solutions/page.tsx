@@ -2,6 +2,7 @@ import PageHero from "@/components/common/PageHero";
 import IndustryNav from "@/components/solutions/IndustryNav";
 import SolutionSection from "@/components/home/SolutionSection";
 import SolutionMatrix from "@/components/solutions/SolutionMatrix";
+import { SectorsDeliver } from "@/components/home/style3/Sections";
 import ContactCta from "@/components/home/ContactCta";
 import { solutions } from "@/data/solutions";
 import { pageMeta } from "@/lib/metadata";
@@ -23,6 +24,7 @@ export default function SolutionsPage() {
         titleHighlight="Every Industry Sector"
         description="From private personal cars and motorcycles to freight logistics, public transport, CNGs, and heavy equipment — discover specialized telematics for your operational needs."
       />
+      <SectorsDeliver showLink={false} />
       <IndustryNav />
       {solutions.map((s, i) => (
         <SolutionSection key={s.id} s={s} index={i} />
