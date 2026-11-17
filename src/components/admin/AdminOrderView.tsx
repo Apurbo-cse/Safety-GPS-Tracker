@@ -1,4 +1,5 @@
 "use client";
+import { AdminDetailSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ import { mediaUrl, type AdminOrder, type Area, type OrderStatus } from "@/lib/ap
 import { errorMessage, useAdminOrderQuery, useSetOrderStatusMutation, useRefundBkashMutation, useUpdateOrderMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
 import ReturnItemsModal from "./ReturnItemsModal";
-import { CARD, ErrorState, PageHeader, Skeleton, StatusBadge, STATUS, STATUS_ORDER, fmtDate, fmtDateTime, view } from "./ui";
+import { CARD, ErrorState, PageHeader, StatusBadge, STATUS, STATUS_ORDER, fmtDate, fmtDateTime, view } from "./ui";
 
 const AREA_OPTIONS = [["DNCC", "Inside Dhaka · DNCC (Dhaka North)"], ["DSCC", "Inside Dhaka · DSCC (Dhaka South)"], ["Outside Dhaka", "Outside Dhaka"]] as const;
 
@@ -91,7 +92,7 @@ export default function AdminOrderView({ id }: { id: string }) {
     <>
       <PageHeader title={`Order ${id}`} subtitle="Everything about this order." actions={o && canManage && <button onClick={() => setEditing(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Pencil className="h-4 w-4" />Edit details</button>} />
       <Link href="/admin/orders" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline"><ArrowLeft className="h-4 w-4" />All orders</Link>
-      {error ? <ErrorState message={error} onRetry={reload} /> : !o ? <Skeleton rows={4} /> : (
+      {error ? <ErrorState message={error} onRetry={reload} /> : !o ? <AdminDetailSkeleton stats={false} /> : (
         <div className={`${CARD} p-1`}>
     <div className="grid gap-5 p-5 md:grid-cols-2">
       <div>

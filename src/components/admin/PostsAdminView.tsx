@@ -1,4 +1,5 @@
 "use client";
+import { AdminTableSkeleton, AdminRowsSkeleton } from "@/components/common/Skeletons";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ImagePlus, Newspaper, Pencil, Plus, Search, Trash2, X } from "lucide-react";
@@ -11,7 +12,7 @@ import { cn, slug } from "@/utils/format";
 import RichEditor, { tokensIn } from "./RichEditor";
 import { prepareImage } from "./ImageManager";
 import { useUploadCleanup } from "./useUploadCleanup";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, fmtDate, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, fmtDate, view } from "./ui";
 
 const LIMIT = 12;
 
@@ -57,7 +58,7 @@ export default function PostsAdminView() {
         </select>
       </div>
 
-      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <Skeleton rows={4} /> : list.data.items.length === 0 ? (
+      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <AdminTableSkeleton tabs={false} thumbs rows={6} /> : list.data.items.length === 0 ? (
         <div className={CARD}><EmptyState icon={Newspaper} title="No posts yet" text="Use “New post” to write the first one." /></div>
       ) : (
         <ul className={cn("space-y-2 transition-opacity", list.loading && "opacity-60")}>
@@ -93,7 +94,7 @@ export default function PostsAdminView() {
 
 function PostEditor({ id, onDone }: { id: string | null; onDone: () => void }) {
   const existing = useAdminPostQuery(id ?? "", { skip: !id });
-  if (id && existing.isLoading) return <div className="p-5"><Skeleton rows={3} /></div>;
+  if (id && existing.isLoading) return <div className="p-5"><AdminRowsSkeleton rows={3} /></div>;
   if (id && !existing.data) return <div className="p-5"><ErrorState message={existing.error ? errorMessage(existing.error) : "Post not found"} onRetry={() => void existing.refetch()} /></div>;
   return <PostForm initial={existing.data ?? null} onDone={onDone} />;
 }

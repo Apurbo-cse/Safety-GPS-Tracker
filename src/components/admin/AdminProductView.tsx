@@ -1,4 +1,5 @@
 "use client";
+import { AdminDetailSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Banknote, ExternalLink, Package, Pencil, ShoppingCart, TrendingUp, Warehouse } from "lucide-react";
@@ -10,7 +11,7 @@ import { useAdminCatalogQuery, useAdminProductQuery } from "@/store/apiSlice";
 import StockPanel from "./StockPanel";
 import { DeviceForm } from "./CatalogAdminView";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, fmtDateTime, view } from "./ui";
+import { CARD, ErrorState, PageHeader, StatCard, StatusBadge, fmtDateTime, view } from "./ui";
 
 /** One product in full, for staff: pictures, price and stock, specs, and how well it sells. */
 export default function AdminProductView({ id }: { id: string }) {
@@ -28,7 +29,7 @@ export default function AdminProductView({ id }: { id: string }) {
         actions={d && <>{canEdit && <button onClick={() => setEditing(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Pencil className="h-4 w-4" />Edit product</button>}<Link href={`/products/${d.id}`} target="_blank" className="inline-flex h-10 items-center gap-2 rounded-lg bg-softer/80 px-4 text-sm font-semibold text-ink hover:text-brand-600 dark:bg-navy-900/90"><ExternalLink className="h-4 w-4" />View on website</Link></>} />
       <Link href="/admin/products" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline"><ArrowLeft className="h-4 w-4" />All products</Link>
 
-      {error ? <ErrorState message={error} onRetry={reload} /> : !data || !d ? <Skeleton rows={4} /> : (
+      {error ? <ErrorState message={error} onRetry={reload} /> : !data || !d ? <AdminDetailSkeleton /> : (
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard icon={ShoppingCart} label="Orders" value={String(data.sales.orders)} hint={`${data.sales.units} unit${data.sales.units === 1 ? "" : "s"} sold`} tone="sky" />

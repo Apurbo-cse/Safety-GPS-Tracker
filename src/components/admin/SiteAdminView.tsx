@@ -1,10 +1,11 @@
 "use client";
+import { AdminFormSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { inputCls } from "@/components/forms/Field";
 import type { SiteDetails } from "@/lib/api";
 import { errorMessage, useAdminSiteQuery, useSaveSiteMutation } from "@/store/apiSlice";
-import { CARD, ErrorState, PageHeader, Skeleton, view } from "./ui";
+import { CARD, ErrorState, PageHeader, view } from "./ui";
 
 const FIELDS: { k: keyof SiteDetails; label: string; hint?: string; wide?: boolean; type?: string; ph?: string }[] = [
   { k: "name", label: "Company name" },
@@ -24,7 +25,7 @@ export default function SiteAdminView() {
   return (
     <>
       <PageHeader title="Site details" subtitle="Company details used across the website: header, footer, contact page, invoices and policy pages. Changes appear within a minute." />
-      {q.error ? <ErrorState message={q.error} onRetry={q.reload} /> : !q.data ? <Skeleton rows={4} /> : <SiteForm initial={q.data} />}
+      {q.error ? <ErrorState message={q.error} onRetry={q.reload} /> : !q.data ? <AdminFormSkeleton /> : <SiteForm initial={q.data} />}
     </>
   );
 }

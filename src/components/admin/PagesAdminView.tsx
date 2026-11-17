@@ -1,4 +1,5 @@
 "use client";
+import { AdminTableSkeleton, AdminRowsSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ExternalLink, FileText, Lock, Pencil, Plus, Trash2 } from "lucide-react";
@@ -9,7 +10,7 @@ import { errorMessage, useAdminPageQuery, useAdminPagesQuery, useDeletePageMutat
 import { slug } from "@/utils/format";
 import RichEditor, { tokensIn } from "./RichEditor";
 import { useUploadCleanup } from "./useUploadCleanup";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, fmtDate, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, fmtDate, view } from "./ui";
 
 const urlOf = (id: string) => (id === "privacy" || id === "terms" ? `/${id}` : `/page/${id}`);
 
@@ -21,7 +22,7 @@ export default function PagesAdminView() {
     <>
       <PageHeader title="Pages" subtitle="Privacy, Terms and any other text page (like a Refund policy). Use headings to split a page into numbered sections."
         actions={<button onClick={() => setEditing({ id: null })} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Plus className="h-4 w-4" />New page</button>} />
-      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <Skeleton rows={3} /> : list.data.length === 0 ? (
+      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <AdminTableSkeleton tabs={false} rows={5} /> : list.data.length === 0 ? (
         <div className={CARD}><EmptyState icon={FileText} title="No pages yet" /></div>
       ) : (
         <ul className="space-y-2">
@@ -51,7 +52,7 @@ export default function PagesAdminView() {
 
 function PageEditor({ id, onDone }: { id: string | null; onDone: () => void }) {
   const q = useAdminPageQuery(id ?? "", { skip: !id });
-  if (id && q.isLoading) return <div className="p-5"><Skeleton rows={3} /></div>;
+  if (id && q.isLoading) return <div className="p-5"><AdminRowsSkeleton rows={3} /></div>;
   if (id && !q.data) return <div className="p-5"><ErrorState message={q.error ? errorMessage(q.error) : "Page not found"} onRetry={() => void q.refetch()} /></div>;
   return <PageForm initial={q.data ?? null} onDone={onDone} />;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { AdminTeamSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Check, Copy, Eye, EyeOff, KeyRound, Lock, Mail, Pencil, Phone, Plus, Search, ShieldCheck, Sparkles, Trash2, UserCheck, UserPlus, UserX, Users, Wand2 } from "lucide-react";
@@ -11,7 +12,7 @@ import {
 } from "@/store/apiSlice";
 import { useAppSelector } from "@/store/hooks";
 import { cn, slug } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, Switch, fmtDate, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, StatCard, Switch, fmtDate, view } from "./ui";
 
 type Tab = "staff" | "roles";
 
@@ -110,7 +111,7 @@ function StaffTab() {
         <button onClick={() => setAdding(true)} className="ml-auto inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><UserPlus className="h-4 w-4" />Add staff</button>
       </div>
 
-      {staff.error ? <ErrorState message={staff.error} onRetry={staff.reload} /> : !staff.data ? <Skeleton rows={3} /> : shown.length === 0 ? (
+      {staff.error ? <ErrorState message={staff.error} onRetry={staff.reload} /> : !staff.data ? <AdminTeamSkeleton /> : shown.length === 0 ? (
         <div className={CARD}><EmptyState icon={Users} title={all.length ? "No one matches" : "No staff yet"} text={all.length ? "Try a different search or filter." : "Add someone and choose what they can do."} /></div>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -282,7 +283,7 @@ function RolesTab() {
         <p className="text-sm text-body">A role is a bundle of permissions. Give people a role instead of setting access one by one.</p>
         <button onClick={() => setEditing({ role: null })} className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Plus className="h-4 w-4" />New role</button>
       </div>
-      {roles.error ? <ErrorState message={roles.error} onRetry={roles.reload} /> : !roles.data ? <Skeleton rows={3} /> : (
+      {roles.error ? <ErrorState message={roles.error} onRetry={roles.reload} /> : !roles.data ? <AdminTeamSkeleton stats={false} /> : (
         <ul className="grid gap-3 lg:grid-cols-2">
           {roles.data.roles.map((r) => {
             const members = (staff.data ?? []).filter((m) => m.roleId === r.id);

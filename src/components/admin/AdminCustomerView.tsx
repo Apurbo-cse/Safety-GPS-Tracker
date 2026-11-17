@@ -1,11 +1,12 @@
 "use client";
+import { AdminDetailSkeleton } from "@/components/common/Skeletons";
 import Link from "next/link";
 import ProductImage from "@/components/common/ProductImage";
 import { mediaUrl } from "@/lib/api";
 import { ArrowLeft, Banknote, Building2, Mail, MapPin, Package, Phone, Receipt, ShoppingCart, Truck } from "lucide-react";
 import { useAdminCustomerQuery } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, fmtDate, fmtDateTime, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, StatCard, StatusBadge, fmtDate, fmtDateTime, view } from "./ui";
 
 /** One account for staff: contact and billing details, totals, and every order they placed. */
 export default function AdminCustomerView({ id }: { id: string }) {
@@ -17,7 +18,7 @@ export default function AdminCustomerView({ id }: { id: string }) {
       <PageHeader title={c?.name ?? "Customer"} subtitle={c ? `Joined ${fmtDate(c.createdAt)}${c.role === "admin" ? " · Staff account" : ""}${c.disabled ? " · Disabled" : ""}` : undefined} />
       <Link href="/admin/customers" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline"><ArrowLeft className="h-4 w-4" />All customers</Link>
 
-      {error ? <ErrorState message={error} onRetry={reload} /> : !data || !c ? <Skeleton rows={4} /> : (
+      {error ? <ErrorState message={error} onRetry={reload} /> : !data || !c ? <AdminDetailSkeleton /> : (
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard icon={ShoppingCart} label="Orders" value={String(data.stats.orders)} hint={`${data.stats.open} in progress`} tone="sky" />

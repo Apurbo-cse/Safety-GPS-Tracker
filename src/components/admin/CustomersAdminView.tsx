@@ -1,11 +1,12 @@
 "use client";
+import { AdminTableSkeleton } from "@/components/common/Skeletons";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Users } from "lucide-react";
 import { useAdminCustomersQuery } from "@/store/apiSlice";
 import ExportButton from "./ExportButton";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, fmtDate, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, fmtDate, view } from "./ui";
 
 const LIMIT = 20;
 
@@ -27,7 +28,7 @@ export default function CustomersAdminView() {
         </div>
         </>} />
 
-      {error ? <ErrorState message={error} onRetry={reload} /> : !data ? <Skeleton rows={5} /> : (
+      {error ? <ErrorState message={error} onRetry={reload} /> : !data ? <AdminTableSkeleton tabs={false} rows={8} /> : (
         <div className={`${CARD} overflow-hidden`}>
           {data.customers.length === 0 ? <EmptyState icon={Users} title="No customers found" text={q ? "Try a different search." : "Accounts created on the website appear here."} /> : (
             <div className={cn("overflow-x-auto", loading && "opacity-60")}>

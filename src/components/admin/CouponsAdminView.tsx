@@ -1,4 +1,5 @@
 "use client";
+import { AdminTableSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Percent, Plus, Trash2 } from "lucide-react";
@@ -7,7 +8,7 @@ import { inputCls } from "@/components/forms/Field";
 import type { AdminCoupon } from "@/lib/api";
 import { errorMessage, useAdminCouponsQuery, useDeleteCouponMutation, useSaveCouponMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, Switch, fmtDate, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Switch, fmtDate, view } from "./ui";
 
 const toLocal = (iso: string | null) => { if (!iso) return ""; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 const describe = (c: AdminCoupon) => `${c.kind === "percent" ? `${c.value}% off` : `${formatBDT(c.value)} off`}${c.minTotal ? ` · min ${formatBDT(c.minTotal)}` : ""}`;
@@ -23,7 +24,7 @@ export default function CouponsAdminView() {
     <>
       <PageHeader title="Coupons" subtitle="Discount codes customers type at checkout. They take money off the device price; monthly charges are never discounted."
         actions={<button onClick={() => setEditing({ coupon: null })} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600"><Plus className="h-4 w-4" />New coupon</button>} />
-      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <Skeleton rows={3} /> : list.data.length === 0 ? (
+      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <AdminTableSkeleton tabs={false} rows={5} /> : list.data.length === 0 ? (
         <div className={CARD}><EmptyState icon={Percent} title="No coupons yet" text="Create a code like WELCOME10 for 10% off." /></div>
       ) : (
         <ul className="space-y-2">

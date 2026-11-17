@@ -1,4 +1,5 @@
 "use client";
+import { AdminTableSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import Link from "next/link";
 import ProductImage from "@/components/common/ProductImage";
@@ -10,7 +11,7 @@ import ExportButton from "./ExportButton";
 import { mediaUrl, type AdminOrder, type OrderStatus } from "@/lib/api";
 import { errorMessage, useAdminOrdersQuery, useSetOrderStatusMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, STATUS, STATUS_ORDER, fmtDateTime, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, STATUS, STATUS_ORDER, fmtDateTime, view } from "./ui";
 
 const LIMIT = 15;
 const selectCls = "h-9 rounded-lg bg-surface px-2.5 text-xs font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:bg-navy-950";
@@ -73,7 +74,7 @@ function OrdersTable({ status, q }: { status?: OrderStatus; q: string }) {
         </form>
       </div>
 
-      {error ? <ErrorState message={error} onRetry={reload} /> : !data ? <Skeleton rows={5} /> : (
+      {error ? <ErrorState message={error} onRetry={reload} /> : !data ? <AdminTableSkeleton /> : (
         <div className={`${CARD} overflow-hidden`}>
           {data.orders.length === 0 ? <EmptyState icon={Package} title="No orders match" text={q || status ? "Try another filter or search." : "Orders placed on the website show up here."} /> : (
             <div className={cn("overflow-x-auto", loading && "opacity-60")}>

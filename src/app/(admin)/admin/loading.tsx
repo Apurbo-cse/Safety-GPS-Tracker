@@ -1,5 +1,10 @@
-import { AdminSkeleton } from "@/components/common/Skeletons";
+import { AdminHeader, AdminDashboardSkeleton } from "@/components/common/Skeletons";
 
 export default function Loading() {
-  return <AdminSkeleton />;
+  return (
+    <>
+      <AdminHeader actions={2} />
+      <AdminDashboardSkeleton />
+    </>
+  );
 }

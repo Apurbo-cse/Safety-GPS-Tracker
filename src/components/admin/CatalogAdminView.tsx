@@ -1,4 +1,5 @@
 "use client";
+import { AdminCatalogSkeleton } from "@/components/common/Skeletons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +16,7 @@ import { mediaUrl, type AdminCatalog, type AdminCategory, type AdminDevice, type
 import { errorMessage, useAdminCatalogQuery, useAdminProductQuery, useAdminProductsQuery, useDeleteCatalogItemMutation, useSaveCatalogItemMutation } from "@/store/apiSlice";
 import { slug } from "@/utils/format";
 import { cn, formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, Switch, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Switch, view } from "./ui";
 import ProductImage from "@/components/common/ProductImage";
 
 export type Kind = "plans" | "devices" | "faqs" | "categories" | "hero";
@@ -484,7 +485,7 @@ export default function CatalogAdminView({ kind: tab }: { kind: Kind }) {
         </div>
       )}
 
-      {loadError ? <ErrorState message={loadError} onRetry={reload} /> : !cat || (deviceFilters && !products.data) ? <Skeleton rows={5} /> : tab === "categories" ? (
+      {loadError ? <ErrorState message={loadError} onRetry={reload} /> : !cat || (deviceFilters && !products.data) ? <AdminCatalogSkeleton /> : tab === "categories" ? (
         <CategoryTree cat={cat} busy={busy} onAdd={(parent) => setEditing({ kind: "categories", item: null, parent })} onEdit={(c) => setEditing({ kind: "categories", item: c })}
           onToggle={(c) => void toggleActive("categories", c)} onDelete={(c) => void remove("categories", c, c.name)} />
       ) : rows.length === 0 ? (

@@ -1,11 +1,12 @@
 "use client";
+import { AdminTableSkeleton } from "@/components/common/Skeletons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCheck, Inbox, Mail, Phone, RotateCcw, Trash2 } from "lucide-react";
 import type { AdminMessage } from "@/lib/api";
 import { errorMessage, useAdminMessagesQuery, useDeleteMessageMutation, useSetMessageStatusMutation } from "@/store/apiSlice";
 import { cn } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, fmtDateTime, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, Pagination, fmtDateTime, view } from "./ui";
 
 const LIMIT = 15;
 type Filter = "all" | "new" | "handled";
@@ -30,7 +31,7 @@ export default function MessagesAdminView() {
         ))}
       </div>
 
-      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <Skeleton rows={4} /> : list.data.items.length === 0 ? (
+      {list.error ? <ErrorState message={list.error} onRetry={list.reload} /> : !list.data ? <AdminTableSkeleton rows={6} /> : list.data.items.length === 0 ? (
         <div className={CARD}><EmptyState icon={Inbox} title={status === "new" ? "No new messages" : "No messages here"} text="Messages sent from the Contact page show up here." /></div>
       ) : (
         <ul className={cn("space-y-2 transition-opacity", list.loading && "opacity-60")}>

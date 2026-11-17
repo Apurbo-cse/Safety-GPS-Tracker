@@ -1,4 +1,5 @@
 "use client";
+import { AdminDashboardSkeleton, AdminRowsSkeleton } from "@/components/common/Skeletons";
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, Banknote, Boxes, Package, PiggyBank, Repeat, Users } from "lucide-react";
 import { useCan } from "@/lib/useCan";
@@ -6,7 +7,7 @@ import { useAppSelector } from "@/store/hooks";
 import type { AdminStats } from "@/lib/api";
 import { useAdminOrdersQuery, useAdminStatsQuery } from "@/store/apiSlice";
 import { formatBDT } from "@/utils/format";
-import { CARD, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, STATUS, STATUS_ORDER, fmtDateTime, view } from "./ui";
+import { CARD, EmptyState, ErrorState, PageHeader, StatCard, StatusBadge, STATUS, STATUS_ORDER, fmtDateTime, view } from "./ui";
 
 /** 14-day bar chart (orders per day) — plain SVG, no chart library. */
 function DailyChart({ daily }: { daily: AdminStats["daily"] }) {
@@ -56,7 +57,7 @@ export default function DashboardView() {
           {s?.orders.byStatus.pending ? `${s.orders.byStatus.pending} new order${s.orders.byStatus.pending === 1 ? "" : "s"} to confirm` : "Review orders"}<ArrowRight className="h-4 w-4" />
         </Link>} />
 
-      {stats.error ? <ErrorState message={stats.error} onRetry={stats.reload} /> : !s ? <Skeleton rows={2} /> : (
+      {stats.error ? <ErrorState message={stats.error} onRetry={stats.reload} /> : !s ? <AdminDashboardSkeleton /> : (
         <>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard icon={Banknote} label="Device sales" value={formatBDT(s.revenue)} hint="Excludes cancelled, returned, refunded" />
@@ -107,7 +108,7 @@ export default function DashboardView() {
 
       <section className={`${CARD} mt-6 p-5 sm:p-6`}>
         <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-black tracking-tight text-ink">Latest orders</h2><Link href="/admin/orders" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">All orders <ArrowRight className="h-4 w-4" /></Link></div>
-        {recent.error ? <ErrorState message={recent.error} onRetry={recent.reload} /> : !recent.data ? <Skeleton rows={3} /> : recent.data.orders.length === 0 ? (
+        {recent.error ? <ErrorState message={recent.error} onRetry={recent.reload} /> : !recent.data ? <AdminRowsSkeleton rows={4} /> : recent.data.orders.length === 0 ? (
           <EmptyState icon={Package} title="No orders yet" text="Orders placed on the website show up here." />
         ) : (
           <ul className="space-y-2">
