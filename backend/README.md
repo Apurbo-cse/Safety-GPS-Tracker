@@ -122,6 +122,15 @@ npm start                  # node dist/main.js
 
 Render / Railway / Fly: build command `npm ci && npm run build`, start command `npm start`, set the env vars above (plus `DB_SSL=1`, `TRUST_PROXY=1`), health check path `/api/v1/health`.
 
+## Deploy with Docker
+
+```bash
+cp .env.production.example .env.production      # fill in the secrets (strong ADMIN_PASSWORD, long JWT_SECRET)
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+Runs the API (port 4000, `API_PORT` to change) and PostgreSQL. On every start the container seeds an empty database (catalogue, hero slides, first admin; never overwrites existing data), runs pending migrations and starts the API. Pictures live in the `apidata` volume (`STORAGE_DIR=/data`) and the database in `pgdata`; back both up. Put it behind HTTPS (a reverse proxy or your host), then set `NEXT_PUBLIC_API_URL` on Vercel to the public `https://…/api/v1` URL and redeploy the website. To use the image alone on Render/Railway/Fly: `docker build -t safety-gps-api .` and pass the same variables, with `DATABASE_URL`, `DB_SSL=1` and a persistent volume at `/data`.
+
 ## Known limits (not built yet)
 
 - **No email/SMS**: no email verification and no self-service password reset (the website sends people to the helpline; admins can't reset passwords from the UI yet).

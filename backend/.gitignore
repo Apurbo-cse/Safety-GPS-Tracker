@@ -4,3 +4,5 @@ dist
 *.tsbuildinfo
 coverage
 storage/media/
+.env.production
+!.env.production.example

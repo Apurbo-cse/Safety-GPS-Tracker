@@ -1,0 +1,40 @@
+# Production-style stack: API + PostgreSQL.
+#   cp .env.production.example .env.production   (fill in the secrets)
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-safety_gps}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-safety_gps}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["${API_PORT:-4000}:4000"]
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-safety_gps}
+      DB_SSL: "0"
+      TRUST_PROXY: "1"
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:?set FRONTEND_ORIGINS}
+      API_PUBLIC_URL: ${API_PUBLIC_URL:?set API_PUBLIC_URL}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+      STORAGE_DIR: /data
+    volumes: [apidata:/data]
+
+volumes:
+  pgdata:
+  apidata:
