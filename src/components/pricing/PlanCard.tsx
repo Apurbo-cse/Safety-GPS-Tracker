@@ -46,7 +46,7 @@ export default function PlanCard({
     <motion.article
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden rounded-lg bg-softer/80 dark:bg-navy-900/90 transition-all",
+        "flex h-full w-full flex-col overflow-hidden rounded-md border border-line/60 bg-softer/80 dark:border-white/5 dark:bg-navy-900/90 transition-all",
         selected ? "ring-2 ring-brand-500" : ""
       )}
     >

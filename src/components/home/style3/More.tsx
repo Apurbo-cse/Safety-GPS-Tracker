@@ -21,7 +21,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
 import { cn } from "@/utils/format";
 
-const SOFT = "rounded-lg bg-softer/80 dark:bg-navy-900/90";
+const SOFT = "rounded-md bg-softer/80 dark:bg-navy-900/90 border border-line/40 dark:border-white/5";
 const Pill = ({ children }: { children: React.ReactNode }) => <span className="inline-block rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">{children}</span>;
 
 /** Counts up to `to` once it scrolls into view (jumps straight to the number if the visitor prefers reduced motion). */
@@ -84,7 +84,7 @@ const TOUR: { id: TourId; label: string; icon: LucideIcon; title: string; text: 
 /** The five illustrative "screens". Plain shapes and text — not data from any real vehicle. */
 function Screen({ id }: { id: TourId }) {
   const reduce = useReducedMotion();
-  const shell = "relative h-full min-h-[320px] overflow-hidden rounded-lg bg-[#0c1e31] text-white";
+  const shell = "relative h-full min-h-[320px] overflow-hidden rounded-md border border-white/10 bg-[#0c1e31] text-white";
   if (id === "map") return (
     <div className={shell}>
       <div aria-hidden className="grid-bg absolute inset-0 opacity-40" />
@@ -94,7 +94,7 @@ function Screen({ id }: { id: TourId }) {
         <circle r="9" fill="#f97316"><animateMotion dur={reduce ? "0s" : "9s"} repeatCount="indefinite"><mpath href="#tour-route" /></animateMotion></circle>
         <circle r="18" fill="#f97316" fillOpacity=".25"><animateMotion dur={reduce ? "0s" : "9s"} repeatCount="indefinite"><mpath href="#tour-route" /></animateMotion></circle>
       </svg>
-      <div className="absolute left-4 top-4 rounded-lg bg-white/10 p-3 text-xs backdrop-blur">
+      <div className="absolute left-4 top-4 rounded-md border border-white/10 bg-white/10 p-3 text-xs backdrop-blur">
         <p className="font-bold">Delivery van 03</p>
         <p className="mt-0.5 text-slate-300">42 km/h · Ignition ON</p>
         <p className="mt-0.5 flex items-center gap-1.5 text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Updated 3s ago</p>
@@ -104,7 +104,7 @@ function Screen({ id }: { id: TourId }) {
   if (id === "alerts") return (
     <div className={`${shell} space-y-2.5 p-4`}>
       {([[Unlock, "Engine started", "Delivery van 03 · 08:02", "text-emerald-300"], [Bell, "Speed limit exceeded (84 km/h)", "Truck 11 · 08:14", "text-amber-300"], [Fence, "Left depot zone", "Pickup 07 · 08:31", "text-sky-300"], [ShieldCheck, "Device removal alert", "Car 02 · 09:05", "text-red-300"]] as const).map(([Icon, t, s, c], i) => (
-        <motion.div key={t} initial={reduce ? false : { opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.12 }} className="flex items-center gap-3 rounded-lg bg-white/[0.07] p-3">
+        <motion.div key={t} initial={reduce ? false : { opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.12 }} className="flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.07] p-3">
           <span className={cn("grid h-9 w-9 place-items-center rounded-md bg-white/10", c)}><Icon className="h-4 w-4" /></span>
           <span className="min-w-0"><span className="block truncate text-sm font-semibold">{t}</span><span className="block text-xs text-slate-300">{s}</span></span>
         </motion.div>
@@ -134,7 +134,7 @@ function Screen({ id }: { id: TourId }) {
           <circle r="8" fill="#f97316"><animateMotion dur={reduce ? "0s" : "7s"} repeatCount="indefinite" path="M60 150 L340 150" /></circle>
         </g>
       </svg>
-      <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs backdrop-blur"><Fence className="h-4 w-4 text-sky-300" />Zone “Main depot” · alert on exit</div>
+      <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs backdrop-blur"><Fence className="h-4 w-4 text-sky-300" />Zone “Main depot” · alert on exit</div>
     </div>
   );
 }
@@ -149,7 +149,7 @@ function LockScreen({ shell }: { shell: string }) {
         </motion.span>
         <p className="mt-4 text-lg font-bold">{locked ? "Engine locked" : "Engine unlocked"}</p>
         <p className="text-xs text-slate-300">Try it — this is a demo, no vehicle is connected</p>
-        <button type="button" onClick={() => setLocked((v) => !v)} className="mt-4 inline-flex h-8 sm:h-10 items-center rounded-lg bg-white/10 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20">{locked ? "Unlock engine" : "Lock engine"}</button>
+        <button type="button" onClick={() => setLocked((v) => !v)} className="mt-4 inline-flex h-8 sm:h-10 items-center rounded-md border border-white/10 bg-white/10 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20">{locked ? "Unlock engine" : "Lock engine"}</button>
       </div>
     </div>
   );
@@ -177,7 +177,7 @@ export function PlatformTour() {
         <div className="mt-8 grid items-stretch gap-6 lg:grid-cols-2">
           <AnimatePresence mode="wait">
             <motion.div key={cur.id} role="tabpanel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className={`${SOFT} flex flex-col justify-center p-6 sm:p-9`}>
-              <span className="grid h-12 w-12 place-items-center rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400"><cur.icon className="h-6 w-6" /></span>
+              <span className="grid h-12 w-12 place-items-center rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400"><cur.icon className="h-6 w-6" /></span>
               <h3 className="mt-4 text-2xl font-black tracking-tight text-ink">{cur.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-body">{cur.text}</p>
               <ul className="mt-5 space-y-2.5">
@@ -235,13 +235,13 @@ export function HowItWorksStepper() {
               {step.cta && <Link href={step.cta.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">{step.cta.label}<ChevronRight className="h-4 w-4" /></Link>}
             </div>
             <ul className="space-y-2.5 self-center">
-              {step.bullets.map((b) => <li key={b} className="flex items-center gap-2.5 rounded-lg bg-surface p-3 text-sm font-medium text-ink dark:bg-navy-950/70"><Check className="h-4 w-4 shrink-0 text-emerald-600" />{b}</li>)}
+              {step.bullets.map((b) => <li key={b} className="flex items-center gap-2.5 rounded-md border border-line/50 bg-surface p-3 text-sm font-medium text-ink dark:border-white/5 dark:bg-navy-950/70"><Check className="h-4 w-4 shrink-0 text-emerald-600" />{b}</li>)}
             </ul>
           </motion.div>
         </AnimatePresence>
         <div className="mt-5 flex justify-center gap-2">
-          <button type="button" onClick={() => setI((v) => Math.max(0, v - 1))} disabled={i === 0} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-lg bg-surface px-3 sm:px-4 text-xs sm:text-sm font-semibold text-ink hover:text-brand-600 disabled:opacity-40 dark:bg-navy-900"><ArrowLeft className="h-4 w-4" />Back</button>
-          <button type="button" onClick={() => setI((v) => Math.min(STEPS.length - 1, v + 1))} disabled={i === STEPS.length - 1} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-lg bg-brand-500 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-40">Next<ArrowRight className="h-4 w-4" /></button>
+          <button type="button" onClick={() => setI((v) => Math.max(0, v - 1))} disabled={i === 0} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-md border border-line/60 bg-surface px-3 sm:px-4 text-xs sm:text-sm font-semibold text-ink hover:text-brand-600 disabled:opacity-40 dark:border-white/10 dark:bg-navy-900"><ArrowLeft className="h-4 w-4" />Back</button>
+          <button type="button" onClick={() => setI((v) => Math.min(STEPS.length - 1, v + 1))} disabled={i === STEPS.length - 1} className="inline-flex h-8 sm:h-10 items-center gap-1.5 rounded-md bg-brand-500 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-40">Next<ArrowRight className="h-4 w-4" /></button>
         </div>
       </Container>
     </section>
@@ -266,16 +266,16 @@ export function IndustriesSlider() {
           <div><Pill>Industries</Pill><h2 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">Built for the way you move</h2></div>
           <div className="flex gap-2">
             <button type="button" onClick={() => by(-1)} disabled={edge.start} aria-label="Previous industries" className={`${SOFT} grid h-11 w-11 place-items-center text-ink hover:text-brand-600 disabled:opacity-40`}><ArrowLeft className="h-5 w-5" /></button>
-            <button type="button" onClick={() => by(1)} disabled={edge.end} aria-label="Next industries" className="grid h-11 w-11 place-items-center rounded-lg bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40"><ArrowRight className="h-5 w-5" /></button>
+            <button type="button" onClick={() => by(1)} disabled={edge.end} aria-label="Next industries" className="grid h-11 w-11 place-items-center rounded-md bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40"><ArrowRight className="h-5 w-5" /></button>
           </div>
         </div>
         <ul ref={track} onScroll={measure} className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:px-0">
           {solutions.map((s) => (
             <li key={s.id} className="w-[78%] shrink-0 snap-start sm:w-[44%] lg:w-[30%]">
-              <Link href={`/solutions#${s.id}`} className="group relative isolate block aspect-[4/5] overflow-hidden rounded-lg bg-navy-950">
+              <Link href={`/solutions#${s.id}`} className="group relative isolate block aspect-[4/5] overflow-hidden rounded-md border border-line/60 bg-navy-950 dark:border-white/10">
                 <Image src={s.image} alt="" fill sizes="(min-width:1024px) 30vw, 78vw" quality={80} className="-z-10 object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-navy-950/95 via-navy-950/40 to-transparent" />
-                <span className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-lg bg-white/15 text-white backdrop-blur"><DynIcon name={s.icon} className="h-5 w-5" /></span>
+                <span className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-md border border-white/10 bg-white/15 text-white backdrop-blur"><DynIcon name={s.icon} className="h-5 w-5" /></span>
                 <div className="absolute inset-x-0 bottom-0 p-5 text-white">
                   <h3 className="text-lg font-black leading-snug">{s.title}</h3>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-300">{s.description}</p>
@@ -298,16 +298,16 @@ export function CtaBand() {
   return (
     <section className="bg-surface py-12 sm:py-16">
       <Container>
-        <div className="relative isolate overflow-hidden rounded-lg bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] px-6 py-12 text-center text-white sm:px-12 sm:py-16">
+        <div className="relative isolate overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-[#0c1e31] via-[#122b46] to-[#1a3a5e] px-6 py-12 text-center text-white sm:px-12 sm:py-16">
           <div aria-hidden className="grid-bg pointer-events-none absolute inset-0 -z-10 opacity-30" />
           <div aria-hidden className="pointer-events-none absolute -left-20 -top-20 -z-10 h-64 w-64 rounded-full bg-brand-500/30 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 -z-10 h-72 w-72 rounded-full bg-sky-500/20 blur-3xl" />
           <h2 className="mx-auto max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">Ready to keep your vehicles safe?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">Order online, or call our team — we&apos;ll help you choose the right package and book the installation.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link href="/pricing" className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-lg bg-brand-500 px-5 sm:px-7 text-xs sm:text-sm font-bold transition-colors hover:bg-brand-600">See packages<ArrowRight className="h-4 w-4" /></Link>
-            <a href={`tel:${site.phone}`} className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-lg bg-white/10 px-5 sm:px-7 text-xs sm:text-sm font-bold backdrop-blur transition-colors hover:bg-white/20"><Phone className="h-4 w-4" />{site.phone}</a>
-            <button type="button" onClick={() => dispatch(openDemoModal("Call-back request (home)"))} className="inline-flex h-10 sm:h-12 items-center rounded-lg px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white">Request a call-back</button>
+            <Link href="/pricing" className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-md bg-brand-500 px-5 sm:px-7 text-xs sm:text-sm font-bold transition-colors hover:bg-brand-600">See packages<ArrowRight className="h-4 w-4" /></Link>
+            <a href={`tel:${site.phone}`} className="inline-flex h-10 sm:h-12 items-center gap-2 rounded-md border border-white/15 bg-white/10 px-5 sm:px-7 text-xs sm:text-sm font-bold backdrop-blur transition-colors hover:bg-white/20"><Phone className="h-4 w-4" />{site.phone}</a>
+            <button type="button" onClick={() => dispatch(openDemoModal("Call-back request (home)"))} className="inline-flex h-10 sm:h-12 items-center rounded-md px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white">Request a call-back</button>
           </div>
           <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-300">
             {["Doorstep installation", "24×7 helpline", "Android, iOS & web apps"].map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />{t}</li>)}

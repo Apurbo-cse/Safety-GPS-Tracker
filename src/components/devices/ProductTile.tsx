@@ -76,7 +76,7 @@ export default function ProductTile({
   return (
     <motion.article
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="group relative flex h-full flex-col overflow-hidden rounded-lg bg-softer/80 transition-all duration-300 dark:bg-navy-900/90"
+      className="group relative flex h-full flex-col overflow-hidden rounded-md border border-line/60 bg-softer/80 transition-all duration-300 dark:border-white/5 dark:bg-navy-900/90"
     >
       {/* Product Image Area */}
       <div className="relative aspect-[858/600] w-full overflow-hidden bg-transparent">

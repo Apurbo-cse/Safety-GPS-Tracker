@@ -74,9 +74,14 @@ function SimpleTelematicsCard({ t }: { t: HeroTelematics }) {
       </div>
 
       {/* Vehicle Info */}
-      <div className="mt-4">
-        <p className="text-base font-bold text-white">{t.vehicle}</p>
-        <p className="font-mono text-xs text-slate-400">{t.plate}</p>
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-base font-bold text-white truncate">{t.vehicle}</p>
+          <p className="font-mono text-xs text-slate-400">{t.plate}</p>
+        </div>
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/10 bg-white/5 text-brand-400">
+          {/bike|motorcycle|yamaha|honda/i.test(t.vehicle) ? <Bike className="h-4.5 w-4.5" /> : /truck|van|isuzu|covered/i.test(t.vehicle) ? <Truck className="h-4.5 w-4.5" /> : <Car className="h-4.5 w-4.5" />}
+        </div>
       </div>
 
       {/* Location */}
@@ -187,7 +192,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
                     </div>
                   </div>
 
-                  <div className="hidden justify-center sm:flex lg:col-span-5 lg:justify-end">
+                  <div className="flex justify-center lg:col-span-5 lg:justify-end">
                     <SimpleTelematicsCard t={s.telematics} />
                   </div>
                 </Container>
@@ -311,8 +316,8 @@ export function ProductWheel() {
                   className="absolute h-[18%] w-[18%] -translate-x-1/2 -translate-y-1/2"
                   style={{ left: `${pos[i].x}%`, top: `${pos[i].y}%` }}
                 >
-                  <span className={cn("orbit-rev grid h-full w-full place-items-center rounded-full shadow-lg transition-all duration-300",
-                    on ? "scale-110 bg-brand-500 text-white shadow-brand-500/40" : "bg-surface text-brand-600 shadow-black/5 hover:scale-105 dark:bg-navy-950 dark:text-brand-400")}>
+                  <span className={cn("orbit-rev grid h-full w-full place-items-center rounded-full border transition-all duration-300",
+                    on ? "scale-110 border-brand-500 bg-brand-500 text-white ring-4 ring-brand-500/20" : "border-line bg-surface text-brand-600 hover:scale-105 dark:border-white/10 dark:bg-navy-950 dark:text-brand-400")}>
                     <w.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </span>
                 </button>
@@ -321,7 +326,7 @@ export function ProductWheel() {
           </div>
 
           {/* centre hub */}
-          <div className="absolute inset-[30%] grid place-items-center rounded-full bg-surface text-center shadow-xl shadow-black/5 dark:bg-navy-950">
+          <div className="absolute inset-[30%] grid place-items-center rounded-full border border-line/60 bg-surface text-center dark:border-white/10 dark:bg-navy-950">
             <span aria-hidden className="ring-pulse absolute inset-0 rounded-full bg-brand-500/10" />
             <div className="relative px-3">
               <Image src="/logo.png" alt="Safety GPS Tracker" width={140} height={46} className="mx-auto h-auto w-[62%] object-contain" />
@@ -788,10 +793,10 @@ export function InnovationGrid() {
           <AnimatePresence mode="popLayout">
             {list.map((c) => (
               <motion.div key={c.t} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.25 }}
-                className="group relative overflow-hidden rounded-xl bg-slate-100/80 p-4 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/10 dark:bg-navy-900/90 sm:p-5">
+                className="group relative overflow-hidden rounded-md border border-line/60 bg-slate-100/80 p-4 transition-all hover:-translate-y-1 dark:border-white/10 dark:bg-navy-900/90 sm:p-5">
                 <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-brand-500/10 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
                 <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
+                  <span className="grid h-10 w-10 place-items-center rounded-md bg-brand-500/10 text-brand-600 transition-colors group-hover:bg-brand-500 group-hover:text-white dark:text-brand-400"><c.icon className="h-5 w-5" /></span>
                   <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-body dark:bg-navy-950/60">{c.cat}</span>
                 </div>
                 <h3 className="mt-3 text-base font-bold text-ink">{c.t}</h3>
