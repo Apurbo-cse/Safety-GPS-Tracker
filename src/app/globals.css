@@ -440,3 +440,15 @@ html[data-nav-hidden] .fab-stack { transform: translateY(calc(3.6rem + env(safe-
 .rich-editor .note-editor .note-editing-area .note-editable { background: #fff; color: #1f2937; min-height: 160px; }
 .note-modal-backdrop { z-index: 2000 !important; } .note-modal { z-index: 2001 !important; }
 .note-editor.note-frame.fullscreen { z-index: 1900; }
+
+/* ---- Hero banner animation: slow zoom/pan on the active slide, drifting light sweep, pulsing glow ---- */
+@keyframes hero-kb { from { transform: scale(1.02) translate3d(0, 0, 0); } to { transform: scale(1.14) translate3d(-2.5%, -1.5%, 0); } }
+.hero-kb { transform-origin: 70% 60%; will-change: transform; }
+.swiper-slide-active .hero-kb { animation: hero-kb 9s ease-out both; }
+@keyframes hero-sweep { 0% { transform: translateX(-60%); opacity: 0; } 25% { opacity: .55; } 100% { transform: translateX(260%); opacity: 0; } }
+.hero-sweep { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.hero-sweep::before { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 28%; transform: translateX(-60%) skewX(-18deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); }
+.swiper-slide-active .hero-sweep::before { animation: hero-sweep 4.5s ease-in-out .6s both; }
+@keyframes hero-glow { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: .75; transform: scale(1.15); } }
+.hero-glow { animation: hero-glow 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .hero-kb, .hero-sweep::before, .hero-glow { animation: none !important; } }

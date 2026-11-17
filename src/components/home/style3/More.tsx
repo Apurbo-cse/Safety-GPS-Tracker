@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import {
-  ArrowLeft, ArrowRight, BarChart3, Bell, Check, ChevronRight, Fence, Headset, Lock, MapPin, PackageCheck, Phone, ShieldCheck, Smartphone, Unlock, Wrench, type LucideIcon,
+  ArrowLeft, ArrowRight, BarChart3, Bell, Check, ChevronRight, Clock, Fence, Gauge, Headset, Lock, MapPin, Navigation, PackageCheck, Phone, Route, ShieldCheck, Smartphone, Unlock, Wrench, type LucideIcon,
 } from "lucide-react";
 import Container from "@/components/common/Container";
 import { DynIcon } from "@/lib/icons";
@@ -98,6 +98,22 @@ function Screen({ id }: { id: TourId }) {
         <p className="font-bold">Delivery van 03</p>
         <p className="mt-0.5 text-slate-300">42 km/h · Ignition ON</p>
         <p className="mt-0.5 flex items-center gap-1.5 text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Updated 3s ago</p>
+      </div>
+      {/* Trip details (illustrative sample values) */}
+      <div className="absolute inset-x-3 bottom-3 grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-md border border-white/10 bg-[#0c1e31]/80 p-3 text-xs backdrop-blur sm:grid-cols-3">
+        {([
+          [MapPin, "Live location", "Mirpur 10, Dhaka", "text-orange-300"],
+          [Clock, "Start time", "08:02 AM", "text-sky-300"],
+          [Clock, "End time", "In progress", "text-sky-300"],
+          [Route, "Mileage today", "38.4 km", "text-emerald-300"],
+          [Gauge, "Speed", "42 km/h", "text-amber-300"],
+          [Navigation, "Last location", "Farmgate, Dhaka · 3s ago", "text-pink-300"],
+        ] as [LucideIcon, string, string, string][]).map(([Icon, label, value, c]) => (
+          <div key={label} className="flex min-w-0 items-start gap-2">
+            <Icon className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", c)} />
+            <span className="min-w-0"><span className="block text-[10px] uppercase tracking-wide text-slate-400">{label}</span><span className="block truncate font-semibold">{value}</span></span>
+          </div>
+        ))}
       </div>
     </div>
   );

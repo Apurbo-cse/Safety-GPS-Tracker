@@ -66,14 +66,18 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
           <SwiperSlide key={s.id} className="relative h-full w-full overflow-hidden">
             {/* Background image & gradient overlays */}
             <div className="absolute inset-0 z-0">
-              <ProductImage
-                src={s.bgImage}
-                alt={s.titleMain}
-                fill
-                priority={idx === 0}
-                sizes="100vw"
-                className="object-cover object-center"
-              />
+              <div className="hero-kb absolute inset-0">
+                <ProductImage
+                  src={s.bgImage}
+                  alt={s.titleMain}
+                  fill
+                  priority={idx === 0}
+                  sizes="100vw"
+                  className="object-cover object-center"
+                />
+              </div>
+              <div aria-hidden className="hero-glow pointer-events-none absolute right-[8%] top-[42%] h-56 w-56 rounded-full bg-brand-500/30 blur-3xl" />
+              <div aria-hidden className="hero-sweep" />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#0c1f38]/95 via-[#0c1f38]/70 to-[#0c1f38]/20" />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0c1f38]/85 via-transparent to-transparent" />
             </div>
