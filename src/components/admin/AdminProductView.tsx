@@ -7,6 +7,7 @@ import { mediaUrl } from "@/lib/api";
 import Modal from "@/components/common/Modal";
 import { useCan } from "@/lib/useCan";
 import { useAdminCatalogQuery, useAdminProductQuery } from "@/store/apiSlice";
+import StockPanel from "./StockPanel";
 import { DeviceForm } from "./CatalogAdminView";
 import { cn, formatBDT } from "@/utils/format";
 import { CARD, ErrorState, PageHeader, Skeleton, StatCard, StatusBadge, fmtDateTime, view } from "./ui";
@@ -77,12 +78,13 @@ export default function AdminProductView({ id }: { id: string }) {
                   {d.monthly ? <div className="flex justify-between"><dt className="text-body">Monthly</dt><dd className="font-bold tabular-nums text-ink">{formatBDT(d.monthly)}/mo</dd></div> : null}
                   {d.cost != null && <div className="flex justify-between"><dt className="text-body">Our cost</dt><dd className="font-semibold tabular-nums text-ink">{formatBDT(d.cost)}</dd></div>}
                   {margin !== null && <div className="flex justify-between"><dt className="text-body">Margin per unit</dt><dd className={cn("font-bold tabular-nums", margin < 0 ? "text-red-600" : "text-green-600")}>{formatBDT(margin)}</dd></div>}
-                  <div className="flex justify-between"><dt className="text-body">Stock</dt><dd className="font-semibold text-ink">{d.stock === null ? "Not tracked" : d.stock}</dd></div>
                   <div className="flex justify-between"><dt className="text-body">Visibility</dt><dd className={cn("font-semibold", d.active ? "text-green-600" : "text-amber-600")}>{d.active ? "Visible" : "Hidden"}</dd></div>
                   {d.planId && <div className="flex justify-between"><dt className="text-body">Linked package</dt><dd className="font-mono text-xs text-ink">{d.planId}</dd></div>}
                   {d.priceNote && <p className="rounded-lg bg-surface p-2.5 text-xs text-body dark:bg-navy-950/70">{d.priceNote}</p>}
                 </dl>
               </section>
+
+              <StockPanel id={d.id} name={d.name} stock={d.stock} />
 
               <section className={`${CARD} p-5`}>
                 <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-slate-500">Recent orders</h2>
@@ -102,7 +104,7 @@ export default function AdminProductView({ id }: { id: string }) {
         </div>
       )}
 
-      <Modal open={editing} onClose={() => setEditing(false)} wide title={d ? `Edit ${d.name}` : "Edit product"}>
+      <Modal open={editing} onClose={() => setEditing(false)} wide="xl" title={d ? `Edit ${d.name}` : "Edit product"}>
         {editing && d && catalog && <DeviceForm key={d.id} initial={d} categories={[]} catTree={catalog.categories} plans={catalog.plans} onSaved={() => setEditing(false)} onCancel={() => setEditing(false)} />}
       </Modal>
     </>

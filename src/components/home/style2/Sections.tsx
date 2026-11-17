@@ -20,6 +20,8 @@ import { plans } from "@/data/pricing";
 import { solutions } from "@/data/solutions";
 import { FAQS } from "@/data/faqs";
 import { DEVICE_PARTNER_LOGOS, TELECOM_PARTNER_LOGOS } from "@/lib/site";
+import ProductImage from "@/components/common/ProductImage";
+import { useCatalog } from "@/components/providers/CatalogProvider";
 import { useSite } from "@/components/providers/SiteProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { openDemoModal } from "@/store/slices/uiSlice";
@@ -82,6 +84,8 @@ const WHY = [
   { icon: Smartphone, t: "Android, iOS and web apps" },
 ];
 export function WhyUsLight() {
+  const { devices } = useCatalog();
+  const pic = devices.find((d) => d.image)?.image;
   return (
     <section className="relative overflow-hidden bg-surface py-14 sm:py-20">
       <p aria-hidden className="pointer-events-none absolute inset-x-0 top-6 select-none text-center text-[clamp(3rem,14vw,10rem)] font-black leading-none tracking-tight text-softer">SAFETY GPS</p>
@@ -90,7 +94,7 @@ export function WhyUsLight() {
         <div className="mt-10 grid items-center gap-8 lg:grid-cols-2">
           <div className="relative mx-auto w-full max-w-md">
             <div aria-hidden className="absolute inset-[10%] rounded-full border-[14px] border-brand-500/70" />
-            <Image src="/img/packages/premium-voice.png" alt="Safety GPS tracking device" width={600} height={600} className="relative h-auto w-full object-contain" />
+            {pic && <ProductImage src={pic} alt="Safety GPS tracking device" width={600} height={600} className="relative h-auto w-full object-contain" />}
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {WHY.map((w) => (

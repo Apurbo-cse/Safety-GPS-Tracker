@@ -13,12 +13,14 @@ export class MediaFile {
   size: number;
 
   /** Content hash — uploading the same picture twice reuses one row. */
-  @Index({ unique: true })
+  @Index("IDX_media_sha256")
   @Column({ type: "varchar", length: 64 })
   sha256: string;
 
-  @Column({ type: "bytea", select: false })
-  data: Buffer;
+
+  /** Only older uploads still have their bytes here; new ones are files in STORAGE_DIR/media/<id>. */
+  @Column({ type: "bytea", select: false, nullable: true })
+  data: Buffer | null;
 
   @CreateDateColumn({ name: "created_at", type: "timestamptz" })
   createdAt: Date;

@@ -1,18 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { toast } from "sonner";
 import { ChevronRight, FolderTree, HelpCircle, Images, Pencil, Plus, Tags, Trash2, Package } from "lucide-react";
 import Modal from "@/components/common/Modal";
 import ImageManager from "./ImageManager";
+import { StockModal } from "./StockPanel";
 import RichEditor, { tokensIn } from "./RichEditor";
 import { useUploadCleanup } from "./useUploadCleanup";
 import { useCan } from "@/lib/useCan";
 import ExportButton from "./ExportButton";
 import { inputCls, textareaCls } from "@/components/forms/Field";
 import { mediaUrl, type AdminCatalog, type AdminCategory, type AdminDevice, type AdminFaq, type AdminHeroSlide, type AdminPlan } from "@/lib/api";
-import { errorMessage, useAdminCatalogQuery, useAdminProductsQuery, useDeleteCatalogItemMutation, useSaveCatalogItemMutation } from "@/store/apiSlice";
+import { errorMessage, useAdminCatalogQuery, useAdminProductQuery, useAdminProductsQuery, useDeleteCatalogItemMutation, useSaveCatalogItemMutation } from "@/store/apiSlice";
 import { slug } from "@/utils/format";
 import { cn, formatBDT } from "@/utils/format";
 import { CARD, EmptyState, ErrorState, PageHeader, Pagination, Skeleton, Switch, view } from "./ui";
@@ -39,7 +39,7 @@ const TABS: { id: Kind; label: string; icon: typeof Tags; add: string }[] = [
 ];
 
 /** Strip server-managed fields before sending an item back. */
-const payload = (it: Item) => { const { id: _id, ...rest } = it as Item & { createdAt?: string; updatedAt?: string }; void _id; delete rest.createdAt; delete rest.updatedAt; return rest; };
+const payload = (it: Item) => { const { id: _id, ...rest } = it as Item & { createdAt?: string; updatedAt?: string; stock?: number | null }; void _id; delete rest.createdAt; delete rest.updatedAt; delete rest.stock; return rest; };
 
 const lines = (t: string) => t.split("\n").map((l) => l.trim()).filter(Boolean);
 const toInt = (label: string, v: string, { required = false } = {}) => {
@@ -49,6 +49,20 @@ const toInt = (label: string, v: string, { required = false } = {}) => {
   return n;
 };
 
+const toIntSafe = (t: string) => { const n = Number(t.trim()); return t.trim() !== "" && Number.isFinite(n) ? Math.trunc(n) : null; };
+
+function Section({ n, title, text, children }: { n: number; title: string; text: string; children: React.ReactNode }) {
+  return (
+    <section className={cn(CARD, "p-5")}>
+      <header className="mb-4 flex items-start gap-3">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-500/15 text-sm font-bold text-brand-600">{n}</span>
+        <div><h3 className="text-sm font-bold text-ink">{title}</h3><p className="text-xs text-slate-500">{text}</p></div>
+      </header>
+      <div className="grid gap-4 sm:grid-cols-2">{children}</div>
+    </section>
+  );
+}
+
 function F({ label, hint, children, wide }: { label: string; hint?: string; children: React.ReactNode; wide?: boolean }) {
   return (
     <label className={cn("block", wide && "sm:col-span-2")}>
@@ -57,6 +71,9 @@ function F({ label, hint, children, wide }: { label: string; hint?: string; chil
     </label>
   );
 }
+
+/** URL id made from the name (new items only); a name with no latin letters gets a short random id. */
+const autoId = (name: string) => slug(name).slice(0, 60) || `item-${Math.random().toString(36).slice(2, 7)}`;
 
 /* ---------------------------------------------------------------- forms */
 export type FormProps<T> = { initial: T | null; categories: string[]; catTree: AdminCategory[]; plans: AdminPlan[]; onSaved: () => void; onCancel: () => void };
@@ -104,14 +121,13 @@ function PlanForm({ initial, onSaved, onCancel }: FormProps<AdminPlan>) {
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
   const { saving, error, run } = useSave("plans", isNew, () => { cleanup.markSaved(); onSaved(); });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void run(v.id, () => ({ name: v.name.trim(), devicePrice: toInt("Device price", v.devicePrice, { required: true }), monthlyCharge: toInt("Monthly charge", v.monthlyCharge, { required: true }), features: lines(v.features), highlight: v.highlight.trim() || undefined, siteTitle: v.siteTitle.trim() || undefined, image: v.image.trim() || undefined, sourceNo: toInt("Source no.", v.sourceNo) ?? 0, vehicles, description, ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}), sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
-      {isNew && <F label="Id (URL name)" hint="Lower-case, e.g. gps-4. Can't be changed later."><input className={inputCls} value={v.id} onChange={set("id")} onBlur={() => !v.id && setV((s) => ({ ...s, id: slug(s.name) }))} /></F>}
+    <form onSubmit={(e) => { e.preventDefault(); void run(isNew ? autoId(v.name) : v.id, () => ({ name: v.name.trim(), devicePrice: toInt("Device price", v.devicePrice, { required: true }), monthlyCharge: toInt("Monthly charge", v.monthlyCharge, { required: true }), features: lines(v.features), highlight: v.highlight.trim() || undefined, siteTitle: v.siteTitle.trim() || undefined, image: v.image.trim() || undefined, sourceNo: toInt("Source no.", v.sourceNo) ?? 0, vehicles, description, ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}), sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
       <F label="Name" wide={!isNew}><input className={inputCls} value={v.name} onChange={set("name")} required /></F>
       <F label="Device price (৳)"><input className={inputCls} inputMode="numeric" value={v.devicePrice} onChange={set("devicePrice")} required /></F>
       <F label="Monthly charge (৳)"><input className={inputCls} inputMode="numeric" value={v.monthlyCharge} onChange={set("monthlyCharge")} required /></F>
       <F label="Badge (optional)" hint="Shown on the card, e.g. Lowest monthly charge"><input className={inputCls} value={v.highlight} onChange={set("highlight")} /></F>
       <F label="Product title on image (optional)"><input className={inputCls} value={v.siteTitle} onChange={set("siteTitle")} /></F>
-      <F label="Image path (optional)" hint="A file in /public, e.g. /img/packages/gps-1.png"><input className={inputCls} value={v.image} onChange={set("image")} /></F>
+      <ImageManager value={v.image ? [v.image] : []} onChange={(l) => setV((s) => ({ ...s, image: l[l.length - 1] ?? "" }))} />
       <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
       {canCost && <F label="Cost (৳)" hint="What the device costs us — only people with finance access see this."><input className={inputCls} inputMode="numeric" value={cost} onChange={(e) => setCost(e.target.value)} /></F>}
       <div className="sm:col-span-2">
@@ -144,6 +160,8 @@ export function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormP
   const [description, setDescription] = useState(initial?.description ?? "");
   const [cost, setCost] = useState(initial?.cost == null ? "" : String(initial.cost));
   const [stock, setStock] = useState(initial?.stock == null ? "" : String(initial.stock));
+  const [stockMode, setStockMode] = useState<"add" | "remove" | "set" | null>(null);
+  const liveStock = useAdminProductQuery(initial?.id ?? "", { skip: !initial }).data?.device.stock ?? initial?.stock ?? null;
   // only staff who may see finance can read or change what a device costs us
   const canCost = useCan("finance.view");
   const cleanup = useUploadCleanup([...startImages, ...tokensIn(initial?.description ?? "")], () => [...images, ...tokensIn(description)]);
@@ -153,48 +171,107 @@ export function DeviceForm({ initial, catTree, plans, onSaved, onCancel }: FormP
   const build = () => ({
     name: v.name.trim(), category: v.category.trim(), subcategory: v.subcategory.trim(), visual: v.visual, summary: v.summary.trim(),
     images, siteTitle: v.siteTitle.trim() || undefined, description,
-    stock: toInt("Stock", stock) ?? null, ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}),
+    ...(isNew ? { stock: toInt("Stock", stock) ?? null } : {}), ...(canCost ? { cost: toInt("Cost", cost) ?? null } : {}),
     price: toInt("Price", v.price) ?? null, monthly: toInt("Monthly charge", v.monthly) ?? null, planId: v.planId || null, priceNote: v.priceNote.trim(),
     features: lines(v.features),
     specs: lines(v.specs).map((l) => { const i = l.indexOf(":"); if (i < 1) throw new Error(`Specification "${l}" needs the form  Label: value`); return { label: l.slice(0, i).trim(), value: l.slice(i + 1).trim() }; }),
     sort: toInt("Order", v.sort) ?? 0, active: v.active,
   });
+  const subs = catTree.filter((c) => c.parentId && tops.find((t) => t.id === c.parentId)?.name === v.category);
+  const priceNum = toIntSafe(v.price);
+  const monthlyNum = toIntSafe(v.monthly);
+  const lowStock = toIntSafe(stock);
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void run(v.id, build); }} className="grid gap-4 p-5 sm:grid-cols-2">
-      {isNew && <F label="Id (URL name)" hint="Lower-case, e.g. obd-pro. Can't be changed later."><input className={inputCls} value={v.id} onChange={set("id")} onBlur={() => !v.id && setV((s) => ({ ...s, id: slug(s.name) }))} /></F>}
-      <F label="Name" wide={!isNew}><input className={inputCls} value={v.name} onChange={set("name")} required /></F>
-      <F label="Category" hint={tops.length ? undefined : "Create a category first (Admin → Categories)."}>
-        <select className={inputCls} value={v.category} onChange={(e) => setV((s) => ({ ...s, category: e.target.value, subcategory: "" }))} required>
-          {!tops.some((c) => c.name === v.category) && <option value={v.category}>{v.category || "Choose…"}</option>}
-          {tops.map((c) => <option key={c.id} value={c.name}>{c.name}{c.active ? "" : " (hidden)"}</option>)}
-        </select>
-      </F>
-      <F label="Sub-category" hint="Create more under Categories.">
-        <select className={inputCls} value={v.subcategory} onChange={set("subcategory")} required>
-          <option value="">Choose…</option>
-          {catTree.filter((c) => c.parentId && tops.find((t) => t.id === c.parentId)?.name === v.category).map((c) => <option key={c.id} value={c.name}>{c.name}{c.active ? "" : " (hidden)"}</option>)}
-        </select>
-      </F>
-      <F label="Price (৳)" hint="Leave empty for “Price on request”."><input className={inputCls} inputMode="numeric" value={v.price} onChange={set("price")} /></F>
-      <F label="Monthly charge (৳)"><input className={inputCls} inputMode="numeric" value={v.monthly} onChange={set("monthly")} /></F>
-      <F label="Linked package"><select className={inputCls} value={v.planId} onChange={set("planId")}><option value="">None</option>{plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></F>
-      <F label="Artwork style" hint="Used when there is no image file."><select className={inputCls} value={v.visual} onChange={set("visual")}>{["tracker", "voice", "video", "relay", "sos"].map((x) => <option key={x}>{x}</option>)}</select></F>
-      <ImageManager value={images} onChange={setImages} onUploaded={cleanup.track} />
-      <F label="Title on picture (optional)"><input className={inputCls} value={v.siteTitle} onChange={set("siteTitle")} /></F>
-      <F label="Summary" wide><textarea className={`${textareaCls} min-h-20`} value={v.summary} onChange={set("summary")} required /></F>
-      <F label="Stock" hint="Units in stock. Leave empty if you don't track stock — then it is always available."><input className={inputCls} inputMode="numeric" value={stock} onChange={(e) => setStock(e.target.value)} /></F>
-      {canCost && <F label="Cost (৳)" hint="What the device costs us — only people with finance access see this. Used for profit."><input className={inputCls} inputMode="numeric" value={cost} onChange={(e) => setCost(e.target.value)} /></F>}
-      <F label="Price note"><input className={inputCls} value={v.priceNote} onChange={set("priceNote")} /></F>
-      <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
-      <div className="sm:col-span-2">
-        <span className="mb-1.5 block text-sm font-medium text-body-strong">Description</span>
-        <RichEditor value={initial?.description ?? ""} onChange={setDescription} onUploaded={cleanup.track} placeholder="Describe the product — headings, lists, pictures, tables…" />
+    <>
+    <form onSubmit={(e) => { e.preventDefault(); void run(isNew ? autoId(v.name) : v.id, build); }} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="space-y-5">
+        <Section n={1} title="Basics" text="What the product is and where it sits in the shop.">
+          <F label="Name" wide><input className={inputCls} value={v.name} onChange={set("name")} placeholder="e.g. OBD Pro Tracker" required autoFocus={isNew} /></F>
+          <F label="Category" hint={tops.length ? undefined : "Create a category first (Admin → Categories)."}>
+            <select className={inputCls} value={v.category} onChange={(e) => setV((s) => ({ ...s, category: e.target.value, subcategory: "" }))} required>
+              {!tops.some((c) => c.name === v.category) && <option value={v.category}>{v.category || "Choose…"}</option>}
+              {tops.map((c) => <option key={c.id} value={c.name}>{c.name}{c.active ? "" : " (hidden)"}</option>)}
+            </select>
+          </F>
+          <F label="Sub-category" hint="Create more under Categories.">
+            <select className={inputCls} value={v.subcategory} onChange={set("subcategory")} required>
+              <option value="">Choose…</option>
+              {subs.map((c) => <option key={c.id} value={c.name}>{c.name}{c.active ? "" : " (hidden)"}</option>)}
+            </select>
+          </F>
+          <F label="Summary" wide hint="One or two lines shown on the product card."><textarea className={`${textareaCls} min-h-20`} value={v.summary} onChange={set("summary")} required /></F>
+        </Section>
+
+        <Section n={2} title="Pictures" text="The first picture is the main one. Drop several at once.">
+          <ImageManager value={images} onChange={setImages} onUploaded={cleanup.track} />
+          <F label="Title on picture (optional)"><input className={inputCls} value={v.siteTitle} onChange={set("siteTitle")} /></F>
+          <F label="Artwork style" hint="Used when there is no picture."><select className={inputCls} value={v.visual} onChange={set("visual")}>{["tracker", "voice", "video", "relay", "sos"].map((x) => <option key={x}>{x}</option>)}</select></F>
+        </Section>
+
+        <Section n={3} title="Pricing & stock" text="Leave a price empty to show “Price on request”.">
+          <F label="Price (৳)"><input className={inputCls} inputMode="numeric" value={v.price} onChange={set("price")} placeholder="0" /></F>
+          <F label="Monthly charge (৳)"><input className={inputCls} inputMode="numeric" value={v.monthly} onChange={set("monthly")} placeholder="0" /></F>
+          <F label="Linked package"><select className={inputCls} value={v.planId} onChange={set("planId")}><option value="">None</option>{plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></F>
+          <F label="Price note"><input className={inputCls} value={v.priceNote} onChange={set("priceNote")} /></F>
+          {isNew
+            ? <F label="Starting stock" hint="Units on the shelf now. Empty = not counted, always available."><input className={inputCls} inputMode="numeric" value={stock} onChange={(e) => setStock(e.target.value)} /></F>
+            : <div className="text-sm">
+                <span className="mb-1.5 block font-medium text-body-strong">Stock</span>
+                <div className="flex flex-wrap items-center gap-2 rounded-lg bg-surface p-2.5 dark:bg-navy-950/70">
+                  <strong className="mr-auto text-base text-ink">{liveStock ?? "Not counted"}</strong>
+                  {([["add", "Add"], ["remove", "Remove"], ["set", liveStock == null ? "Start counting" : "Set count"]] as const).map(([k, label]) => (
+                    <button key={k} type="button" disabled={liveStock == null && k !== "set"} onClick={() => setStockMode(k)} className="h-8 rounded-md bg-softer/80 px-3 text-xs font-semibold text-ink hover:text-brand-600 disabled:opacity-40 dark:bg-navy-900/90">{label}</button>
+                  ))}
+                </div>
+                <span className="mt-1 block text-xs text-slate-500">Every change is saved straight away and recorded in the stock history.</span>
+              </div>}
+          {canCost && <F label="Cost (৳)" hint="Finance access only. Used for profit."><input className={inputCls} inputMode="numeric" value={cost} onChange={(e) => setCost(e.target.value)} /></F>}
+        </Section>
+
+        <Section n={4} title="Details" text="Description, key features and technical specifications.">
+          <div className="sm:col-span-2">
+            <span className="mb-1.5 block text-sm font-medium text-body-strong">Description</span>
+            <RichEditor value={initial?.description ?? ""} onChange={setDescription} onUploaded={cleanup.track} placeholder="Describe the product — headings, lists, pictures, tables…" />
+          </div>
+          <F label="Features" hint="One per line." wide><textarea className={`${textareaCls} min-h-28`} value={v.features} onChange={set("features")} /></F>
+          <F label="Specifications" hint="One per line as  Label: value" wide><textarea className={`${textareaCls} min-h-28`} value={v.specs} onChange={set("specs")} /></F>
+        </Section>
       </div>
-      <F label="Features" hint="One per line." wide><textarea className={`${textareaCls} min-h-28`} value={v.features} onChange={set("features")} /></F>
-      <F label="Specifications" hint="One per line as  Label: value" wide><textarea className={`${textareaCls} min-h-28`} value={v.specs} onChange={set("specs")} /></F>
-      <label className="flex items-center gap-3 sm:col-span-2"><Switch on={v.active} onChange={() => setV((s) => ({ ...s, active: !s.active }))} label="Visible on the website" /><span className="text-sm font-medium text-ink">Visible on the website</span></label>
-      <FormFooter saving={saving} error={error} onCancel={onCancel} />
+
+      <aside className="lg:sticky lg:top-16 lg:self-start">
+        <div className={cn(CARD, "overflow-hidden")}>
+          <div className="relative aspect-[4/3] bg-softer">
+            {images[0] ? <ProductImage src={mediaUrl(images[0])} alt="" fill sizes="300px" className="object-contain p-3" /> : <span className="grid h-full place-items-center text-xs text-slate-400">No picture yet</span>}
+            {images.length > 1 && <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white">+{images.length - 1} more</span>}
+          </div>
+          <div className="space-y-1.5 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600">{v.subcategory || v.category || "Category"}</p>
+            <p className="font-bold text-ink">{v.name || "Product name"}</p>
+            <p className="line-clamp-2 text-xs text-body">{v.summary || "The summary appears here."}</p>
+            <p className="pt-1 text-lg font-extrabold text-ink">{priceNum == null ? "Price on request" : formatBDT(priceNum)}</p>
+            {monthlyNum != null && <p className="text-xs text-body">+ {formatBDT(monthlyNum)} / month</p>}
+            <p className={cn("text-xs font-semibold", lowStock != null && lowStock <= 0 ? "text-red-600" : "text-emerald-600")}>{lowStock == null ? "Always available" : lowStock <= 0 ? "Out of stock" : `${lowStock} in stock`}</p>
+          </div>
+        </div>
+        <div className={cn(CARD, "mt-4 space-y-4 p-4")}>
+          <label className="flex items-center justify-between gap-3"><span className="text-sm font-medium text-ink">Visible on the website</span><Switch on={v.active} onChange={() => setV((s) => ({ ...s, active: !s.active }))} label="Visible on the website" /></label>
+          <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
+        </div>
+      </aside>
+
+      <div className="sticky bottom-0 -mx-5 -mb-5 border-t border-line-soft bg-surface px-5 py-3 lg:col-span-2">
+        {error && <p role="alert" className="mb-2 rounded-lg bg-red-500/10 p-2.5 text-sm font-medium text-red-600">{error}</p>}
+        <div className="flex items-center justify-between gap-3">
+          <span className="hidden text-xs text-slate-500 sm:block">{isNew ? "The page address is made from the name." : "Changes go live within a minute."}</span>
+          <div className="ml-auto flex gap-2">
+            <button type="button" onClick={onCancel} className="h-10 rounded-lg px-4 text-sm font-semibold text-body hover:text-ink">Cancel</button>
+            <button type="submit" disabled={saving} className="h-10 rounded-lg bg-brand-500 px-6 text-sm font-bold text-white hover:bg-brand-600 disabled:opacity-60">{saving ? "Saving…" : isNew ? "Add product" : "Save changes"}</button>
+          </div>
+        </div>
+      </div>
     </form>
+    {initial && <StockModal id={initial.id} name={initial.name} current={liveStock} mode={stockMode} onClose={() => setStockMode(null)} />}
+    </>
   );
 }
 
@@ -219,34 +296,30 @@ function CategoryForm({ initial, catTree, parent, onSaved, onCancel }: { initial
   );
 }
 
-const HERO_IMAGES = ["/img/hero-car.jpg", "/img/hero-truck.jpg", "/img/hero-bike.jpg", "/img/industries/private-cars-hd.jpg", "/img/industries/logistics-bd.jpg", "/img/industries/motorcycles-v3.jpg", "/img/industries/business-fleet-v3.jpg", "/img/industries/construction-hd.jpg", "/img/industries/public-transport-bd2.jpg", "/img/industries/cng-v3.jpg", "/img/industries/ships-cargo-hd.jpg"];
 const DEFAULT_ROUTE = "M10 160 C 80 150, 120 70, 230 70 S 300 120, 310 120";
 
 function HeroForm({ initial, onSaved, onCancel }: { initial: AdminHeroSlide | null; onSaved: () => void; onCancel: () => void }) {
   const isNew = !initial;
   const t = initial?.telematics;
-  const [v, setV] = useState({ id: initial?.id ?? "", tab: initial?.tab ?? "", badge: initial?.badge ?? "", badgeIcon: initial?.badgeIcon ?? "shield", titleMain: initial?.titleMain ?? "", titleHighlight: initial?.titleHighlight ?? "", text: initial?.text ?? "", bgImage: initial?.bgImage ?? HERO_IMAGES[0], accent: initial?.accent ?? "brand", ctaLabel: initial?.ctaLabel ?? "Explore Products", ctaHref: initial?.ctaHref ?? "/products", vehicle: t?.vehicle ?? "", plate: t?.plate ?? "", place: t?.place ?? "", speed: t?.speed ?? "0 km/h", ignition: t?.ignition ?? "ON", status: t?.status ?? "In Transit", sensor: t?.sensor ?? "AC: ON · Door: Closed", fuel: t?.fuel ?? "78% Fuel", sort: String(initial?.sort ?? 0), active: initial?.active ?? true });
+  const [v, setV] = useState({ id: initial?.id ?? "", tab: initial?.tab ?? "", badge: initial?.badge ?? "", badgeIcon: initial?.badgeIcon ?? "shield", titleMain: initial?.titleMain ?? "", titleHighlight: initial?.titleHighlight ?? "", text: initial?.text ?? "", bgImage: initial?.bgImage ?? "", accent: initial?.accent ?? "brand", ctaLabel: initial?.ctaLabel ?? "Explore Products", ctaHref: initial?.ctaHref ?? "/products", vehicle: t?.vehicle ?? "", plate: t?.plate ?? "", place: t?.place ?? "", speed: t?.speed ?? "0 km/h", ignition: t?.ignition ?? "ON", status: t?.status ?? "In Transit", sensor: t?.sensor ?? "AC: ON · Door: Closed", fuel: t?.fuel ?? "78% Fuel", sort: String(initial?.sort ?? 0), active: initial?.active ?? true });
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
-  const { saving, error, run } = useSave("hero", isNew, onSaved);
+  const cleanup = useUploadCleanup(initial?.bgImage ? [initial.bgImage] : [], () => (v.bgImage ? [v.bgImage] : []));
+  const { saving, error, run } = useSave("hero", isNew, () => { cleanup.markSaved(); onSaved(); });
   const build = () => ({
     tab: v.tab.trim(), badge: v.badge.trim(), badgeIcon: v.badgeIcon, titleMain: v.titleMain.trim(), titleHighlight: v.titleHighlight.trim(), text: v.text.trim(),
-    bgImage: v.bgImage.trim(), accent: v.accent, ctaLabel: v.ctaLabel.trim(), ctaHref: v.ctaHref.trim(),
+    bgImage: v.bgImage.trim() || (() => { throw new Error("Upload a banner picture"); })(), accent: v.accent, ctaLabel: v.ctaLabel.trim(), ctaHref: v.ctaHref.trim(),
     telematics: { vehicle: v.vehicle.trim(), plate: v.plate.trim(), place: v.place.trim(), speed: v.speed.trim(), ignition: v.ignition, status: v.status.trim(), route: t?.route ?? DEFAULT_ROUTE, sensor: v.sensor.trim(), fuel: v.fuel.trim() },
     sort: toInt("Order", v.sort) ?? 0, active: v.active,
   });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void run(v.id || slug(v.tab), build); }} className="grid gap-4 p-5 sm:grid-cols-2">
-      {isNew && <F label="Id (URL name)" hint="Lower-case, e.g. summer-offer. Can't be changed later."><input className={inputCls} value={v.id} onChange={set("id")} onBlur={() => !v.id && setV((s) => ({ ...s, id: slug(s.tab) }))} /></F>}
+    <form onSubmit={(e) => { e.preventDefault(); void run(isNew ? autoId(v.tab) : v.id, build); }} className="grid gap-4 p-5 sm:grid-cols-2">
       <F label="Tab label" hint="Short name under the progress bar."><input className={inputCls} value={v.tab} onChange={set("tab")} required /></F>
       <F label="Badge text"><input className={inputCls} value={v.badge} onChange={set("badge")} required /></F>
       <F label="Badge icon"><select className={inputCls} value={v.badgeIcon} onChange={set("badgeIcon")}>{["shield", "bike", "truck"].map((x) => <option key={x}>{x}</option>)}</select></F>
       <F label="Headline"><input className={inputCls} value={v.titleMain} onChange={set("titleMain")} required /></F>
       <F label="Highlighted words" hint="Shown in orange after the headline."><input className={inputCls} value={v.titleHighlight} onChange={set("titleHighlight")} required /></F>
       <F label="Description" wide><textarea className={`${textareaCls} min-h-24`} value={v.text} onChange={set("text")} required /></F>
-      <F label="Background image" hint="Files in the website's /public/img folder. Add new pictures there, then type the path.">
-        <input className={inputCls} list="hero-images" value={v.bgImage} onChange={set("bgImage")} required /><datalist id="hero-images">{HERO_IMAGES.map((i) => <option key={i} value={i} />)}</datalist>
-      </F>
-      <div className="relative aspect-[16/6] overflow-hidden rounded-lg bg-navy-950">{v.bgImage.startsWith("/") && <Image key={v.bgImage} src={v.bgImage} alt="" fill sizes="400px" className="object-cover opacity-80" />}</div>
+      <ImageManager single wide preset="banner" label="Banner picture" value={v.bgImage ? [v.bgImage] : []} onChange={(l) => setV((s) => ({ ...s, bgImage: l[0] ?? "" }))} onUploaded={cleanup.track} />
       <F label="Glow colour"><select className={inputCls} value={v.accent} onChange={set("accent")}>{["brand", "sky", "emerald"].map((x) => <option key={x}>{x}</option>)}</select></F>
       <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
       <F label="Button text"><input className={inputCls} value={v.ctaLabel} onChange={set("ctaLabel")} required /></F>
@@ -273,15 +346,14 @@ function FaqForm({ initial, categories, onSaved, onCancel }: FormProps<AdminFaq>
   const set = (k: keyof typeof v) => (e: { target: { value: string } }) => setV((s) => ({ ...s, [k]: e.target.value }));
   const { saving, error, run } = useSave("faqs", isNew, () => { cleanup.markSaved(); onSaved(); });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void run(v.id, () => ({ category: v.category.trim(), q: v.q.trim(), a: v.a.trim(), tag: v.tag.trim() || undefined, sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
-      <F label="Question" wide><input className={inputCls} value={v.q} onChange={(e) => { set("q")(e); }} onBlur={() => isNew && !v.id && setV((s) => ({ ...s, id: slug(s.q).slice(0, 60) }))} required /></F>
+    <form onSubmit={(e) => { e.preventDefault(); void run(isNew ? autoId(v.q) : v.id, () => ({ category: v.category.trim(), q: v.q.trim(), a: v.a.trim(), tag: v.tag.trim() || undefined, sort: toInt("Order", v.sort) ?? 0, active: v.active })); }} className="grid gap-4 p-5 sm:grid-cols-2">
+      <F label="Question" wide><input className={inputCls} value={v.q} onChange={(e) => { set("q")(e); }} required /></F>
       <div className="sm:col-span-2">
         <span className="mb-1.5 block text-sm font-medium text-body-strong">Answer</span>
         <RichEditor value={initial?.a ?? ""} onChange={(html) => setV((s) => ({ ...s, a: html }))} onUploaded={cleanup.track} height={220} placeholder="Write the answer…" />
       </div>
       <F label="Category"><input className={inputCls} list="faq-cat-list" value={v.category} onChange={set("category")} required /><datalist id="faq-cat-list">{categories.map((c) => <option key={c} value={c} />)}</datalist></F>
       <F label="Tag (optional)"><input className={inputCls} value={v.tag} onChange={set("tag")} /></F>
-      {isNew && <F label="Id (URL name)" hint="Also the link to this question, e.g. /faq#my-question"><input className={inputCls} value={v.id} onChange={set("id")} /></F>}
       <F label="Display order"><input className={inputCls} inputMode="numeric" value={v.sort} onChange={set("sort")} /></F>
       <label className="flex items-center gap-3 sm:col-span-2"><Switch on={v.active} onChange={() => setV((s) => ({ ...s, active: !s.active }))} label="Visible on the website" /><span className="text-sm font-medium text-ink">Visible on the website</span></label>
       <FormFooter saving={saving} error={error} onCancel={onCancel} />
@@ -441,7 +513,7 @@ export default function CatalogAdminView({ kind: tab }: { kind: Kind }) {
 
       {deviceFilters && products.data && <Pagination page={products.data.page} limit={products.data.limit} total={products.data.total} onPage={setPage} />}
 
-      <Modal open={!!editing} onClose={closeEdit} wide title={editing ? `${editing.item ? "Edit" : "Add"} ${editing.kind === "plans" ? "package" : editing.kind === "devices" ? "product" : editing.kind === "hero" ? "hero slide" : editing.kind === "categories" ? (editing.parent || (editing.item as AdminCategory | null)?.parentId ? "sub-category" : "category") : "FAQ"}` : ""}>
+      <Modal open={!!editing} onClose={closeEdit} wide={editing?.kind === "devices" ? "xl" : true} title={editing ? `${editing.item ? "Edit" : "Add"} ${editing.kind === "plans" ? "package" : editing.kind === "devices" ? "product" : editing.kind === "hero" ? "hero slide" : editing.kind === "categories" ? (editing.parent || (editing.item as AdminCategory | null)?.parentId ? "sub-category" : "category") : "FAQ"}` : ""}>
         {editing && cat && (
           editing.kind === "hero" ? <HeroForm key={editing.item?.id ?? "new"} initial={editing.item as AdminHeroSlide | null} onSaved={saved} onCancel={closeEdit} /> :
           editing.kind === "categories" ? <CategoryForm key={editing.item?.id ?? `new-${editing.parent?.id ?? "top"}`} initial={editing.item as AdminCategory | null} catTree={catTree} parent={editing.parent ?? null} onSaved={saved} onCancel={closeEdit} /> :

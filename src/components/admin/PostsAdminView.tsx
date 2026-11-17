@@ -113,7 +113,7 @@ function PostForm({ initial, onDone }: { initial: AdminPost | null; onDone: () =
   const pickCover = async (f: File | undefined) => {
     if (!f) return;
     setError(null); setBusy("Uploading…");
-    try { const up = await upload({ file: await prepareImage(f), name: f.name }).unwrap(); cleanup.track(up.token); setCover(up.token); }
+    try { const up = await upload({ file: await prepareImage(f, "cover"), name: f.name }).unwrap(); cleanup.track(up.token); setCover(up.token); }
     catch (e) { setError(errorMessage(e, "Upload failed")); }
     setBusy(null); if (file.current) file.current.value = "";
   };

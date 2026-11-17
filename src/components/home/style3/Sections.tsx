@@ -15,7 +15,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import {
   ArrowRight, BarChart3, Bell, Bike, CalendarCheck, ChevronDown, Fence, Fuel, Globe,
-  Lock, Mail, MapPin, Phone, Route, Shield, ShieldCheck, Smartphone, Truck, Car, User, type LucideIcon,
+  Lock, Mail, MapPin, Phone, Route, Shield, ShieldCheck, Smartphone, Truck, Car, Unlock, User, type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import Container from "@/components/common/Container";
@@ -39,7 +39,7 @@ const clean = (l: string) => l.replace("/img/partners/", "/img/partners/clean/")
 /* ================================================================ 1. hero */
 const HERO_ICONS: Record<HeroIcon, LucideIcon> = { shield: Shield, bike: Bike, truck: Truck };
 
-function TelematicsPreviewCard({ t }: { t: HeroTelematics }) {
+function SimpleTelematicsCard({ t }: { t: HeroTelematics }) {
   const [locked, setLocked] = useState(t.ignition === "LOCKED");
 
   const handleToggleLock = () => {
@@ -53,61 +53,39 @@ function TelematicsPreviewCard({ t }: { t: HeroTelematics }) {
   };
 
   return (
-    <div className="w-full max-w-[380px] rounded-md border border-white/10 bg-[#0d1e30]/90 p-5 text-white backdrop-blur-xl">
-      {/* Top status */}
+    <div className="w-full max-w-[340px] rounded-md border border-white/15 bg-[#091524]/90 p-5 text-white backdrop-blur-xl">
+      {/* Live status header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-75", locked ? "bg-amber-400" : "bg-emerald-400")} />
             <span className={cn("relative inline-flex h-2 w-2 rounded-full", locked ? "bg-amber-400" : "bg-emerald-400")} />
           </span>
-          <span className="text-xs font-semibold text-slate-200">Live Telematics</span>
+          <span className="text-xs font-semibold text-slate-200">Live Protection</span>
         </div>
         <span className={cn(
           "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border",
           locked
-            ? "border-amber-500/30 bg-amber-500/15 text-amber-300"
-            : "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
+            ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
+            : "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
         )}>
-          {locked ? "Engine Locked" : t.status}
+          {locked ? "Locked" : "Online"}
         </span>
       </div>
 
       {/* Vehicle Info */}
-      <div className="mt-3.5">
+      <div className="mt-4">
         <p className="text-base font-bold text-white">{t.vehicle}</p>
         <p className="font-mono text-xs text-slate-400">{t.plate}</p>
       </div>
 
       {/* Location */}
-      <div className="mt-3 flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.04] px-3 py-2 text-xs text-slate-300">
+      <div className="mt-3.5 flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs text-slate-300">
         <MapPin className="h-4 w-4 shrink-0 text-brand-400" />
         <span className="truncate">{t.place}</span>
       </div>
 
-      {/* 2x2 Stats Grid */}
-      <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
-          <span className="block text-[10px] font-medium uppercase text-slate-400">Speed</span>
-          <span className="mt-0.5 block text-sm font-bold text-white">{locked ? "0 km/h" : t.speed}</span>
-        </div>
-        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
-          <span className="block text-[10px] font-medium uppercase text-slate-400">Ignition</span>
-          <span className={cn("mt-0.5 block text-sm font-bold", locked ? "text-amber-400" : t.ignition === "ON" ? "text-emerald-400" : "text-slate-300")}>
-            {locked ? "LOCKED" : t.ignition}
-          </span>
-        </div>
-        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
-          <span className="block text-[10px] font-medium uppercase text-slate-400">Fuel / Battery</span>
-          <span className="mt-0.5 block text-sm font-bold text-white">{t.fuel}</span>
-        </div>
-        <div className="rounded-md border border-white/5 bg-white/[0.03] p-2.5">
-          <span className="block text-[10px] font-medium uppercase text-slate-400">Sensors</span>
-          <span className="mt-0.5 block truncate text-xs font-semibold text-slate-300">{t.sensor}</span>
-        </div>
-      </div>
-
-      {/* Lock Button */}
+      {/* Single Clean Action Button */}
       <button
         onClick={handleToggleLock}
         type="button"
@@ -118,8 +96,8 @@ function TelematicsPreviewCard({ t }: { t: HeroTelematics }) {
             : "bg-red-600/90 text-white hover:bg-red-600"
         )}
       >
-        <Lock className="h-3.5 w-3.5" />
-        <span>{locked ? "Restore Engine Ignition" : "Remote Engine Immobilizer"}</span>
+        {locked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+        <span>{locked ? "Unlock Engine" : "Lock Engine"}</span>
       </button>
     </div>
   );
@@ -153,7 +131,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
           return (
             <SwiperSlide key={s.id}>
               <div className="relative isolate flex min-h-[480px] items-center overflow-hidden bg-[#0a1628] sm:min-h-[520px]">
-                <Image
+                <ProductImage
                   src={s.bgImage}
                   alt=""
                   fill
@@ -170,6 +148,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
                       <BadgeIcon className="h-3.5 w-3.5" />
                       {s.badge}
                     </span>
+
                     <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-[52px]">
                       {s.titleMain}{" "}
                       <span className="text-brand-500">{s.titleHighlight}</span>
@@ -177,12 +156,6 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
                     <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
                       {s.text}
                     </p>
-
-                    <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-slate-300">
-                      <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-400" /> 10s Live Refresh</span>
-                      <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-brand-400" /> Remote Engine Lock</span>
-                      <span className="inline-flex items-center gap-1.5"><Phone className="h-4 w-4 text-sky-400" /> 24/7 Helpline Support</span>
-                    </div>
 
                     <div className="mt-7 flex flex-wrap gap-3">
                       {s.ctaHref.startsWith("https://") ? (
@@ -215,7 +188,7 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
                   </div>
 
                   <div className="hidden justify-center sm:flex lg:col-span-5 lg:justify-end">
-                    <TelematicsPreviewCard t={s.telematics} />
+                    <SimpleTelematicsCard t={s.telematics} />
                   </div>
                 </Container>
               </div>
@@ -224,35 +197,38 @@ function HeroCarousel({ slides }: { slides: HeroSlideT[] }) {
         })}
       </Swiper>
 
-      {/* slide tabs */}
+      {/* slide tabs with vehicle category icons */}
       {slides.length > 1 && (
-        <div className="absolute inset-x-0 bottom-5 z-20">
+        <div className="absolute inset-x-0 bottom-4 z-20">
           <Container>
-            <div role="tablist" aria-label="Choose slide" className="flex items-center gap-4">
-              {slides.map((s, i) => (
-                <button
-                  key={s.id}
-                  role="tab"
-                  aria-selected={active === i}
-                  onClick={() => swiperRef.current?.slideToLoop(i)}
-                  className="group flex items-center gap-2 text-left"
-                >
-                  <span
+            <div role="tablist" aria-label="Choose vehicle type" className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {slides.map((s, i) => {
+                const TabIcon = i === 0 ? Car : i === 1 ? Bike : Truck;
+                const isSel = active === i;
+                return (
+                  <button
+                    key={s.id}
+                    role="tab"
+                    aria-selected={isSel}
+                    onClick={() => swiperRef.current?.slideToLoop(i)}
                     className={cn(
-                      "block h-1.5 rounded-full transition-all duration-300",
-                      active === i ? "w-8 bg-brand-500" : "w-3 bg-white/25 group-hover:bg-white/50"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-xs font-medium transition-colors",
-                      active === i ? "text-white" : "text-slate-400 group-hover:text-slate-200"
+                      "group flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all backdrop-blur-md",
+                      isSel
+                        ? "border-brand-500/60 bg-brand-500/20 text-white"
+                        : "border-white/10 bg-black/30 text-slate-400 hover:border-white/20 hover:text-slate-200"
                     )}
                   >
-                    {s.tab}
-                  </span>
-                </button>
-              ))}
+                    <TabIcon className={cn("h-3.5 w-3.5", isSel ? "text-brand-400" : "text-slate-400 group-hover:text-slate-300")} />
+                    <span>{s.tab}</span>
+                    {isSel && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-400" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </Container>
         </div>

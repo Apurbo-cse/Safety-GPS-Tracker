@@ -18,7 +18,6 @@ const MEDIA: Record<string, { src: string; contain?: boolean }> = {
   "remote-engine-lock": { src: "/img/hero-bike.jpg" },
   "geo-fencing-alerts": { src: "/img/industries/logistics-bd.jpg" },
   "route-history-playback": { src: "/img/hero-truck.jpg" },
-  "in-car-voice-monitoring": { src: "/img/packages/voice-gps.png", contain: true },
   "speed-violation-alerts": { src: "/img/hero-car.jpg" },
   "brta-document-expiry-alerts": { src: "/img/industries/business-fleet-v3.jpg" },
   "android-application": { src: "/img/platform.png", contain: true },

@@ -181,4 +181,8 @@ export class OrderItem {
 
   @Column({ type: "int" })
   qty: number;
+
+  /** Units the customer has sent back (devices only). */
+  @Column({ name: "returned_qty", type: "int", default: 0 })
+  returnedQty: number;
 }

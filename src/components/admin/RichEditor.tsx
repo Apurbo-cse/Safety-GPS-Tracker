@@ -55,7 +55,7 @@ export default function RichEditor({ value, onChange, onUploaded, height = 280, 
             setError(null);
             for (const f of Array.from(files)) {
               try {
-                const up = await cb.current.upload({ file: await prepareImage(f), name: f.name }).unwrap();
+                const up = await cb.current.upload({ file: await prepareImage(f, "content"), name: f.name }).unwrap();
                 cb.current.onUploaded?.(up.token);
                 $el.summernote("insertImage", mediaUrl(up.token), ($img: any) => $img.css("max-width", "100%"));
               } catch (e) { setError(errorMessage(e, "Upload failed")); }

@@ -151,4 +151,7 @@ export interface CartItem {
   price: number;
   monthly?: number;
   qty: number;
+  /** Order lines only (staff): the line's own id, and how many units the customer has sent back. */
+  lineId?: string;
+  returned?: number;
 }

@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Header, HttpCode, Param, Patch, Post, Put, Query } from "@nestjs/common";
-import { AdminProductsQuery, CategoryDto, DeviceDto, FaqDto, HeroSlideDto, PlanDto } from "../catalog/catalog.dto";
+import { AdminProductsQuery, CategoryDto, DeviceDto, FaqDto, HeroSlideDto, PlanDto, StockDto } from "../catalog/catalog.dto";
+import { StockService } from "../catalog/stock.service";
 import { CatalogService } from "../catalog/catalog.service";
 import { AnyPermission, CurrentUser, Permissions, Roles } from "../common/decorators";
 import { SlugPipe } from "../common/slug.pipe";
-import { AdminOrdersQuery, UpdateOrderDto, UpdateStatusDto } from "../orders/orders.dto";
+import { AdminOrdersQuery, ReturnItemsDto, UpdateOrderDto, UpdateStatusDto } from "../orders/orders.dto";
 import { OrdersService } from "../orders/orders.service";
 import { PaymentsService } from "../payments/payments.service";
 import { AdminPostsQuery, PostDto } from "../posts/posts.dto";
@@ -28,7 +29,7 @@ const hideCost = <T extends { cost?: number | null }>(rows: T[]) => rows.map(({ 
  */
 @Roles("admin") @Controller("admin")
 export class AdminController {
-  constructor(private orders: OrdersService, private catalog: CatalogService, private admin: AdminService, private posts: PostsService, private roles: RolesService, private content: ContentService, private coupons: CouponsService, private contact: ContactService, private payments: PaymentsService) {}
+  constructor(private orders: OrdersService, private catalog: CatalogService, private stock: StockService, private admin: AdminService, private posts: PostsService, private roles: RolesService, private content: ContentService, private coupons: CouponsService, private contact: ContactService, private payments: PaymentsService) {}
 
   private async finance(user: User) { return (await this.roles.permissionsFor(user)).includes("finance.view"); }
 
@@ -69,7 +70,18 @@ export class AdminController {
   refundOrder(@Param("id") id: string) { return this.payments.refund(id.slice(0, 16)); }
 
   @Permissions("orders.manage") @Patch("orders/:id/status")
-  setStatus(@Param("id") id: string, @Body() dto: UpdateStatusDto) { return this.orders.adminSetStatus(id, dto.status); }
+  setStatus(@CurrentUser() me: User, @Param("id") id: string, @Body() dto: UpdateStatusDto) { return this.orders.adminSetStatus(id, dto.status, { damaged: dto.damaged, userId: me.id }); }
+
+  /** Part of an order came back: which lines, how many, and whether they are damaged. */
+  @Permissions("orders.manage") @HttpCode(200) @Post("orders/:id/return-items")
+  returnItems(@CurrentUser() me: User, @Param("id") id: string, @Body() dto: ReturnItemsDto) { return this.orders.returnItems(id.slice(0, 16), dto.lines, me.id, dto.note); }
+
+  /* -------------------------------------------------------------- stock */
+  @Permissions("products.manage") @HttpCode(200) @Post("catalog/devices/:id/stock")
+  changeStock(@CurrentUser() me: User, @Param("id", SlugPipe) id: string, @Body() dto: StockDto) { return this.stock.change(id, dto, me.id); }
+
+  @Permissions("products.manage") @Get("catalog/devices/:id/stock/history")
+  stockHistory(@Param("id", SlugPipe) id: string) { return this.stock.history(id); }
 
   /* ----------------------------------------------------------- catalogue */
   /** `?slim=1` leaves the (potentially long) product list out — use GET /admin/products for that. */

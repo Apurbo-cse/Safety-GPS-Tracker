@@ -177,7 +177,7 @@ up = await upload(Buffer.from("this is not a picture, just text pretending to be
 up = await upload(Buffer.alloc(0)); ok(up.status === 400, "empty upload refused");
 up = await upload(Buffer.concat([png("big"), Buffer.alloc(3 * 1024 * 1024)])); ok(up.status === 400 || up.status === 413, "file over 3 MB refused");
 let m = await media(a1.json.token);
-ok(m.status === 200 && m.headers.get("content-type") === "image/png" && /immutable/.test(m.headers.get("cache-control")) && m.headers.get("x-content-type-options") === "nosniff", "served with the right type, long cache and nosniff");
+ok(m.status === 200 && m.headers.get("content-type") === "image/png" && /no-cache/.test(m.headers.get("cache-control")) && !!m.headers.get("etag") && m.headers.get("x-content-type-options") === "nosniff", "served with the right type, revalidating cache (ETag) and nosniff");
 ok(m.headers.get("cross-origin-resource-policy") === "cross-origin", "can be embedded by the website (cross-origin resource policy)");
 const etag = m.headers.get("etag"); m = await media(a1.json.token, { "if-none-match": etag }); ok(m.status === 304, "unchanged picture answers 304 to If-None-Match");
 m = await fetch(`${API}/media/not-a-uuid`); ok(m.status === 400, "malformed id → 400");
@@ -191,7 +191,7 @@ const prod = (images, over = {}) => ({ name: "Smoke Gallery Tracker", category: 
 r = await call("PUT", "/admin/catalog/devices/smoke-gallery", { token: tokAdmin, body: prod([a1.json.token, b1.json.token, "/img/hero-car.jpg"]) });
 ok(r.status === 200 && r.json.image === a1.json.token && r.json.images.length === 3, "product saved with three pictures; main = first");
 r = await call("GET", "/catalog"); let g = r.json.devices.find((d) => d.id === "smoke-gallery");
-ok(g.images.length === 3 && g.image === g.images[0] && g.images[0].startsWith("http") && g.images[0].endsWith(`/api/v1/media/${a1.json.token.slice(6)}`) && g.images[2] === "/img/hero-car.jpg", "public catalogue returns absolute URLs for uploads and local paths unchanged");
+ok(g.images.length === 3 && g.image === g.images[0] && g.images[0].startsWith("http") && g.images[0].endsWith(`/api/v1/media/${a1.json.token.slice(6)}`) && g.images[2] === "/img/hero-car.jpg", "public catalogue returns absolute URLs for uploads and site-picture paths unchanged");
 r = await call("PUT", "/admin/catalog/devices/smoke-gallery", { token: tokAdmin, body: prod([b1.json.token, a1.json.token, "/img/hero-car.jpg"]) });
 ok(r.status === 200 && r.json.image === b1.json.token, "reordering changes the main picture");
 r = await call("PUT", "/admin/catalog/devices/smoke-gallery", { token: tokAdmin, body: prod(["https://evil.example/x.png"]) }); ok(r.status === 400, "remote picture URL rejected");
@@ -466,6 +466,75 @@ r = await call("GET", "/posts/smoke-post"); ok(r.status === 404, "a deleted post
 /* clean up the staff accounts made above */
 for (const x of [sales, support, content, inventory, inv, auditor, writer]) { if (x.id) await call("DELETE", `/admin/staff/${x.id}`, { token: tokAdmin }); if (x.token) await call("DELETE", "/me", { token: x.token }); }
 await call("DELETE", "/admin/roles/auditor", { token: tokAdmin });
+
+console.log("stock tools, history and returns");
+const SH = `stock-hist-${stamp}`; // a fresh product every run, so its history starts empty
+const sk = (over = {}) => ({ name: "Stock History Tracker", category: "GPS Tracking Devices", subcategory: "Car Trackers", visual: "tracker", summary: "Stock history test.", specs: [], features: [], price: 1500, stock: 5, ...over });
+const stk = (mode, qty, note, token = tokAdmin) => call("POST", `/admin/catalog/devices/${SH}/stock`, { token, body: { mode, qty, ...(note ? { note } : {}) } });
+const hist = async () => (await call("GET", `/admin/catalog/devices/${SH}/stock/history`, { token: tokAdmin })).json;
+r = await call("PUT", `/admin/catalog/devices/${SH}`, { token: tokAdmin, body: sk() }); ok(r.status === 200 && r.json.stock === 5, "a new product can start with a stock number");
+let hh = await hist(); ok(hh.length === 1 && hh[0].reason === "initial" && hh[0].delta === 5 && hh[0].stockAfter === 5, "…and that is the first line of its history");
+r = await stk("add", 10, "Supplier X"); ok(r.status === 200 && r.json.stock === 15, "adding stock adds to what is there");
+r = await stk("remove", 3, "Broken"); ok(r.status === 200 && r.json.stock === 12, "removing stock takes it off");
+r = await stk("remove", 100); ok(r.status === 409, "can't remove more than is in stock");
+r = await stk("add", 0); ok(r.status === 400, "adding 0 is refused");
+r = await stk("set", 8, "Shelf count"); ok(r.status === 200 && r.json.stock === 8 && (await stockOf(SH)) === 8, "set count makes it exactly that number");
+hh = await hist(); ok(hh[0].reason === "recount" && hh[0].delta === -4 && hh[0].stockAfter === 8 && hh[0].note === "Shelf count" && hh[0].by, "history records reason, change, result, note and who did it");
+ok(hh.map((x) => x.reason).join() === "recount,adjustment,purchase,initial", "history is newest first");
+r = await call("PUT", `/admin/catalog/devices/${SH}`, { token: tokAdmin, body: (({ stock, ...rest }) => rest)(sk({ summary: "Edited without a stock number" })) }); ok(r.status === 200 && r.json.stock === 8, "editing a product without sending stock leaves the stock alone");
+r = await stk("add", 1, "", tokA); ok(r.status === 403, "a customer can't change stock");
+const salesOnly = await makeStaff("sales", "stockdeny");
+r = await stk("add", 1, "", salesOnly.token); ok(r.status === 403, "a role without product access can't change stock");
+r = await call("PUT", `/admin/catalog/devices/${SH}-off`, { token: tokAdmin, body: sk({ name: "Uncounted Tracker", stock: null }) }); r = await call("POST", `/admin/catalog/devices/${SH}-off/stock`, { token: tokAdmin, body: { mode: "add", qty: 2 } }); ok(r.status === 409, "adding to a product that doesn't count stock → asks to set a count first");
+r = await call("POST", `/admin/catalog/devices/${SH}-off/stock`, { token: tokAdmin, body: { mode: "set", qty: 4 } }); ok(r.status === 200 && r.json.stock === 4, "…and set count starts counting");
+r = await call("POST", "/admin/catalog/devices/no-such-product/stock", { token: tokAdmin, body: { mode: "set", qty: 1 } }); ok(r.status === 404, "unknown product → 404");
+
+// orders move stock and write to the history
+r = await call("POST", "/orders", { token: tokA, body: order([{ id: `dev-${SH}`, qty: 2 }]) }); const ho = r.json.id; ok(r.status === 201 && (await stockOf(SH)) === 6, "an order takes its units");
+hh = await hist(); ok(hh[0].reason === "order" && hh[0].delta === -2 && hh[0].orderId === ho, "…and shows in the history with its order id");
+r = await call("PATCH", `/admin/orders/${ho}/status`, { token: tokAdmin, body: { status: "delivered" } }); ok(r.status === 200, "order delivered");
+
+// partial returns
+let ao = await call("GET", `/admin/orders/${ho}`, { token: tokAdmin }); const retLine = ao.json.items[0].lineId; ok(!!retLine && ao.json.items[0].returned === undefined, "staff see each order retLine's id");
+r = await call("POST", `/admin/orders/${ho}/return-items`, { token: tokAdmin, body: { lines: [{ lineId: retLine, qty: 3 }] } }); ok(r.status === 400, "returning more than was bought is refused");
+r = await call("POST", `/admin/orders/${ho}/return-items`, { token: tokAdmin, body: { lines: [{ lineId: "0f0f0f0f-0f0f-4f0f-8f0f-0f0f0f0f0f0f", qty: 1 }] } }); ok(r.status === 400, "a retLine that isn't in this order is refused");
+r = await call("POST", `/admin/orders/${ho}/return-items`, { token: tokA, body: { lines: [{ lineId: retLine, qty: 1 }] } }); ok(r.status === 403, "a customer can't record a return");
+r = await call("POST", `/admin/orders/${ho}/return-items`, { token: tokAdmin, body: { lines: [{ lineId: retLine, qty: 1 }], note: "Changed mind" } }); ok(r.status === 200 && r.json.status === "delivered" && r.json.items[0].returned === 1 && (await stockOf(SH)) === 7, "one unit back in good condition → goes back on the shelf, order stays delivered");
+hh = await hist(); ok(hh[0].reason === "return" && hh[0].delta === 1 && hh[0].note === "Changed mind", "…and is in the history");
+r = await call("POST", `/admin/orders/${ho}/return-items`, { token: tokAdmin, body: { lines: [{ lineId: retLine, qty: 1, damaged: true }] } }); ok(r.status === 200 && r.json.status === "returned" && r.json.items[0].returned === 2 && (await stockOf(SH)) === 7, "the last unit back damaged → NOT added to stock, and the order becomes returned");
+hh = await hist(); ok(hh[0].reason === "return_damaged" && hh[0].delta === 0 && hh[0].damaged === 1, "…the history records the damaged unit");
+r = await call("PATCH", `/admin/orders/${ho}/status`, { token: tokAdmin, body: { status: "cancelled" } }); ok(r.status === 200 && (await stockOf(SH)) === 7, "cancelling an order that was fully returned doesn't give its stock back twice");
+r = await call("POST", "/orders", { token: tokA, body: order([{ id: `dev-${SH}`, qty: 1 }]) }); const ho2 = r.json.id;
+r = await call("POST", `/admin/orders/${ho2}/return-items`, { token: tokAdmin, body: { lines: [{ lineId: (await call("GET", `/admin/orders/${ho2}`, { token: tokAdmin })).json.items[0].lineId, qty: 1 }] } }); ok(r.status === 409, "items can only be returned from a delivered order");
+await call("PATCH", `/admin/orders/${ho2}/status`, { token: tokAdmin, body: { status: "delivered" } });
+r = await call("PATCH", `/admin/orders/${ho2}/status`, { token: tokAdmin, body: { status: "returned", damaged: true } }); ok(r.status === 200 && (await stockOf(SH)) === 6, "marking a whole order returned as damaged keeps its unit off the shelf");
+r = await call("PATCH", `/admin/orders/${ho2}/status`, { token: tokAdmin, body: { status: "refunded" } });
+
+console.log("staff can't hand out more access than they have");
+r = await call("PUT", "/admin/roles/hr-smoke", { token: tokAdmin, body: { name: "HR smoke", description: "", permissions: ["staff.manage", "orders.view"] } }); ok(r.status === 200, "owner makes a role that can manage staff but not products or money");
+await call("PUT", "/admin/roles/viewer-smoke", { token: tokAdmin, body: { name: "Viewer smoke", description: "", permissions: ["orders.view"] } });
+await call("PUT", "/admin/roles/none-smoke", { token: tokAdmin, body: { name: "None smoke", description: "", permissions: [] } });
+const hr = await makeStaff("hr-smoke", "hr");
+const owners = (await call("GET", "/admin/staff", { token: hr.token })).json; const ownerRow = owners.find((x) => x.roleId === "owner");
+ok(Array.isArray(owners) && !!ownerRow, "that role can list staff");
+r = await call("POST", `/admin/staff/${ownerRow.id}/password`, { token: hr.token, body: { password: "Hacked1234" } }); ok(r.status === 403, "…but can't reset an owner's password");
+r = await call("PATCH", `/admin/staff/${ownerRow.id}`, { token: hr.token, body: { name: "Not Owner" } }); ok(r.status === 403, "…or edit an owner");
+r = await call("PATCH", `/admin/staff/${ownerRow.id}`, { token: hr.token, body: { disabled: true } }); ok(r.status === 403, "…or block an owner");
+r = await call("DELETE", `/admin/staff/${ownerRow.id}`, { token: hr.token }); ok(r.status === 403, "…or remove an owner");
+const strong = await makeStaff("support", "strong");
+const victim = await makeStaff("viewer-smoke", "victim");
+r = await call("PATCH", `/admin/staff/${strong.id}`, { token: hr.token, body: { name: "Nope" } }); ok(r.status === 403, "…or change someone who has more access than it does (support has customer access)");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { roleId: "owner" } }); ok(r.status === 403, "…or make someone an owner");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { roleId: "manager" } }); ok(r.status === 403, "…or give a role with permissions it doesn't have (manager has products and finance)");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { roleId: "support" } }); ok(r.status === 403, "…or give support (customer access it doesn't have)");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { roleId: "none-smoke" } }); ok(r.status === 200 && r.json.roleId === "none-smoke", "…but can change someone to a role within its own access");
+r = await call("PUT", "/admin/roles/hr-smoke", { token: hr.token, body: { name: "HR smoke", description: "", permissions: ["staff.manage", "orders.view", "finance.view"] } }); ok(r.status === 403, "…and can't add a permission it doesn't hold to its own role");
+r = await call("PUT", "/admin/roles/manager", { token: hr.token, body: { name: "Manager", description: "", permissions: ["orders.view"] } }); ok(r.status === 403, "…or edit a role stronger than itself");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { name: "Renamed Victim", mobile: phone() } }); ok(r.status === 200 && r.json.name === "Renamed Victim", "staff details (name, mobile) can be edited");
+r = await call("PATCH", `/admin/staff/${victim.id}`, { token: hr.token, body: { email: hr.email } }); ok(r.status === 409, "an email already used by someone else is refused");
+r = await call("PATCH", `/admin/staff/${hr.id}`, { token: hr.token, body: { name: "HR Self" } }); ok(r.status === 200, "a person can edit their own name");
+r = await call("PATCH", `/admin/staff/${hr.id}`, { token: hr.token, body: { roleId: "owner" } }); ok(r.status === 400, "…but not their own role");
+r = await call("DELETE", `/admin/staff/${victim.id}`, { token: hr.token }); await call("DELETE", `/admin/staff/${hr.id}`, { token: tokAdmin }); await call("DELETE", `/admin/staff/${strong.id}`, { token: tokAdmin }); await call("DELETE", `/admin/staff/${salesOnly.id}`, { token: tokAdmin }); for (const rid of ["hr-smoke", "viewer-smoke", "none-smoke"]) await call("DELETE", `/admin/roles/${rid}`, { token: tokAdmin });
 
 console.log("account deletion");
 r = await call("DELETE", "/me", { token: tokB }); ok(r.status === 204, "customer deletes own account");

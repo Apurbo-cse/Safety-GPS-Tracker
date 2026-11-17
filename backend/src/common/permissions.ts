@@ -24,3 +24,6 @@ export const BUILT_IN_ROLES: BuiltInRole[] = [
   { id: "inventory", name: "Inventory", description: "Keeps products, categories and stock up to date.", permissions: ["products.manage", "orders.view"] },
 ];
 export const OWNER_ROLE = "owner";
+
+/** True when `actor` holds every permission in `wanted` — nobody may hand out, or touch someone who has, more access than they hold themselves. */
+export const covers = (actor: readonly Permission[], wanted: readonly string[]) => wanted.every((p) => actor.includes(p as Permission));

@@ -18,6 +18,9 @@ export class AddStaffDto {
 export class UpdateStaffDto {
   @IsOptional() @IsString() @Matches(ROLE_ID) roleId?: string;
   @IsOptional() @IsBoolean() disabled?: boolean;
+  @IsOptional() @Transform(trim) @IsString() @Length(2, 120) name?: string;
+  @IsOptional() @Transform(({ value }) => (typeof value === "string" ? value.trim().toLowerCase() : value)) @IsEmail() @MaxLength(254) email?: string;
+  @IsOptional() @IsBdMobile() mobile?: string;
 }
 
 export class RoleDto {

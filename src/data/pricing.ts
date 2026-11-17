@@ -46,14 +46,14 @@ const PREMIUM = [
 ];
 
 export const plans: PricingPlan[] = [
-  { id: "premium-voice", image: "/img/packages/premium-voice.png", siteTitle: "Premium Pro With Voice", name: "Premium Voice Monitoring", devicePrice: 7000, monthlyCharge: 500, features: PREMIUM, sourceNo: 1, highlight: "Most complete cabin alerts" },
-  { id: "standard-gps", image: "/img/packages/standard-gps.png", siteTitle: "Premium Device With Voice", name: "Standard GPS", devicePrice: 6000, monthlyCharge: 400, features: STANDARD, sourceNo: 2 },
-  { id: "gps-1", image: "/img/packages/gps-1.png", siteTitle: "Premium Without Voice", name: "GPS Package 1", devicePrice: 4000, monthlyCharge: 400, features: STANDARD, sourceNo: 3 },
-  { id: "gps-2", image: "/img/packages/gps-2.png", siteTitle: "Bike Premium Device", name: "GPS Package 2", devicePrice: 4000, monthlyCharge: 300, features: STANDARD, sourceNo: 4, highlight: "Lowest monthly charge" },
-  { id: "gps-3", image: "/img/packages/gps-3.png", siteTitle: "Excavator Device", name: "GPS Package 3", devicePrice: 4000, monthlyCharge: 300, features: STANDARD, sourceNo: 5 },
-  { id: "voice-gps", image: "/img/packages/voice-gps.png", siteTitle: "Truck Tracking Device", name: "Voice Monitoring GPS", devicePrice: 4000, monthlyCharge: 300, features: VOICE, sourceNo: 6 },
-  { id: "video-voice", image: "/img/packages/video-voice.png", siteTitle: "Live Video & Tracking", name: "Video & Voice Monitoring", devicePrice: 16000, monthlyCharge: 500, features: VIDEO, sourceNo: 7, highlight: "Live video + voice" },
-  { id: "voice-gps-2", image: "/img/packages/voice-gps-2.png", siteTitle: "Easy OBD Device", name: "Voice Monitoring GPS 2", devicePrice: 4000, monthlyCharge: 300, features: VOICE, sourceNo: 8 },
+  { id: "premium-voice", siteTitle: "Premium Pro With Voice", name: "Premium Voice Monitoring", devicePrice: 7000, monthlyCharge: 500, features: PREMIUM, sourceNo: 1, highlight: "Most complete cabin alerts" },
+  { id: "standard-gps", siteTitle: "Premium Device With Voice", name: "Standard GPS", devicePrice: 6000, monthlyCharge: 400, features: STANDARD, sourceNo: 2 },
+  { id: "gps-1", siteTitle: "Premium Without Voice", name: "GPS Package 1", devicePrice: 4000, monthlyCharge: 400, features: STANDARD, sourceNo: 3 },
+  { id: "gps-2", siteTitle: "Bike Premium Device", name: "GPS Package 2", devicePrice: 4000, monthlyCharge: 300, features: STANDARD, sourceNo: 4, highlight: "Lowest monthly charge" },
+  { id: "gps-3", siteTitle: "Excavator Device", name: "GPS Package 3", devicePrice: 4000, monthlyCharge: 300, features: STANDARD, sourceNo: 5 },
+  { id: "voice-gps", siteTitle: "Truck Tracking Device", name: "Voice Monitoring GPS", devicePrice: 4000, monthlyCharge: 300, features: VOICE, sourceNo: 6 },
+  { id: "video-voice", siteTitle: "Live Video & Tracking", name: "Video & Voice Monitoring", devicePrice: 16000, monthlyCharge: 500, features: VIDEO, sourceNo: 7, highlight: "Live video + voice" },
+  { id: "voice-gps-2", siteTitle: "Easy OBD Device", name: "Voice Monitoring GPS 2", devicePrice: 4000, monthlyCharge: 300, features: VOICE, sourceNo: 8 },
 ];
 
 /** Union of all features in display order for the comparison table */

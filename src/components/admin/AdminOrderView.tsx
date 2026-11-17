@@ -11,6 +11,7 @@ import { useCan } from "@/lib/useCan";
 import { mediaUrl, type AdminOrder, type Area, type OrderStatus } from "@/lib/api";
 import { errorMessage, useAdminOrderQuery, useSetOrderStatusMutation, useRefundBkashMutation, useUpdateOrderMutation } from "@/store/apiSlice";
 import { cn, formatBDT } from "@/utils/format";
+import ReturnItemsModal from "./ReturnItemsModal";
 import { CARD, ErrorState, PageHeader, Skeleton, StatusBadge, STATUS, STATUS_ORDER, fmtDate, fmtDateTime, view } from "./ui";
 
 const AREA_OPTIONS = [["DNCC", "Inside Dhaka · DNCC (Dhaka North)"], ["DSCC", "Inside Dhaka · DSCC (Dhaka South)"], ["Outside Dhaka", "Outside Dhaka"]] as const;
@@ -65,9 +66,12 @@ export default function AdminOrderView({ id }: { id: string }) {
   const canManage = useCan("orders.manage");
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [returning, setReturning] = useState(false);
 
   const changeStatus = async (next: OrderStatus) => {
     if (!o || next === o.status) return;
+    // a delivered order goes back through the return form, where staff say how many units and whether they are damaged
+    if (next === "returned" && o.status === "delivered") { setReturning(true); return; }
     if ((next === "cancelled" || next === "returned" || next === "refunded") && !window.confirm(`Mark order ${o.id} as ${next}? The customer will see it, and stock and any coupon use are given back.`)) return;
     setBusy(true);
     try { await setOrderStatus({ id: o.id, status: next }).unwrap(); toast.success(`${o.id} → ${STATUS[next].label}`); }
@@ -96,7 +100,7 @@ export default function AdminOrderView({ id }: { id: string }) {
           {o.items.map((i) => (
             <li key={i.id} className="flex items-center gap-3 rounded-lg bg-softer/80 p-3 text-sm dark:bg-navy-900/90">
                     <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-surface dark:bg-navy-950">{i.image ? <ProductImage src={mediaUrl(i.image)} alt={i.name} fill sizes="48px" className="object-contain p-1" /> : <Package className="m-auto mt-3 h-5 w-5 text-slate-400" />}</span>
-              <span className="min-w-0 flex-1"><span className="block truncate font-semibold text-ink">{i.name}</span><span className="text-xs text-slate-500">{i.qty} × {formatBDT(i.price)}{i.monthly ? ` + ${formatBDT(i.monthly)}/mo` : ""}</span></span>
+              <span className="min-w-0 flex-1"><span className="block truncate font-semibold text-ink">{i.name}</span><span className="text-xs text-slate-500">{i.qty} × {formatBDT(i.price)}{i.monthly ? ` + ${formatBDT(i.monthly)}/mo` : ""}{i.returned ? ` · ${i.returned} returned` : ""}</span></span>
               <span className="text-right"><span className="block font-bold tabular-nums text-ink">{formatBDT(i.price * i.qty)}</span>{i.cost != null && <span className="block text-[11px] tabular-nums text-slate-500">cost {formatBDT(i.cost * i.qty)}</span>}</span>
             </li>
           ))}
@@ -133,6 +137,9 @@ export default function AdminOrderView({ id }: { id: string }) {
               )}
               {canManage && <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-slate-500">Move to</p>}
         <div className="flex flex-wrap gap-2">
+          {canManage && o.status === "delivered" && o.items.some((i) => i.kind === "device" && i.qty - (i.returned ?? 0) > 0) && (
+            <button disabled={busy} onClick={() => setReturning(true)} className="rounded-full bg-amber-500/15 px-3.5 py-1.5 text-xs font-semibold text-amber-700 hover:opacity-80 disabled:opacity-50 dark:text-amber-300">Return items…</button>
+          )}
           {canManage && STATUS_ORDER.filter((k) => k !== o.status).map((k) => (
             <button key={k} disabled={busy} onClick={() => void changeStatus(k)} className={cn("rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors hover:opacity-80 disabled:opacity-50", STATUS[k].cls)}>{STATUS[k].label}</button>
           ))}
@@ -142,6 +149,7 @@ export default function AdminOrderView({ id }: { id: string }) {
         </div>
       )}
 
+      {o && <ReturnItemsModal key={`${o.id}-${o.items.map((i) => i.returned ?? 0).join(".")}`} order={o} open={returning} onClose={() => setReturning(false)} />}
       <Modal open={editing} onClose={() => setEditing(false)} wide title={`Edit order ${id}`}>
         {editing && o && <EditOrderForm key={o.id} o={o} onDone={() => setEditing(false)} />}
       </Modal>

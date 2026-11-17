@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEmail, IsISO8601, IsIn, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEmail, IsISO8601, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
 import { DISTRICTS } from "../common/districts";
 import { IsBdMobile } from "../common/bd-mobile";
 import { AREAS, ORDER_STATUSES, PAYMENT_METHODS, type Area, type OrderStatus, type PaymentMethod } from "./order.entities";
@@ -68,6 +68,20 @@ export class CouponDto {
 
 export class UpdateStatusDto {
   @IsIn(ORDER_STATUSES as unknown as string[]) status: OrderStatus;
+  /** For "returned": the goods can't be sold again, so they don't go back on the shelf. */
+  @IsOptional() @IsBoolean() damaged?: boolean;
+}
+
+class ReturnLineDto {
+  @IsUUID() lineId: string;
+  @IsInt() @Min(1) @Max(50) qty: number;
+  @IsOptional() @IsBoolean() damaged?: boolean;
+}
+
+/** Staff record that part of an order came back. */
+export class ReturnItemsDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => ReturnLineDto) lines: ReturnLineDto[];
+  @IsOptional() @IsString() @MaxLength(300) note?: string;
 }
 
 /** Staff fix an order's installation details (for example after a call with the customer). Anything left out stays as it is. */

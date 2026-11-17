@@ -14,6 +14,7 @@ import { EventsGateway } from "../events/events.gateway";
 import { NotificationsService } from "../notifications/notifications.service";
 import { PushService } from "../push/push.service";
 import type { AdminOrdersQuery, CreateOrderDto, QuoteDto, UpdateOrderDto } from "./orders.dto";
+import { logStock, moveStock } from "../catalog/stock.service";
 import { parseRef, priceCart, PricingError } from "./pricing";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 32 symbols, no 0/O/1/I — 256 % 32 === 0 so no modulo bias
@@ -36,7 +37,7 @@ export const toOrderView = (o: Order, images?: Map<string, string>) => ({
   discount: o.discount,
   couponCode: o.couponCode ?? undefined,
   monthlyTotal: o.monthlyTotal,
-  items: (o.items ?? []).map((i) => ({ id: i.itemRef, kind: i.kind, name: i.name, price: i.unitPrice, monthly: i.monthly || undefined, qty: i.qty, image: images?.get(i.itemRef) })),
+  items: (o.items ?? []).map((i) => ({ id: i.itemRef, kind: i.kind, name: i.name, price: i.unitPrice, monthly: i.monthly || undefined, qty: i.qty, image: images?.get(i.itemRef), lineId: i.id, returned: i.returnedQty || undefined })),
   billing: { name: o.billingName, company: o.billingCompany || undefined, taxId: o.billingTaxId || undefined, address: o.billingAddress, division: o.billingDivision, district: o.billingDistrict ?? undefined, postcode: o.billingPostcode || undefined, phone: o.billingPhone, email: o.billingEmail },
   contact: {
     name: o.contactName, phone: o.contactPhone, email: o.contactEmail, address: o.address, division: o.division, district: o.district ?? undefined, thana: o.thana ?? undefined, postcode: o.postcode ?? undefined, area: o.area ?? undefined,
@@ -99,12 +100,13 @@ export class OrdersService {
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
         // stock is taken in the same transaction as the order, so two buyers can never both get the last unit
+        const orderId = newOrderId();
         return await this.orders.manager.transaction(async (m) => {
-          await this.takeStock(m, priced.items);
+          await this.takeStock(m, priced.items, orderId, user.id);
           if (priced.couponCode) await this.takeCoupon(m, priced.couponCode);
           const repo = m.getRepository(Order);
           const order = repo.create({
-            id: newOrderId(), userId: user.id, status: "pending", payment: dto.payment,
+            id: orderId, userId: user.id, status: "pending", payment: dto.payment,
             deviceTotal: priced.deviceTotal, monthlyTotal: priced.monthlyTotal, discount: priced.discount, couponCode: priced.couponCode,
             contactName: dto.name, contactPhone: normalizePhone(dto.phone)!, contactEmail: dto.email,
             address: dto.address, division: divisionOf(dto.district), district: dto.district, postcode: dto.postcode || null, thana: dto.area === "Outside Dhaka" ? null : dto.thana, area: dto.area, vehicleReg: dto.vehicleReg, vehicleType: dto.vehicleType,
@@ -127,14 +129,14 @@ export class OrdersService {
     throw new ConflictException("Could not create the order, please try again");
   }
 
-  /** Take stock for the device lines; throws if there isn't enough. Products with no stock number are not tracked. */
-  private async takeStock(m: EntityManager, items: { itemRef: string; kind: string; name: string; qty: number }[], reopening = false) {
+  /** Take stock for the device lines; throws if there isn't enough. Products with no stock number are not tracked. Units already sent back are not taken again. */
+  private async takeStock(m: EntityManager, items: { itemRef: string; kind: string; name: string; qty: number; returnedQty?: number }[], orderId: string, userId: string | null, reopening = false) {
     for (const i of items) {
       const ref = i.kind === "device" ? parseRef(i.itemRef)?.ref : null;
-      if (!ref) continue;
-      const res = await m.createQueryBuilder().update(Device).set({ stock: () => `"stock" - ${Math.trunc(i.qty)}` })
-        .where("id = :id AND stock IS NOT NULL AND stock >= :q", { id: ref, q: i.qty }).execute();
-      if (res.affected) continue;
+      const qty = Math.trunc(i.qty) - (i.returnedQty ?? 0);
+      if (!ref || qty <= 0) continue;
+      const hit = await moveStock(m, ref, -qty, { reason: reopening ? "reopen" : "order", orderId, userId, note: reopening ? "Order reopened" : "" });
+      if (hit !== null) continue;
       const row = await m.getRepository(Device).findOne({ where: { id: ref }, select: { id: true, stock: true } });
       if (!row || row.stock === null) continue; // untracked (or product since deleted)
       throw new ConflictException(row.stock <= 0 ? `"${i.name}" is out of stock${reopening ? " — can't reopen this order" : ""}` : `Only ${row.stock} of "${i.name}" left${reopening ? " — can't reopen this order" : ""}`);
@@ -165,17 +167,24 @@ export class OrdersService {
     } catch { /* live numbers are a nicety — the order is already saved */ }
   }
 
-  /** Give stock back (order cancelled). */
-  private async returnStock(m: EntityManager, items: { itemRef: string; kind: string; qty: number }[]) {
+  /**
+   * Give stock back (order cancelled / returned / refunded). Units already sent back through "Return items" are skipped.
+   * `damaged`: the goods are not fit to sell again — the history records it, but nothing goes back on the shelf.
+   */
+  private async returnStock(m: EntityManager, items: { itemRef: string; kind: string; qty: number; returnedQty?: number }[], orderId: string, userId: string | null, reason: "cancel" | "return" | "refund", damaged = false) {
     for (const i of items) {
       const ref = i.kind === "device" ? parseRef(i.itemRef)?.ref : null;
-      if (!ref) continue;
-      await m.createQueryBuilder().update(Device).set({ stock: () => `"stock" + ${Math.trunc(i.qty)}` }).where("id = :id AND stock IS NOT NULL", { id: ref }).execute();
+      const qty = Math.trunc(i.qty) - (i.returnedQty ?? 0);
+      if (!ref || qty <= 0) continue;
+      if (damaged) {
+        const cur = await m.getRepository(Device).findOne({ where: { id: ref }, select: { id: true, stock: true } });
+        if (cur && cur.stock !== null) await logStock(m, { deviceId: ref, delta: 0, stockAfter: cur.stock, reason: "return_damaged", damaged: qty, orderId, userId, note: "Returned damaged — not put back on the shelf" });
+      } else await moveStock(m, ref, qty, { reason, orderId, userId });
     }
   }
 
   /** Move an order to a new status, keeping stock in step (cancel → stock back; reopen → stock taken again). */
-  private async changeStatus(id: string, status: OrderStatus, owner?: string) {
+  private async changeStatus(id: string, status: OrderStatus, owner?: string, opts: { damaged?: boolean; userId?: string } = {}) {
     let changed = false, stockMoved = false;
     return this.orders.manager.transaction(async (m) => {
       const repo = m.getRepository(Order);
@@ -185,8 +194,8 @@ export class OrdersService {
       // cancelled, returned and refunded orders no longer hold stock or a coupon use
       const out = (st: OrderStatus) => st === "cancelled" || st === "returned" || st === "refunded";
       stockMoved = out(order.status) !== out(status);
-      if (!out(order.status) && out(status)) { await this.returnStock(m, order.items); if (order.couponCode) await this.returnCoupon(m, order.couponCode); }
-      if (out(order.status) && !out(status)) { await this.takeStock(m, order.items, true); if (order.couponCode) await this.takeCoupon(m, order.couponCode, true); }
+      if (!out(order.status) && out(status)) { await this.returnStock(m, order.items, order.id, opts.userId ?? owner ?? null, status === "returned" ? "return" : status === "refunded" ? "refund" : "cancel", status === "returned" && !!opts.damaged); if (order.couponCode) await this.returnCoupon(m, order.couponCode); }
+      if (out(order.status) && !out(status)) { await this.takeStock(m, order.items, order.id, opts.userId ?? null, true); if (order.couponCode) await this.takeCoupon(m, order.couponCode, true); }
       changed = order.status !== status;
       order.status = status;
       if (status === "refunded" && order.paymentStatus === "paid") order.paymentStatus = "refunded"; // a record only: the money itself is sent back by staff
@@ -307,7 +316,45 @@ export class OrdersService {
     return this.adminView(o, false, await this.imagesFor([o]));
   }
 
-  async adminSetStatus(id: string, status: OrderStatus) {
-    return toOrderView(await this.changeStatus(id, status));
+  async adminSetStatus(id: string, status: OrderStatus, opts: { damaged?: boolean; userId?: string } = {}) {
+    return toOrderView(await this.changeStatus(id, status, undefined, opts));
+  }
+
+  /**
+   * The customer sent some of the items back. Each line says how many units came back and whether they are damaged
+   * (damaged units are recorded but don't go back on the shelf). When every device unit is back the order becomes "returned".
+   */
+  async returnItems(id: string, lines: { lineId: string; qty: number; damaged?: boolean }[], userId: string, note?: string) {
+    const saved = await this.orders.manager.transaction(async (m) => {
+      const repo = m.getRepository(Order);
+      const order = await repo.findOne({ where: { id }, relations: { items: true } });
+      if (!order) throw new NotFoundException("Order not found");
+      if (["cancelled", "returned", "refunded"].includes(order.status)) throw new ConflictException(`This order is already ${order.status}`);
+      if (order.status !== "delivered") throw new ConflictException("Only a delivered order can have items returned");
+      for (const l of lines) {
+        const item = order.items.find((x) => x.id === l.lineId);
+        if (!item || item.kind !== "device") throw new BadRequestException("That item is not part of this order");
+        const left = item.qty - item.returnedQty;
+        if (l.qty < 1 || l.qty > left) throw new BadRequestException(`"${item.name}": only ${left} unit${left === 1 ? "" : "s"} can still be returned`);
+        item.returnedQty += l.qty;
+        const ref = parseRef(item.itemRef)?.ref;
+        if (!ref) continue;
+        if (l.damaged) {
+          const cur = await m.getRepository(Device).findOne({ where: { id: ref }, select: { id: true, stock: true } });
+          if (cur && cur.stock !== null) await logStock(m, { deviceId: ref, delta: 0, stockAfter: cur.stock, reason: "return_damaged", damaged: l.qty, orderId: id, userId, note: note ?? "Returned damaged — not put back on the shelf" });
+        } else await moveStock(m, ref, l.qty, { reason: "return", orderId: id, userId, note });
+      }
+      await m.getRepository(OrderItem).save(order.items);
+      const devices = order.items.filter((x) => x.kind === "device");
+      if (devices.length === order.items.length && devices.every((x) => x.returnedQty >= x.qty)) {
+        order.status = "returned";
+        if (order.couponCode) await this.returnCoupon(m, order.couponCode);
+        await repo.save(order);
+      }
+      return order;
+    });
+    this.events.orderChanged(saved.userId, "order:updated", { id: saved.id, status: saved.status });
+    void this.announceStock(saved.items);
+    return toOrderView(saved);
   }
 }

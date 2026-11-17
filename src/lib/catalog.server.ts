@@ -14,8 +14,8 @@ const REVALIDATE_SECONDS = 60;
 /** Built-in data, used when the API isn't configured or can't be reached. */
 export const fallbackCatalog = (): Catalog => ({
   plans: staticPlans,
-  // same picture paths the database uses (public/img/products/<id>.png)
-  devices: staticDevices.map((d) => ({ ...d, image: `/img/products/${d.id}.png` })),
+  // pictures are served by the API only; the built-in fallback has none
+  devices: staticDevices.map((d) => ({ ...d, image: undefined })),
   faqs: FAQS,
   heroSlides: staticHero,
 });

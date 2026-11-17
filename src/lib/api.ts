@@ -120,6 +120,8 @@ export interface UpdateOrderBody {
   phone?: string; address?: string; district?: string; area?: Area; thana?: string; postcode?: string;
   vehicleReg?: string; vehicleType?: string; preferredDate?: string; note?: string;
 }
+export type StockReason = "initial" | "purchase" | "adjustment" | "recount" | "order" | "cancel" | "return" | "return_damaged" | "refund" | "reopen";
+export interface StockMovement { id: string; delta: number; stockAfter: number; reason: StockReason; damaged: number; note: string; orderId: string | null; createdAt: string; by: string | null }
 export interface AdminProductDetail {
   device: AdminDevice;
   /** Orders that were not cancelled, returned or refunded. `profit` only for staff who may see finance. */

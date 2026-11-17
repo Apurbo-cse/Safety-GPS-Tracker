@@ -21,14 +21,14 @@ export class MediaController {
   @Roles("admin") @AnyPermission("products.manage", "content.manage") @HttpCode(204) @Delete("admin/media/:id")
   async discard(@Param("id", ParseUUIDPipe) id: string) { await this.media.deleteOrphans([`media:${id}`]); }
 
-  /** Public, cacheable forever (the id is content-addressed, a changed picture gets a new id). */
+  /** Public. The ETag is the picture's hash, so browsers keep their copy until the file really changes. */
   @Public() @Get("media/:id")
   async get(@Param("id", ParseUUIDPipe) id: string, @Headers("if-none-match") inm: string | undefined, @Res() res: Response) {
-    const f = await this.media.get(id);
+    const f = await this.media.meta(id);
     const etag = `"${f.sha256}"`;
     res.set({
       "Content-Type": f.mime,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, no-cache", // always checked with the ETag (a cheap 304), so an edited file shows up at once
       ETag: etag,
       "X-Content-Type-Options": "nosniff",
       "Content-Disposition": "inline",
@@ -36,6 +36,6 @@ export class MediaController {
       "Cross-Origin-Resource-Policy": "cross-origin",
     });
     if (inm === etag) { res.status(304).end(); return; }
-    res.send(f.data);
+    res.send(await f.bytes());
   }
 }

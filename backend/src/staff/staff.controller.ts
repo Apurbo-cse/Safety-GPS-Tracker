@@ -15,12 +15,12 @@ export class StaffController {
   constructor(private staff: StaffService) {}
 
   @Get("staff") list() { return this.staff.list(); }
-  @Post("staff") add(@Body() dto: AddStaffDto) { return this.staff.add(dto); }
+  @Post("staff") add(@CurrentUser() me: User, @Body() dto: AddStaffDto) { return this.staff.add(me, dto); }
   @Patch("staff/:id") update(@CurrentUser() me: User, @Param("id") id: string, @Body() dto: UpdateStaffDto) { return this.staff.update(me, id, dto); }
   @HttpCode(204) @Delete("staff/:id") remove(@CurrentUser() me: User, @Param("id") id: string) { return this.staff.remove(me, id); }
-  @HttpCode(204) @Post("staff/:id/password") setPassword(@Param("id") id: string, @Body() dto: PasswordDto) { return this.staff.setPassword(id, dto.password); }
+  @HttpCode(204) @Post("staff/:id/password") setPassword(@CurrentUser() me: User, @Param("id") id: string, @Body() dto: PasswordDto) { return this.staff.setPassword(me, id, dto.password); }
 
   @Get("roles") roles() { return this.staff.listRoles(); }
-  @Put("roles/:id") putRole(@Param("id", SlugPipe) id: string, @Body() dto: RoleDto) { return this.staff.upsertRole(id, dto); }
-  @HttpCode(204) @Delete("roles/:id") delRole(@Param("id", SlugPipe) id: string) { return this.staff.removeRole(id); }
+  @Put("roles/:id") putRole(@CurrentUser() me: User, @Param("id", SlugPipe) id: string, @Body() dto: RoleDto) { return this.staff.upsertRole(me, id, dto); }
+  @HttpCode(204) @Delete("roles/:id") delRole(@CurrentUser() me: User, @Param("id", SlugPipe) id: string) { return this.staff.removeRole(me, id); }
 }

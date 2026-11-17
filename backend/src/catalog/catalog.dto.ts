@@ -14,7 +14,7 @@ export class PlanDto {
   @IsInt() @Min(0) @Max(MONEY) monthlyCharge: number;
   @IsArray() @ArrayMaxSize(100) @IsString({ each: true }) @MaxLength(120, { each: true }) features: string[];
   @IsOptional() @IsString() @MaxLength(80) highlight?: string | null;
-  @IsOptional() @IsString() @Matches(/^\/(?!.*\.\.)[A-Za-z0-9/_.-]{2,230}$/, { message: "Image must be a path inside /public, e.g. /img/products/my-product.png" }) image?: string | null;
+  @IsOptional() @IsString() @Matches(IMAGE_REF, { message: "Image must be an uploaded picture" }) image?: string | null;
   @IsOptional() @IsString() @MaxLength(120) siteTitle?: string | null;
   @IsOptional() @IsInt() @Min(0) sourceNo?: number;
   @IsOptional() @IsArray() @ArrayMaxSize(VEHICLE_TYPES.length) @IsIn(VEHICLE_TYPES, { each: true }) vehicles?: string[];
@@ -97,7 +97,7 @@ export class HeroSlideDto {
   @IsString() @Length(2, 120) titleHighlight: string;
   @IsString() @Length(2, 300) text: string;
   /** Only files that live in the website's /public folder. */
-  @IsString() @Matches(/^\/(?!.*\.\.)[A-Za-z0-9/_.-]{2,230}$/, { message: "bgImage must be a path inside /public, e.g. /img/hero-car.jpg" }) bgImage: string;
+  @IsString() @Matches(IMAGE_REF, { message: "The banner must be an uploaded picture" }) bgImage: string;
   @IsIn(["brand", "sky", "emerald"]) accent: string;
   @IsString() @Length(2, 40) ctaLabel: string;
   /** A site page ("/products") or a full https:// link. */
@@ -132,4 +132,11 @@ export class AdminProductsQuery {
   @IsOptional() @IsIn(["all", "visible", "hidden"]) status?: "all" | "visible" | "hidden";
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+}
+
+/** Staff change a product's stock: add units, remove units, or set the counted number. */
+export class StockDto {
+  @IsIn(["add", "remove", "set"]) mode: "add" | "remove" | "set";
+  @IsInt() @Min(0) @Max(1_000_000) qty: number;
+  @IsOptional() @IsString() @MaxLength(300) note?: string;
 }

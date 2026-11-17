@@ -2,7 +2,7 @@
   "plans": [
     {
       "id": "premium-voice",
-      "image": "/img/packages/premium-voice.png",
+      "image": "/img/products/premium-pro-voice.png",
       "siteTitle": "Premium Pro With Voice",
       "name": "Premium Voice Monitoring",
       "devicePrice": 7000,
@@ -35,7 +35,7 @@
     },
     {
       "id": "standard-gps",
-      "image": "/img/packages/standard-gps.png",
+      "image": "/img/products/premium-with-voice.png",
       "siteTitle": "Premium Device With Voice",
       "name": "Standard GPS",
       "devicePrice": 6000,
@@ -67,7 +67,7 @@
     },
     {
       "id": "gps-1",
-      "image": "/img/packages/gps-1.png",
+      "image": "/img/products/premium-without-voice.png",
       "siteTitle": "Premium Without Voice",
       "name": "GPS Package 1",
       "devicePrice": 4000,
@@ -99,7 +99,7 @@
     },
     {
       "id": "gps-2",
-      "image": "/img/packages/gps-2.png",
+      "image": "/img/products/bike-premium.png",
       "siteTitle": "Bike Premium Device",
       "name": "GPS Package 2",
       "devicePrice": 4000,
@@ -132,7 +132,7 @@
     },
     {
       "id": "gps-3",
-      "image": "/img/packages/gps-3.png",
+      "image": "/img/products/excavator-device.png",
       "siteTitle": "Excavator Device",
       "name": "GPS Package 3",
       "devicePrice": 4000,
@@ -164,7 +164,7 @@
     },
     {
       "id": "voice-gps",
-      "image": "/img/packages/voice-gps.png",
+      "image": "/img/products/truck-tracking.png",
       "siteTitle": "Truck Tracking Device",
       "name": "Voice Monitoring GPS",
       "devicePrice": 4000,
@@ -196,7 +196,7 @@
     },
     {
       "id": "video-voice",
-      "image": "/img/packages/video-voice.png",
+      "image": "/img/products/live-video-tracking.png",
       "siteTitle": "Live Video & Tracking",
       "name": "Video & Voice Monitoring",
       "devicePrice": 16000,
@@ -229,7 +229,7 @@
     },
     {
       "id": "voice-gps-2",
-      "image": "/img/packages/voice-gps-2.png",
+      "image": "/img/products/easy-obd.png",
       "siteTitle": "Easy OBD Device",
       "name": "Voice Monitoring GPS 2",
       "devicePrice": 4000,
@@ -296,7 +296,7 @@
       "price": 7000,
       "monthly": 500,
       "planId": "premium-voice",
-      "image": "/img/packages/premium-voice.png",
+      "image": "/img/products/premium-pro-voice.png",
       "siteTitle": "Premium Pro With Voice",
       "priceNote": "Device price from the Premium Voice Monitoring package",
       "sort": 0
@@ -336,7 +336,7 @@
       "price": 6000,
       "monthly": 400,
       "planId": "standard-gps",
-      "image": "/img/packages/standard-gps.png",
+      "image": "/img/products/premium-with-voice.png",
       "siteTitle": "Premium Device With Voice",
       "priceNote": "Device price from the Standard GPS package",
       "sort": 1
@@ -376,7 +376,7 @@
       "price": 4000,
       "monthly": 400,
       "planId": "gps-1",
-      "image": "/img/packages/gps-1.png",
+      "image": "/img/products/premium-without-voice.png",
       "siteTitle": "Premium Without Voice",
       "priceNote": "Device price from the GPS Package 1 package",
       "sort": 2
@@ -416,7 +416,7 @@
       "price": 4000,
       "monthly": 300,
       "planId": "gps-2",
-      "image": "/img/packages/gps-2.png",
+      "image": "/img/products/bike-premium.png",
       "siteTitle": "Bike Premium Device",
       "priceNote": "Device price from the GPS Package 2 package",
       "sort": 3
@@ -456,7 +456,7 @@
       "price": 4000,
       "monthly": 300,
       "planId": "gps-3",
-      "image": "/img/packages/gps-3.png",
+      "image": "/img/products/excavator-device.png",
       "siteTitle": "Excavator Device",
       "priceNote": "Device price from the GPS Package 3 package",
       "sort": 4
@@ -496,7 +496,7 @@
       "price": 4000,
       "monthly": 300,
       "planId": "voice-gps",
-      "image": "/img/packages/voice-gps.png",
+      "image": "/img/products/truck-tracking.png",
       "siteTitle": "Truck Tracking Device",
       "priceNote": "Device price from the Voice Monitoring GPS package",
       "sort": 5
@@ -536,7 +536,7 @@
       "price": 16000,
       "monthly": 500,
       "planId": "video-voice",
-      "image": "/img/packages/video-voice.png",
+      "image": "/img/products/live-video-tracking.png",
       "siteTitle": "Live Video & Tracking",
       "priceNote": "Device price from the Video & Voice Monitoring package",
       "sort": 6
@@ -576,7 +576,7 @@
       "price": 4000,
       "monthly": 300,
       "planId": "voice-gps-2",
-      "image": "/img/packages/voice-gps-2.png",
+      "image": "/img/products/easy-obd.png",
       "siteTitle": "Easy OBD Device",
       "priceNote": "Device price from the Voice Monitoring GPS 2 package",
       "sort": 7

@@ -5,6 +5,7 @@ import { BadRequestException, ConflictException } from "@nestjs/common";
 import { Category, Device, Faq, HeroSlide, Plan } from "./catalog.entities";
 import type { AdminProductsQuery, CategoryDto, DeviceDto, FaqDto, HeroSlideDto, PlanDto, ProductsQuery } from "./catalog.dto";
 import { MEDIA_TOKEN, MediaService } from "../media/media.service";
+import { logStock } from "./stock.service";
 import { mediaTokensIn, resolveMedia } from "../common/html";
 
 /** Drop nulls so the JSON matches the website's optional-field types (`price?: number`). */
@@ -12,6 +13,16 @@ const clean = <T extends object>(o: T) => Object.fromEntries(Object.entries(o).f
 const strip = <T extends { sort: number; active: boolean; createdAt: Date; updatedAt: Date }>(e: T) => {
   const { sort: _s, active: _a, createdAt: _c, updatedAt: _u, ...rest } = e; void _s; void _a; void _c; void _u;
   return clean(rest);
+};
+
+/**
+ * "media:<id>" -> an uploaded picture, as a full URL on this API.
+ * "/img/…" stays a path: the website asks for it on its own address and Next fetches it from this API (backend/storage/img),
+ * which lets Next shrink and convert it (AVIF/WebP) for each screen instead of sending the original.
+ */
+const pictureUrl = (ref: string, base: string) => {
+  const m = MEDIA_TOKEN.exec(ref);
+  return m ? `${base}/api/v1/media/${m[1]}` : ref;
 };
 
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, "\\$&");
@@ -30,9 +41,9 @@ export class CatalogService {
     private media: MediaService,
   ) {}
 
-  /** "media:<id>" tokens become absolute URLs on this API; "/img/…" files stay as they are (the website serves them). */
+  /** "media:<id>" tokens become absolute URLs on this API; "/img/…" paths stay as they are (served from backend/storage/img through the website). */
   private publicDevice(d: Device, base: string, full = false) {
-    const url = (ref: string) => { const m = MEDIA_TOKEN.exec(ref); return m ? `${base}/api/v1/media/${m[1]}` : ref; };
+    const url = (ref: string) => pictureUrl(ref, base);
     const images = (d.images?.length ? d.images : d.image ? [d.image] : []).map(url);
     // cost never leaves the server; the long description is only sent with a single product
     const { image: _i, images: _is, cost: _c, description, ...rest } = strip(d) as Partial<Device>; void _i; void _is; void _c;
@@ -40,8 +51,8 @@ export class CatalogService {
   }
 
   private publicPlan(p: Plan, base: string) {
-    const { cost: _c, description, ...rest } = strip(p) as Partial<Plan>; void _c;
-    return { ...rest, ...(description ? { description: resolveMedia(description, base) } : {}) };
+    const { cost: _c, description, image, ...rest } = strip(p) as Partial<Plan>; void _c;
+    return { ...rest, ...(image ? { image: pictureUrl(image, base) } : {}), ...(description ? { description: resolveMedia(description, base) } : {}) };
   }
 
   /**
@@ -65,7 +76,7 @@ export class CatalogService {
       devices: visible.map((d) => this.publicDevice(d, base)),
       faqs: faqs.map((f) => { const x = strip(f) as Partial<Faq>; return { ...x, a: resolveMedia(x.a, base) }; }),
       categories: [...top, ...subs].map((c) => ({ id: c.id, name: c.name, parentId: c.parentId ?? undefined, sort: c.sort })),
-      heroSlides: heroSlides.map(strip),
+      heroSlides: heroSlides.map((h) => ({ ...strip(h), bgImage: pictureUrl(h.bgImage, base) })),
     };
   }
 
@@ -90,13 +101,20 @@ export class CatalogService {
     // the gallery wins; `image` always mirrors its first picture
     const images = dto.images ?? prev?.images ?? [];
     const image = images.length ? images[0] : dto.image ?? null;
-    const saved = await this.devices.save(this.devices.create({ sort: 0, active: true, siteTitle: null, price: null, monthly: null, planId: null, priceNote: "", description: "", ...dto, cost: keepCost ? prev?.cost ?? null : dto.cost ?? null, stock: dto.stock ?? null, images, image, id }));
+    const saved = await this.devices.save(this.devices.create({ sort: 0, active: true, siteTitle: null, price: null, monthly: null, planId: null, priceNote: "", description: "", ...dto, cost: keepCost ? prev?.cost ?? null : dto.cost ?? null, stock: dto.stock !== undefined ? dto.stock : prev?.stock ?? null, images, image, id }));
+    // stock is changed through the stock tools (so it has a history); a brand-new product may start with a number
+    if (!prev && saved.stock != null) await logStock(this.db.manager, { deviceId: saved.id, delta: saved.stock, stockAfter: saved.stock, reason: "initial", note: "Starting stock" });
     // pictures this product no longer uses are deleted when nothing else refers to them
     const kept = new Set(refsOf(saved));
     await this.media.deleteOrphans(refsOf(prev).filter((r) => !kept.has(r)));
     return saved;
   }
-  async upsertSlide(id: string, dto: HeroSlideDto) { return this.slides.save(this.slides.create({ sort: 0, active: true, ...dto, id } as HeroSlide)); }
+  async upsertSlide(id: string, dto: HeroSlideDto) {
+    const prev = await this.slides.findOne({ where: { id } });
+    const saved = await this.slides.save(this.slides.create({ sort: 0, active: true, ...dto, id } as HeroSlide));
+    if (prev && prev.bgImage !== saved.bgImage) await this.media.deleteOrphans([prev.bgImage]); // the old banner goes when nothing uses it
+    return saved;
+  }
   async upsertFaq(id: string, dto: FaqDto) {
     const prev = await this.faqs.findOne({ where: { id } });
     const saved = await this.faqs.save(this.faqs.create({ sort: 0, active: true, tag: "", ...dto, id }));
@@ -161,8 +179,10 @@ export class CatalogService {
     const repo = (kind === "plans" ? this.plans : kind === "devices" ? this.devices : kind === "slides" ? this.slides : this.faqs) as Repository<{ id: string }>;
     const prevDevice = kind === "devices" ? await this.devices.findOne({ where: { id } }) : null;
     const prevText = kind === "plans" ? (await this.plans.findOne({ where: { id } }))?.description : kind === "faqs" ? (await this.faqs.findOne({ where: { id } }))?.a : null;
+    const prevBanner = kind === "slides" ? (await this.slides.findOne({ where: { id } }))?.bgImage : null;
     const res = await repo.delete({ id });
     if (!res.affected) throw new NotFoundException("Not found");
+    if (prevBanner) await this.media.deleteOrphans([prevBanner]);
     if (prevDevice) await this.media.deleteOrphans(refsOf(prevDevice));
     if (prevText) await this.media.deleteOrphans(mediaTokensIn(prevText));
   }

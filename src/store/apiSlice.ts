@@ -2,7 +2,7 @@ import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import {
   ApiError, qs, request,
   type AdminCatalog, type AdminCoupon, type AdminMessage, type ContactBody, type Quote, type AdminPageFull, type AdminPageRow, type SiteDetails, type AdminCustomer, type AdminDevice, type UpdateOrderBody, type AdminCustomerDetail, type AdminProductDetail, type AdminOrder, type AdminPost, type AdminStats, type ApiOrder, type ApiSettings, type ApiUser,
-  type CreateOrderBody, type OrderStatus, type Paged, type Permission, type PostFull, type PostSummary, type ProductsQuery, type RoleRow, type StaffMember,
+  type StockMovement, type CreateOrderBody, type OrderStatus, type Paged, type Permission, type PostFull, type PostSummary, type ProductsQuery, type RoleRow, type StaffMember,
 } from "@/lib/api";
 import type { Device } from "@/types";
 import { loginSuccess } from "./slices/authSlice";
@@ -35,7 +35,7 @@ export type ProfilePatch = Partial<Pick<ApiUser, (typeof profileKeys)[number]>>;
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Catalog", "AdminProducts", "Products", "Posts", "MyOrders", "AdminOrders", "Stats", "Customers", "Staff", "Roles", "Site", "Pages", "Coupons", "Messages"],
+  tagTypes: ["Catalog", "AdminProducts", "Products", "Posts", "MyOrders", "AdminOrders", "Stats", "Customers", "Staff", "Roles", "Site", "Pages", "Coupons", "Messages", "StockHistory"],
   // admin lists are cheap to refetch; keep them only while a screen uses them so the next visit is never stale
   keepUnusedDataFor: 60,
   endpoints: (b) => ({
@@ -141,6 +141,20 @@ export const baseApi = createApi({
       query: (id) => ({ path: `/admin/products/${encodeURIComponent(id)}` }),
       providesTags: ["AdminProducts", "AdminOrders"],
     }),
+    /** Staff add units, remove units, or set the counted number. Every change is written to the product's stock history. */
+    changeStock: b.mutation<{ stock: number }, { id: string; mode: "add" | "remove" | "set"; qty: number; note?: string }>({
+      query: ({ id, ...body }) => ({ method: "POST", path: `/admin/catalog/devices/${encodeURIComponent(id)}/stock`, body }),
+      invalidatesTags: ["Catalog", "AdminProducts", "Products", "StockHistory", "Stats"],
+    }),
+    stockHistory: b.query<StockMovement[], string>({
+      query: (id) => ({ path: `/admin/catalog/devices/${encodeURIComponent(id)}/stock/history` }),
+      providesTags: ["StockHistory"],
+    }),
+    /** Part of an order came back: which lines, how many, and whether they are damaged (damaged units don't go back on the shelf). */
+    returnItems: b.mutation<ApiOrder, { id: string; lines: { lineId: string; qty: number; damaged: boolean }[]; note?: string }>({
+      query: ({ id, ...body }) => ({ method: "POST", path: `/admin/orders/${encodeURIComponent(id)}/return-items`, body }),
+      invalidatesTags: ["AdminOrders", "Stats", "AdminProducts", "Products", "Catalog", "StockHistory", "MyOrders"],
+    }),
     /** Sends the money back through bKash, then the order becomes "refunded". */
     refundBkash: b.mutation<ApiOrder, string>({
       query: (id) => ({ method: "POST", path: `/admin/orders/${encodeURIComponent(id)}/refund` }),
@@ -224,10 +238,10 @@ export const baseApi = createApi({
       query: (body) => ({ method: "POST", path: "/admin/staff", body }),
       invalidatesTags: ["Staff", "Roles", "Customers"],
     }),
-    updateStaff: b.mutation<StaffMember, { id: string; roleId?: string; disabled?: boolean }>({
+    updateStaff: b.mutation<StaffMember, { id: string; roleId?: string; disabled?: boolean; name?: string; email?: string; mobile?: string }>({
       query: ({ id, ...body }) => ({ method: "PATCH", path: `/admin/staff/${id}`, body }),
-      async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
-        const undo = dispatch(baseApi.util.updateQueryData("staff", undefined, (d) => { const s = d.find((x) => x.id === id); if (s) Object.assign(s, patch); }));
+      async onQueryStarted({ id, mobile, ...patch }, { dispatch, queryFulfilled }) {
+        const undo = dispatch(baseApi.util.updateQueryData("staff", undefined, (d) => { const s = d.find((x) => x.id === id); if (s) Object.assign(s, patch, mobile ? { phone: mobile } : {}); }));
         try { await queryFulfilled; dispatch(baseApi.util.invalidateTags(["Staff", "Roles"])); } catch { undo.undo(); }
       },
     }),
@@ -399,7 +413,7 @@ export const {
   useProductsQuery, useProductQuery, usePostsQuery, usePostQuery,
   useLoginMutation, useRegisterMutation, useMeQuery, useDeleteAccountMutation, useUploadImageMutation, useDiscardImageMutation,
   useMyOrdersQuery, useMyOrderQuery, useCreateOrderMutation, usePayBkashMutation, useCancelOrderMutation, useUpdateProfileMutation, useUpdateSettingsMutation, useChangePasswordMutation,
-  useAdminCatalogQuery, useAdminProductsQuery, useAdminStatsQuery, useAdminOrdersQuery, useAdminOrderQuery, useUpdateOrderMutation, useRefundBkashMutation, useAdminCustomerQuery, useAdminProductQuery, useAdminCustomersQuery, useSetOrderStatusMutation,
+  useAdminCatalogQuery, useAdminProductsQuery, useAdminStatsQuery, useAdminOrdersQuery, useAdminOrderQuery, useUpdateOrderMutation, useRefundBkashMutation, useChangeStockMutation, useStockHistoryQuery, useReturnItemsMutation, useAdminCustomerQuery, useAdminProductQuery, useAdminCustomersQuery, useSetOrderStatusMutation,
   useSaveCatalogItemMutation, useDeleteCatalogItemMutation,
   useStaffQuery, useAddStaffMutation, useUpdateStaffMutation, useRemoveStaffMutation, useSetStaffPasswordMutation,
   useRolesQuery, useSaveRoleMutation, useDeleteRoleMutation,

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function Modal({
   open, onClose, title, children, wide = false,
-}: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean }) {
+}: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean | "xl" }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -27,7 +27,7 @@ export default function Modal({
         >
           <motion.div
             role="dialog" aria-modal="true" aria-label={title}
-            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-md bg-surface pb-[env(safe-area-inset-bottom)]   sm:rounded-md ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
+            className={`max-h-[92vh] w-full overflow-y-auto rounded-t-md bg-surface pb-[env(safe-area-inset-bottom)]   sm:rounded-md ${wide === "xl" ? "sm:max-w-6xl" : wide ? "sm:max-w-3xl" : "sm:max-w-lg"}`}
             initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 30, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
